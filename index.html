@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Einbürgerungstest — practice the official question catalogue</title>
+<meta name="description" content="Practise all 460 questions of the official German citizenship test (Einbürgerungstest / Leben in Deutschland), with English explanations, a German glossary and a timed mock exam. Free, offline-capable, nothing tracked.">
+<link rel="stylesheet" href="app.css">
+<link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
+<link rel="preload" as="fetch" type="application/json" href="data/glossary.json" crossorigin>
+<link rel="modulepreload" href="app.js">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">Einbürgerungstest <span>· question catalogue</span></div>
+    <div class="modes" role="group" aria-label="Modus">
+      <button id="m-drill" aria-pressed="true">Practice</button>
+      <button id="m-flash" aria-pressed="false">Browse</button>
+      <button id="m-exam" aria-pressed="false">Exam</button>
+    </div>
+    <select class="pick" id="land" aria-label="Federal state"></select>
+    <select class="pick" id="filter" aria-label="Selection"></select>
+    <button class="icon" id="glosBtn" title="Open the glossary (G)">Glossary</button>
+    <button class="icon" id="setBtn" aria-expanded="false" title="Settings" aria-label="Settings"><span class="wide">Settings</span><span class="narrow">⚙</span></button>
+  </div>
+
+  <div class="pop" id="pop" hidden>
+    <div class="opt-row" id="t-gloss" role="checkbox" tabindex="0" aria-checked="true">
+      <span class="lb">English explanations<em>Civic and legal terms are underlined. Hover or tap one to read it.</em></span>
+      <span class="sw"></span>
+    </div>
+    <div class="opt-row" id="t-shufq" role="checkbox" tabindex="0" aria-checked="false">
+      <span class="lb">Shuffle questions<em>Otherwise they follow catalogue order.</em></span><span class="sw"></span>
+    </div>
+    <div class="opt-row" id="t-shufa" role="checkbox" tabindex="0" aria-checked="false">
+      <span class="lb">Shuffle answers<em>Stops you memorising the position instead of the answer.</em></span><span class="sw"></span>
+    </div>
+    <hr>
+    <div class="speed" id="voicerow"><span>Voice</span><select id="voice" aria-label="German voice"></select></div>
+    <div class="speed" id="raterow"><span>Reading speed</span>
+      <select id="rate" aria-label="Reading speed">
+        <option value="0.7">Slow</option><option value="0.85">Relaxed</option>
+        <option value="1">Normal</option><option value="1.15">Brisk</option>
+      </select>
+    </div>
+    <div class="note" id="voicenote" hidden></div>
+    <hr>
+    <button class="danger" id="reset">Reset progress</button>
+  </div>
+</header>
+
+<main id="view"><div class="empty"><b>Loading…</b>Fetching the question catalogue.</div></main>
+
+<div class="foot">
+  Questions: Federal Office for Migration and Refugees (BAMF), &bdquo;Gesamtfragenkatalog zum Test
+  Leben in Deutschland und zum Einbürgerungstest&ldquo;, dated 26 May 2025 — an official work under
+  § 5 UrhG, reproduced unaltered. Some images are reproduced from that catalogue; others have been redrawn.
+  This is not a BAMF service. The English explanations are a study aid and are not part of the official catalogue.
+  Your progress stays local to this browser.
+  Spotted a wrong answer or a confusing explanation?
+  <a href="https://github.com/JadRizk/einbuergerungstest/issues/new">Tell me about it</a>.
+</div>
+
+<div class="dock" id="dock">
+  <div class="dock-in">
+    <div class="dock-head">
+      <span id="dock-stat"></span>
+      <span class="legend">
+        <span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--edge)"></i>not seen</span>
+        <span><i style="background:var(--ok)"></i>correct</span>
+        <span><i style="background:var(--cellbad)"></i>wrong</span>
+        <span><i style="box-shadow:inset 0 0 0 1.5px var(--gold)"></i>state question</span>
+      </span>
+      <button class="fold" id="fold">hide</button>
+    </div>
+    <div class="map" id="map"></div>
+  </div>
+</div>
+
+<div id="tip" role="tooltip" hidden><b></b><span></span></div>
+
+<div class="veil" id="veil" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Glossary">
+    <header>
+      <h2>Glossary</h2>
+      <input id="gsearch" type="search" placeholder="Search a German term or its English meaning" aria-label="Search the glossary">
+      <button class="icon" id="gclose">Close</button>
+    </header>
+    <div class="body" id="gbody"></div>
+  </div>
+</div>
+
+</body>
+</html>
