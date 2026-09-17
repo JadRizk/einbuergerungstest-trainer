@@ -1,0 +1,1813 @@
+{
+ "meta": {
+  "terms": 361,
+  "note": "Learning aid for the BAMF Einbürgerungstest catalogue. Not part of the official catalogue."
+ },
+ "terms": [
+  {
+   "de": "Abkürzung",
+   "en": "abbreviation",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Amt",
+   "en": "public office; also a public authority",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Ansprechpartner",
+   "en": "contact person",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Ansprechpartnerin",
+   "en": "contact person (f.)",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Aufgabe",
+   "en": "task, responsibility",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Aufgaben",
+   "en": "tasks, responsibilities",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Begriff",
+   "en": "term, concept",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Beispiel",
+   "en": "example",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Bevölkerung",
+   "en": "population",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Direktive",
+   "en": "a directive — not one of Germany's branches of state power",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Frieden",
+   "en": "peace",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Fürstentum",
+   "en": "principality",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Gebiet",
+   "en": "territory, area",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Gesetzgebung",
+   "en": "legislation, law-making",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Grenze",
+   "en": "border",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Grundsatz",
+   "en": "principle",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Krieg",
+   "en": "war",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Mitglied",
+   "en": "member",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Mitgliedschaft",
+   "en": "membership",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Politik",
+   "en": "politics; also policy",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Presse",
+   "en": "the press",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Pressezensur",
+   "en": "press censorship — forbidden by the Basic Law",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Sicherheit",
+   "en": "safety, security",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Soldat",
+   "en": "soldier",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Verantwortung",
+   "en": "responsibility",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Verbrechen",
+   "en": "a crime",
+   "category": "Allgemein"
+  },
+  {
+   "de": "abschaffen",
+   "en": "to abolish",
+   "category": "Allgemein"
+  },
+  {
+   "de": "benachteiligt",
+   "en": "disadvantaged, discriminated against",
+   "category": "Allgemein"
+  },
+  {
+   "de": "beschimpfen",
+   "en": "to insult, to abuse verbally",
+   "category": "Allgemein"
+  },
+  {
+   "de": "beschließen",
+   "en": "to decide, to pass a law",
+   "category": "Allgemein"
+  },
+  {
+   "de": "erlaubt",
+   "en": "permitted, allowed",
+   "category": "Allgemein"
+  },
+  {
+   "de": "gewählt",
+   "en": "elected",
+   "category": "Allgemein"
+  },
+  {
+   "de": "gültig",
+   "en": "valid",
+   "category": "Allgemein"
+  },
+  {
+   "de": "leugnen",
+   "en": "to deny — denying the Holocaust is a criminal offence",
+   "category": "Allgemein"
+  },
+  {
+   "de": "verboten",
+   "en": "forbidden, banned",
+   "category": "Allgemein"
+  },
+  {
+   "de": "wählen",
+   "en": "to vote, to elect",
+   "category": "Allgemein"
+  },
+  {
+   "de": "zuständig",
+   "en": "responsible for, in charge of",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Öffentlichkeit",
+   "en": "the public",
+   "category": "Allgemein"
+  },
+  {
+   "de": "öffentlich",
+   "en": "public, in public",
+   "category": "Allgemein"
+  },
+  {
+   "de": "Abitur",
+   "en": "school-leaving exam qualifying for university",
+   "category": "Bildung"
+  },
+  {
+   "de": "Bildung",
+   "en": "education",
+   "category": "Bildung"
+  },
+  {
+   "de": "Hauptschule",
+   "en": "basic secondary school",
+   "category": "Bildung"
+  },
+  {
+   "de": "Hochschule",
+   "en": "university or college",
+   "category": "Bildung"
+  },
+  {
+   "de": "Kindergarten",
+   "en": "kindergarten, nursery",
+   "category": "Bildung"
+  },
+  {
+   "de": "Religionsunterricht",
+   "en": "religious education — parents may opt their child out",
+   "category": "Bildung"
+  },
+  {
+   "de": "Schule",
+   "en": "school",
+   "category": "Bildung"
+  },
+  {
+   "de": "Schulen",
+   "en": "schools",
+   "category": "Bildung"
+  },
+  {
+   "de": "Schulpflicht",
+   "en": "compulsory schooling — children must attend school",
+   "category": "Bildung"
+  },
+  {
+   "de": "Schulpolitik",
+   "en": "school policy — decided by each federal state, not by Berlin",
+   "category": "Bildung"
+  },
+  {
+   "de": "Volkshochschule",
+   "en": "adult education centre — cheap evening courses",
+   "category": "Bildung"
+  },
+  {
+   "de": "Beitritt",
+   "en": "accession, joining",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Euro",
+   "en": "the euro — Germany's currency since 2002",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Europäische Union",
+   "en": "the European Union",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Europäisches Parlament",
+   "en": "the European Parliament, elected by EU citizens",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Israel",
+   "en": "the State of Israel — Germany accepts a special responsibility for it",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Mitgliedstaat",
+   "en": "member state",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "NATO",
+   "en": "NATO — the North Atlantic military alliance",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Nachbarland",
+   "en": "a neighbouring country — Germany has nine",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Römische Verträge",
+   "en": "the Treaties of Rome, 1957 — founding the European Community",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Schengen",
+   "en": "the Schengen area — travel without border checks",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Vereinte Nationen",
+   "en": "the United Nations",
+   "category": "Europa & Welt"
+  },
+  {
+   "de": "Alliierte",
+   "en": "the Allies — Britain, the USA, the USSR and France",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Attentat",
+   "en": "an assassination attempt",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Auschwitz",
+   "en": "the largest Nazi extermination camp, liberated 27 January 1945",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Besatzungszone",
+   "en": "occupation zone — Germany was split among four Allied powers in 1945",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Besatzungszonen",
+   "en": "occupation zones — the four Allied areas after 1945",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Bundeskanzler Adenauer",
+   "en": "Konrad Adenauer, first Chancellor of West Germany",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Drittes Reich",
+   "en": "'Third Reich' — the Nazi regime's name for its state",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Einheit",
+   "en": "unity — as in the Day of German Unity, 3 October",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Eiserner Vorhang",
+   "en": "the Iron Curtain",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Gedenktag",
+   "en": "day of remembrance",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Ghetto",
+   "en": "a district Jews were forced to live in under Nazi rule",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Holocaust",
+   "en": "the Nazi genocide of European Jews",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Kalter Krieg",
+   "en": "the Cold War",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Kniefall",
+   "en": "Willy Brandt's kneeling in Warsaw in 1970, asking forgiveness",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Luftbrücke",
+   "en": "the Berlin Airlift of 1948/49",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Mauer",
+   "en": "the Berlin Wall, 1961–1989",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Mauerbau",
+   "en": "the building of the Berlin Wall in 1961",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Montagsdemonstrationen",
+   "en": "the Monday protests in East Germany in 1989",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Nationalsozialismus",
+   "en": "National Socialism — the Nazi dictatorship, 1933–1945",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Nationalsozialisten",
+   "en": "the Nazis",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Sowjetunion",
+   "en": "the Soviet Union",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Staatssicherheit",
+   "en": "State Security — the GDR's surveillance apparatus",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Stasi",
+   "en": "the GDR's Ministry for State Security — its secret police",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Stolpersteine",
+   "en": "'stumbling stones' — brass plaques in pavements naming Nazi victims",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Vernichtungslager",
+   "en": "extermination camp — built to murder people on arrival",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Volksaufstand",
+   "en": "popular uprising — as on 17 June 1953 in East Germany",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Warschauer Pakt",
+   "en": "the Warsaw Pact — the Soviet-led military alliance",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Weimarer Republik",
+   "en": "the German republic of 1919–1933",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Weltkrieg",
+   "en": "world war",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Wende",
+   "en": "the peaceful upheaval in East Germany in 1989/90",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Wiedervereinigung",
+   "en": "reunification of East and West Germany, 3 October 1990",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Zwangsarbeit",
+   "en": "forced labour — banned by the Basic Law",
+   "category": "Geschichte"
+  },
+  {
+   "de": "nationalsozialistisch",
+   "en": "National Socialist, Nazi",
+   "category": "Geschichte"
+  },
+  {
+   "de": "Asyl",
+   "en": "asylum",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Behinderung",
+   "en": "disability",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Brauch",
+   "en": "a custom, a tradition",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Bürger",
+   "en": "citizen",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Bürgerin",
+   "en": "citizen (f.)",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Bürgerinitiative",
+   "en": "citizens' action group",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Christentum",
+   "en": "Christianity",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Demonstration",
+   "en": "demonstration, protest march",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Diskriminierung",
+   "en": "discrimination",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Ehrenamt",
+   "en": "voluntary unpaid work for the community",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Ehrenamtlich",
+   "en": "on a voluntary, unpaid basis",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Einwohner",
+   "en": "resident, inhabitant",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Eltern",
+   "en": "parents",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Erziehung",
+   "en": "upbringing, raising children",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Erziehungsberechtigte",
+   "en": "legal guardians — those with parental responsibility",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Familie",
+   "en": "family",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Gastarbeiter",
+   "en": "'guest worker' — labour migrants recruited from the 1950s onward",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Integration",
+   "en": "integration",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Islam",
+   "en": "Islam",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Kirche",
+   "en": "church",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Kirchen",
+   "en": "churches",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Meinung",
+   "en": "opinion",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Moschee",
+   "en": "mosque",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Religionsgemeinschaft",
+   "en": "religious community",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Sportverein",
+   "en": "sports club",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Synagoge",
+   "en": "synagogue — a Jewish house of prayer",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Toleranz",
+   "en": "tolerance",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Verein",
+   "en": "a registered club or association — central to German social life",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "antisemitisch",
+   "en": "antisemitic",
+   "category": "Gesellschaft & Religion"
+  },
+  {
+   "de": "Briefgeheimnis",
+   "en": "privacy of correspondence",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Freizügigkeit",
+   "en": "freedom of movement — to live and work anywhere in Germany",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Gewissensfreiheit",
+   "en": "freedom of conscience",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Gleichbehandlung",
+   "en": "equal treatment — nobody may be disadvantaged for who they are",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Grundrecht",
+   "en": "fundamental right — guaranteed by the Basic Law",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Grundrechte",
+   "en": "fundamental rights — guaranteed by the Basic Law",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Meinungsfreiheit",
+   "en": "freedom of expression — you may criticise the government openly",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Menschenwürde",
+   "en": "human dignity — Article 1, the untouchable core of the Basic Law",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Pressefreiheit",
+   "en": "freedom of the press",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Religionsfreiheit",
+   "en": "freedom of religion",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Versammlungsfreiheit",
+   "en": "freedom of assembly — the right to gather and demonstrate",
+   "category": "Grundrechte"
+  },
+  {
+   "de": "Abgeordnete",
+   "en": "member of parliament",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Abgeordneter",
+   "en": "member of parliament",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Außenminister",
+   "en": "foreign minister — a federal post only, states have none",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Außenministerin",
+   "en": "foreign minister (f.) — a federal post only, states have none",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundeskabinett",
+   "en": "the federal cabinet — Chancellor and ministers",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundeskanzler",
+   "en": "Federal Chancellor — head of government, elected by the Bundestag",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundeskanzleramt",
+   "en": "the Chancellery — the Chancellor's office and staff",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundeskanzlerin",
+   "en": "Federal Chancellor (f.) — head of government, elected by the Bundestag",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundespräsident",
+   "en": "Federal President — head of state, largely ceremonial",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundespräsidentin",
+   "en": "Federal President (f.) — head of state, largely ceremonial",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesrat",
+   "en": "the chamber where the 16 state governments are represented",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesratspräsident",
+   "en": "President of the Bundesrat — rotates yearly among state leaders",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesratspräsidentin",
+   "en": "President of the Bundesrat (f.) — rotates yearly among state leaders",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesregierung",
+   "en": "the federal government — Chancellor plus ministers",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundestag",
+   "en": "the federal parliament, directly elected by the people",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundestagspräsident",
+   "en": "President of the Bundestag — the speaker who chairs parliament",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundestagspräsidentin",
+   "en": "President of the Bundestag (f.) — the speaker who chairs parliament",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesverfassungsgericht",
+   "en": "Federal Constitutional Court, in Karlsruhe — guards the Basic Law",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundesversammlung",
+   "en": "Federal Convention — the body that meets only to elect the President",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bundeswehr",
+   "en": "the German armed forces",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bürgermeister",
+   "en": "mayor",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bürgermeisterin",
+   "en": "mayor (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Bürgerschaft",
+   "en": "the state parliament of Hamburg or Bremen",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Finanzminister",
+   "en": "finance minister",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Finanzministerin",
+   "en": "finance minister (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Finanzsenator",
+   "en": "finance senator — the finance minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Finanzsenatorin",
+   "en": "finance senator (f.) — the finance minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Fraktion",
+   "en": "parliamentary group — all MPs of one party sitting together",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Innenminister",
+   "en": "interior minister — police, security, administration",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Innenministerin",
+   "en": "interior minister (f.) — police, security, administration",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Innensenator",
+   "en": "interior senator — the interior minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Innensenatorin",
+   "en": "interior senator (f.) — the interior minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Justizminister",
+   "en": "justice minister",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Justizministerin",
+   "en": "justice minister (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Justizsenator",
+   "en": "justice senator — the justice minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Justizsenatorin",
+   "en": "justice senator (f.) — the justice minister of a city-state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Kanzler",
+   "en": "chancellor",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Kanzlerin",
+   "en": "chancellor (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Kanzlerkandidat",
+   "en": "a party's candidate for Chancellor",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Karlsruhe",
+   "en": "Karlsruhe — seat of the Federal Constitutional Court",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Koalition",
+   "en": "coalition — parties governing together",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Landesparlament",
+   "en": "the parliament of a federal state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Landtag",
+   "en": "the parliament of a federal state",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Minister",
+   "en": "minister",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Ministerin",
+   "en": "minister (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Ministerium",
+   "en": "ministry",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Ministerpräsident",
+   "en": "Minister-President — head of a state government",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Ministerpräsidentin",
+   "en": "Minister-President (f.) — head of a state government",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Oberbürgermeister",
+   "en": "lord mayor — of a larger city",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Opposition",
+   "en": "the opposition — MPs who are not part of the governing majority",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Parlament",
+   "en": "parliament",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Politiker",
+   "en": "politician",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Premierminister",
+   "en": "prime minister — a title Germany does not use",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Premierministerin",
+   "en": "prime minister (f.) — a title Germany does not use",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Präsident",
+   "en": "president",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Präsidentin",
+   "en": "president (f.)",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Regierung",
+   "en": "the government",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Regierungspartei",
+   "en": "governing party — the party or parties in power",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Senat",
+   "en": "senate — the government of Berlin, Hamburg or Bremen",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Senator",
+   "en": "senator — a minister in one of the three city-states",
+   "category": "Institutionen"
+  },
+  {
+   "de": "Senatorin",
+   "en": "senator (f.) — a minister in one of the three city-states",
+   "category": "Institutionen"
+  },
+  {
+   "de": "AfD",
+   "en": "Alternative for Germany — right-wing populist party",
+   "category": "Parteien"
+  },
+  {
+   "de": "Bündnis",
+   "en": "alliance — as in Bündnis 90/Die Grünen, the Green party",
+   "category": "Parteien"
+  },
+  {
+   "de": "CDU",
+   "en": "Christian Democratic Union — centre-right party",
+   "category": "Parteien"
+  },
+  {
+   "de": "CSU",
+   "en": "Christian Social Union — the CDU's Bavarian sister party",
+   "category": "Parteien"
+  },
+  {
+   "de": "FDP",
+   "en": "Free Democratic Party — liberal, pro-market",
+   "category": "Parteien"
+  },
+  {
+   "de": "Grünen",
+   "en": "the Greens — environmentalist party",
+   "category": "Parteien"
+  },
+  {
+   "de": "Linke",
+   "en": "The Left — left-wing party",
+   "category": "Parteien"
+  },
+  {
+   "de": "SPD",
+   "en": "Social Democratic Party — centre-left, Germany's oldest party",
+   "category": "Parteien"
+  },
+  {
+   "de": "Union",
+   "en": "here: the Union — the CDU and CSU acting together",
+   "category": "Parteien"
+  },
+  {
+   "de": "Amtsgericht",
+   "en": "local court — the lowest ordinary court",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Arbeitsgericht",
+   "en": "labour court — for disputes between employer and employee",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Ehescheidung",
+   "en": "divorce — in Germany it needs a court and a lawyer",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Familiengericht",
+   "en": "family court — divorce, custody",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Faustrecht",
+   "en": "rule of the strongest — the opposite of the rule of law",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Freiheitsstrafe",
+   "en": "a prison sentence",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Geldstrafe",
+   "en": "a fine",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gericht",
+   "en": "court",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gerichte",
+   "en": "courts",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gerichtsschöffe",
+   "en": "lay judge — an ordinary citizen who judges alongside professionals",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gerichtsschöffin",
+   "en": "lay judge (f.) — an ordinary citizen who judges alongside professionals",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gesetz",
+   "en": "a law, an act of parliament",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gesetze",
+   "en": "laws",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Gewalt",
+   "en": "here: a branch of state power; elsewhere it can mean violence",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Klage",
+   "en": "a lawsuit, a legal claim",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Kündigung",
+   "en": "termination of a contract; dismissal from a job",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Pflicht",
+   "en": "duty, obligation",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Polizei",
+   "en": "police",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Recht",
+   "en": "law; also a right",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Rechtsanwalt",
+   "en": "lawyer, attorney",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Rechtsanwältin",
+   "en": "lawyer (f.), attorney",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Richter",
+   "en": "judge",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Richterin",
+   "en": "judge (f.)",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Scheidung",
+   "en": "divorce",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Schweigepflicht",
+   "en": "duty of confidentiality",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Schöffe",
+   "en": "lay judge — an unpaid citizen serving on a criminal court",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Schöffin",
+   "en": "lay judge (f.) — an unpaid citizen serving on a criminal court",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Selbstjustiz",
+   "en": "taking the law into your own hands — forbidden",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Staatsanwalt",
+   "en": "public prosecutor",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Strafe",
+   "en": "punishment, penalty",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Straftat",
+   "en": "criminal offence",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Straftäter",
+   "en": "offender",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Urteil",
+   "en": "judgment, verdict",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Verbot",
+   "en": "a ban, a prohibition",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Verträge",
+   "en": "contracts, treaties",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Verwaltungsgericht",
+   "en": "administrative court — for disputes with public authorities",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Volljährig",
+   "en": "of legal age — 18 in Germany",
+   "category": "Recht & Justiz"
+  },
+  {
+   "de": "Bundesrepublik",
+   "en": "Federal Republic",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Bundesstaat",
+   "en": "federal state — power is shared between the federation and the 16 Länder",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Demokratie",
+   "en": "democracy",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Diktatur",
+   "en": "dictatorship",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Exekutive",
+   "en": "executive — the branch that carries out laws (government, police, agencies)",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Grundgesetz",
+   "en": "Basic Law — Germany's constitution, in force since 1949",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Judikative",
+   "en": "judiciary — the branch that judges (the courts)",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Legislative",
+   "en": "legislature — the branch that makes laws (parliament)",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Monarchie",
+   "en": "monarchy",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Rechtsstaat",
+   "en": "state bound by law — the government itself must obey the law",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Regierungschef",
+   "en": "head of government — the Chancellor federally, a Minister-President in a state",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Republik",
+   "en": "republic — head of state is elected, not inherited",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Sozialstaat",
+   "en": "welfare state — the state cushions poverty, illness, old age",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Staat",
+   "en": "the state",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Staatsangehörige",
+   "en": "nationals, citizens of a state",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Staatsform",
+   "en": "form of government",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Staatsgewalt",
+   "en": "state authority — all power emanating from the people",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Staatsoberhaupt",
+   "en": "head of state — in Germany the Federal President",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Verfassung",
+   "en": "constitution",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Volk",
+   "en": "the people",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Volkssouveränität",
+   "en": "popular sovereignty — all state power comes from the people",
+   "category": "Staat & Verfassung"
+  },
+  {
+   "de": "Bundesadler",
+   "en": "the federal eagle, Germany's state emblem",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Bundesland",
+   "en": "federal state — Germany has 16",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Bundesländer",
+   "en": "the federal states — 16 of them",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Flagge",
+   "en": "flag",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Freistaat",
+   "en": "'Free State' — a traditional title used by Bavaria, Saxony, Thuringia",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Hansestadt",
+   "en": "Hanseatic city — a historic trading-league title",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Land",
+   "en": "here: a federal state",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Landesflagge",
+   "en": "the flag of a federal state",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Landeshauptstadt",
+   "en": "the capital of a federal state",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Länder",
+   "en": "the federal states",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Nationalhymne",
+   "en": "national anthem",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Stadtstaat",
+   "en": "city-state — Berlin, Hamburg and Bremen are both city and state",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Wappen",
+   "en": "coat of arms",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Wappentier",
+   "en": "heraldic animal — Germany's is the eagle",
+   "category": "Symbole & Länder"
+  },
+  {
+   "de": "Antrag",
+   "en": "an application, a formal request",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Behörde",
+   "en": "a public authority or agency",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Bezirk",
+   "en": "borough or district",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Einwohnermeldeamt",
+   "en": "residents' registration office — where you register your address",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Finanzamt",
+   "en": "tax office",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Führerschein",
+   "en": "driving licence",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Gemeinde",
+   "en": "municipality — the smallest unit of local government",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Gemeinderat",
+   "en": "municipal council",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Gemeindeverwaltung",
+   "en": "municipal administration",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Gesundheitsamt",
+   "en": "public health office",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Jugendamt",
+   "en": "youth welfare office — child protection and family support",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Landeszentrale",
+   "en": "state centre for civic education",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Landkreis",
+   "en": "rural district — groups several municipalities",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Ordnungsamt",
+   "en": "public order office — parking, noise, local rules",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Standesamt",
+   "en": "registry office — births, marriages, deaths",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Verbraucherzentrale",
+   "en": "consumer advice centre — independent help with contracts and disputes",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Verwaltung",
+   "en": "administration",
+   "category": "Verwaltung"
+  },
+  {
+   "de": "Briefwahl",
+   "en": "postal vote",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Bundestagswahl",
+   "en": "federal election — for the Bundestag, every four years",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Erststimme",
+   "en": "first vote — for a candidate in your constituency",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Europawahl",
+   "en": "European election — for the European Parliament",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Kandidat",
+   "en": "candidate",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Kandidatin",
+   "en": "candidate (f.)",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Kommunalwahl",
+   "en": "local election — town or district council",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Kommunalwahlen",
+   "en": "local elections — town or district councils",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Landtagswahl",
+   "en": "state election — for a state parliament",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Mehrheit",
+   "en": "majority",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Partei",
+   "en": "political party",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Parteien",
+   "en": "political parties",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Stimmabgabe",
+   "en": "the casting of a vote",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Stimme",
+   "en": "vote",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Stimmen",
+   "en": "votes",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Stimmzettel",
+   "en": "ballot paper",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahl",
+   "en": "election",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlberechtigte",
+   "en": "people entitled to vote",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlen",
+   "en": "elections",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlhelfer",
+   "en": "poll worker — a duty citizens can be called up for",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlhelferin",
+   "en": "poll worker (f.) — a duty citizens can be called up for",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlkabine",
+   "en": "voting booth",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlkampf",
+   "en": "election campaign",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahllokal",
+   "en": "polling station",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wahlrecht",
+   "en": "the right to vote; also electoral law",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wähler",
+   "en": "voter",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Wählerin",
+   "en": "voter (f.)",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Zweitstimme",
+   "en": "second vote — for a party list; this one decides the seat share",
+   "category": "Wahlen"
+  },
+  {
+   "de": "wahlberechtigt",
+   "en": "entitled to vote",
+   "category": "Wahlen"
+  },
+  {
+   "de": "Angebot",
+   "en": "supply; also an offer",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Arbeit",
+   "en": "work, employment",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Arbeitgeber",
+   "en": "employer",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Arbeitgeberin",
+   "en": "employer (f.)",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Arbeitnehmer",
+   "en": "employee",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Arbeitslosenversicherung",
+   "en": "unemployment insurance",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Ausbildung",
+   "en": "vocational training — the dual system of school plus workplace",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Beruf",
+   "en": "occupation, trade, profession",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Betriebsrat",
+   "en": "works council — elected staff representatives in a company",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Elterngeld",
+   "en": "parental allowance after a birth",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Elternzeit",
+   "en": "parental leave",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Firma",
+   "en": "company, firm",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Gehaltsvorstellung",
+   "en": "salary expectation — what you state you want to earn",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Gewerkschaft",
+   "en": "trade union",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Kindergeld",
+   "en": "child benefit — a monthly payment per child",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Kirchensteuer",
+   "en": "church tax, collected from registered members",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Krankenversicherung",
+   "en": "health insurance — compulsory in Germany",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Kündigungsfrist",
+   "en": "notice period",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Lohnsteuer",
+   "en": "wage tax, deducted from your pay",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Marktwirtschaft",
+   "en": "market economy",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Mieter",
+   "en": "tenant",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Nachfrage",
+   "en": "demand",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Pflegeversicherung",
+   "en": "long-term care insurance",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Planwirtschaft",
+   "en": "planned economy — as in the GDR",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Rechnung",
+   "en": "invoice, bill",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Rentenversicherung",
+   "en": "state pension insurance",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Soziale Marktwirtschaft",
+   "en": "social market economy — free markets plus a social safety net",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Sozialhilfe",
+   "en": "social assistance",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Sozialversicherung",
+   "en": "social insurance — health, pension, care, unemployment, accident",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Steuer",
+   "en": "tax",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Steuererklärung",
+   "en": "tax return",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Steuern",
+   "en": "taxes",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Streik",
+   "en": "strike",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Unfallversicherung",
+   "en": "accident insurance — paid by the employer",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Unternehmen",
+   "en": "a company, a business",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Wirtschaft",
+   "en": "the economy",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Wirtschaftswunder",
+   "en": "the 'economic miracle' — West Germany's rapid post-war boom",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Wohngeld",
+   "en": "housing benefit",
+   "category": "Wirtschaft & Arbeit"
+  },
+  {
+   "de": "Zentralwirtschaft",
+   "en": "centrally planned economy — not Germany's system",
+   "category": "Wirtschaft & Arbeit"
+  }
+ ]
+}
