@@ -617,3 +617,29 @@ document.addEventListener('keydown',e=>{
 
 /* ---------------- boot ---------------- */
 (async()=>{ await load(); buildFilter(); initSpeech(); setMode('drill'); })();
+
+
+/* Fill the image cache in the background, so a randomly drawn exam still has
+   its pictures with no signal. Deferred to idle and skipped on metered or very
+   slow connections -- 1.3 MB is not something to spend on someone's behalf
+   without asking, unless it is cheap for them. */
+function warmAll(){
+  const c = navigator.connection;
+  if(c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ''))) return;
+  Object.keys(IMG).forEach(k => warm(k));
+}
+
+/* Only worth the bytes once a service worker is actually controlling the page.
+   On a first visit the worker installs but does not control until it claims,
+   and anything fetched before that is downloaded and dropped -- the visitor
+   would pay 1.3 MB and still have no pictures offline. */
+const onIdle = f => (window.requestIdleCallback || (g => setTimeout(g, 3000)))(f);
+function warmWhenItWillBeKept(){
+  const sw = navigator.serviceWorker;
+  if(!sw) return;
+  if(sw.controller) return warmAll();
+  sw.addEventListener('controllerchange', () => onIdle(warmAll), {once:true});
+}
+/* this module has a top-level await, so 'load' may already have fired */
+if(document.readyState === 'complete') onIdle(warmWhenItWillBeKept);
+else addEventListener('load', () => onIdle(warmWhenItWillBeKept));

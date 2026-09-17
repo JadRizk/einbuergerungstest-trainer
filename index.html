@@ -10,6 +10,10 @@
 <link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
 <link rel="preload" as="fetch" type="application/json" href="data/glossary.json" crossorigin>
 <link rel="modulepreload" href="app.js">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#EDF0EF">
+<link rel="icon" href="icon/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
 <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -94,5 +98,13 @@
   </div>
 </div>
 
+<script>
+/* Registered here rather than in app.js: if the catalogue fetch fails on a
+   first visit, app.js never finishes, and offline support is exactly what a
+   failed fetch needs. */
+if('serviceWorker' in navigator){
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
 </body>
 </html>
