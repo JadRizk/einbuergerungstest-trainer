@@ -1,20 +1,25 @@
 # Einbürgerungstest
 
-A practice app for the German citizenship test, built as a single HTML file.
-No build step, no server, no account, no network calls — open it and it works,
-including offline.
+A practice app for the German citizenship test. No build step, no server, no
+account, no tracking — open it and it works, including offline.
+
+**https://jadrizk.github.io/einbuergerungstest/**
 
 It covers the full official catalogue: **460 questions**, 300 general plus 10
 for each of the 16 federal states. The exam you sit draws 33 of them.
 
 ## Getting started
 
-Download `einbuergerungstest.html` and open it in any modern browser. That is
-the whole install. All 38 images are embedded in the file, so it keeps working
-with no connection.
+Open <https://jadrizk.github.io/einbuergerungstest/>. That is the whole install.
 
-The other files are the sources it was built from, kept for reference — the
-app does not read them at runtime.
+On a phone, "Add to Home Screen" installs it properly — it then launches like
+an app and works with no connection. On a first visit it quietly caches all 38
+question images in the background, so a randomly drawn exam still has its
+pictures when you are underground. That background caching is skipped if your
+browser reports a metered or very slow connection.
+
+`source/` holds the original inputs the app was built from, kept for reference.
+Nothing reads them at runtime.
 
 ## The three modes
 
@@ -45,25 +50,67 @@ state, nothing marked until you finish. 17 correct is a pass.
 Your progress is stored in your own browser (`localStorage`) and goes nowhere
 else. "Reset progress" in Settings clears it.
 
+## Found a mistake?
+
+[Open an issue](https://github.com/JadRizk/einbuergerungstest/issues/new).
+Wrong answers, confusing explanations and bad glossary entries are all worth
+reporting.
+
 ## Privacy
 
 The app makes no network requests of its own: no analytics, no tracking, no
-telemetry, no backend. Two external touches are worth naming so they are not a
-surprise:
+telemetry, no backend. It fetches only its own files from its own origin — the
+typeface included, so no visitor IP reaches Google.
 
-- The page loads its typeface from Google Fonts, which means Google sees the
-  visitor's IP. Self-host the font if that matters to you.
-- Each question offers a "translate" link, which opens Google Translate in a
-  new tab only when you click it.
+One external touch is worth naming so it is not a surprise: each question
+offers a "translate" link, which opens Google Translate in a new tab, and only
+when you click it.
 
 ## Files
 
+Plain static files, served straight from the repository root. There is no build
+step and no dependency: `git push` is the deploy.
+
 | File | What it is |
 | --- | --- |
-| `einbuergerungstest.html` | The whole app — code, styling, data and images inlined |
-| `einbuergerungstest-fragen.json` | The 460-question catalogue |
-| `einbuergerungstest-glossar.json` | 361 German→English terms, a study aid |
-| `einbuergerungstest-bilder.zip` | The 38 source images, before inlining |
+| `index.html` | The shell — markup only |
+| `app.css` | All styling, and the self-hosted `@font-face` |
+| `app.js` | The whole app, an ES module, ~600 lines |
+| `data/questions.json` | The 460-question catalogue |
+| `data/glossary.json` | 361 German→English terms, a study aid |
+| `img/` | The 38 question images, fetched only when a question needs one |
+| `font/` | Archivo variable, latin subset, self-hosted |
+| `sw.js` | Service worker — offline support and caching |
+| `source/` | The original inputs, for reference only |
+
+The data is fetched at runtime rather than inlined, so a change to the styling
+does not make returning visitors re-download the catalogue.
+
+### If you change something
+
+`sw.js` serves the shell network-first, so a deploy reaches people on their
+next reload with no cache-busting needed; bump `VERSION` in it when the shell
+changes. `data/*.json` is stale-while-revalidate, so a catalogue revision
+arrives on the visit after next. Everything in `font/`, `img/` and `icon/` is
+cache-first and assumed immutable — **give a file a new name if its bytes
+change**. The icons in `icon/` are flat placeholders.
+
+### Do not rebuild `data/glossary.json` from `source/`
+
+They are not the same thing, despite the names. The shipped
+`data/glossary.json` carries a `rx` field per term — a match pattern with
+German word boundaries — and 89 of the 361 entries list inflections that exist
+nowhere else:
+
+```
+Ministerpräsident → Ministerpräsidentinnen | Ministerpräsidenten | Ministerpräsidentin | Ministerpräsident
+```
+
+Those cannot be derived from the plain source file; they need German
+morphology. They also earn their keep: of the 2,235 glossary matches across the
+catalogue, 542 are inflected forms. Regenerating `data/glossary.json` from
+`source/einbuergerungstest-glossar.json` would delete all of that silently —
+no error, no crash, just terms quietly ceasing to underline.
 
 ## Source and licence
 
@@ -74,6 +121,7 @@ Questions and images come from the **Bundesamt für Migration und Flüchtlinge
 Licensing is split, because the exam content is not mine to license:
 
 - **Code and glossary** — [MIT](LICENSE).
+- **The typeface**, Archivo — [SIL Open Font License 1.1](font/OFL.txt).
 - **The catalogue and its images** — see [LICENSE-CONTENT.md](LICENSE-CONTENT.md),
   which covers their § 5 UrhG status and the attribution and
   no-modification duties that come with reusing them.

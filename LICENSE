@@ -1,11 +1,13 @@
 Applies to the software in this repository only — the application code and
-styling in einbuergerungstest.html, and the English glossary in
-einbuergerungstest-glossar.json.
+styling in index.html, app.css, app.js and sw.js, and the English glossary in
+data/glossary.json.
 
 It does NOT apply to the official question catalogue or its images
-(einbuergerungstest-fragen.json, einbuergerungstest-bilder.zip, and the image
-data embedded in einbuergerungstest.html). Those are not mine to license.
-See LICENSE-CONTENT.md.
+(data/questions.json, img/, and the copies of both under source/). Those are
+not mine to license. See LICENSE-CONTENT.md.
+
+It does not apply to the typeface in font/ either, which is under the SIL Open
+Font License 1.1 — see font/OFL.txt.
 
 ---
 

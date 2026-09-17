@@ -13,9 +13,10 @@ status it has and what that asks of you.
 
 Affected files:
 
-- `einbuergerungstest-fragen.json` — the catalogue
-- `einbuergerungstest-bilder.zip` — the images
-- the image data embedded in `einbuergerungstest.html`
+- `data/questions.json` — the catalogue
+- `img/` — the 38 images
+- `source/einbuergerungstest-fragen.json` and
+  `source/einbuergerungstest-bilder.zip` — the original copies of both
 
 ## Status: amtliches Werk under § 5 UrhG
 
