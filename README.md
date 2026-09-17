@@ -3,14 +3,14 @@
 A practice app for the German citizenship test. No build step, no server, no
 account, no tracking — open it and it works, including offline.
 
-**https://jadrizk.github.io/einbuergerungstest/**
+**https://jadrizk.github.io/einbuergerungstest-trainer/**
 
 It covers the full official catalogue: **460 questions**, 300 general plus 10
 for each of the 16 federal states. The exam you sit draws 33 of them.
 
 ## Getting started
 
-Open <https://jadrizk.github.io/einbuergerungstest/>. That is the whole install.
+Open <https://jadrizk.github.io/einbuergerungstest-trainer/>. That is the whole install.
 
 On a phone, "Add to Home Screen" installs it properly — it then launches like
 an app and works with no connection. On a first visit it quietly caches all 38
@@ -52,7 +52,7 @@ else. "Reset progress" in Settings clears it.
 
 ## Found a mistake?
 
-[Open an issue](https://github.com/JadRizk/einbuergerungstest/issues/new).
+[Open an issue](https://github.com/JadRizk/einbuergerungstest-trainer/issues/new).
 Wrong answers, confusing explanations and bad glossary entries are all worth
 reporting.
 
