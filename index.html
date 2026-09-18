@@ -4,16 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>Einbürgerungstest — practice the official question catalogue</title>
-<meta name="description" content="Practise all 460 questions of the official German citizenship test (Einbürgerungstest / Leben in Deutschland), with English explanations, a German glossary and a timed mock exam. Free, offline-capable, nothing tracked.">
+
+<!-- Fetched before the identity block below so the render path is not held up
+     behind two dozen meta tags the parser has to walk first. -->
 <link rel="stylesheet" href="app.css">
 <link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
 <link rel="preload" as="fetch" type="application/json" href="data/glossary.json" crossorigin>
 <link rel="modulepreload" href="app.js">
-<link rel="manifest" href="manifest.json">
+
+<!-- ------------------------------------------------ identity
+     Crawlers reject relative og:image and og:url, so the origin is written out
+     in full here. It is a static site with no build step: nothing else is going
+     to resolve it. Regenerate the artwork with `python3 brand/build.py`. -->
+<title>Einbürgerungstest — all 460 questions, explained in English</title>
+<meta name="description" content="All 460 questions of the official German citizenship test, explained in English — with a 361-term glossary and a timed mock exam. Works offline.">
+<link rel="canonical" href="https://jadrizk.github.io/einbuergerungstest-trainer/">
 <meta name="theme-color" content="#EDF0EF">
-<link rel="icon" href="icon/icon-192.png" sizes="192x192">
+
+<link rel="icon" href="icon/favicon.ico" sizes="32x32">
+<link rel="icon" href="icon/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Einbürgerungstest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Einbürgerungstest">
+<meta property="og:locale" content="en_GB">
+<meta property="og:title" content="Einbürgerungstest — Understand the questions, don’t memorise them.">
+<meta property="og:description" content="All 460 questions of the official German citizenship test, explained in English — with a 361-term glossary and a timed mock exam. Works offline.">
+<meta property="og:url" content="https://jadrizk.github.io/einbuergerungstest-trainer/">
+<meta property="og:image" content="https://jadrizk.github.io/einbuergerungstest-trainer/icon/social-card.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Einbürgerungstest wordmark above the line “Understand the questions, don’t memorise them.” and the facts: 460 questions, 361 terms explained, works offline.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Einbürgerungstest — Understand the questions, don’t memorise them.">
+<meta name="twitter:description" content="All 460 questions of the official German citizenship test, explained in English — with a 361-term glossary and a timed mock exam. Works offline.">
+<meta name="twitter:image" content="https://jadrizk.github.io/einbuergerungstest-trainer/icon/social-card.png">
 <script type="module" src="app.js"></script>
 </head>
 <body>

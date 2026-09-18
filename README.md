@@ -1,6 +1,7 @@
 <div align="center">
 
-# Einbürgerungstest
+<img src="brand/assets/readme-header.png" width="820"
+     alt="Einbürgerungstest — Understand the questions, don’t memorise them.">
 
 **All 460 questions of the official German citizenship test — with English explanations.**
 

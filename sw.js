@@ -14,8 +14,15 @@
  *                                          without anyone remembering to bump VERSION.
  *   font/ img/ icon/     cache-first    -- genuinely immutable; the name changes
  *                                          if the bytes do.
+ *
+ * The one exception to that last line is the brand kit: icon/icon-192.png and
+ * friends were replaced in place when the mark was drawn. Cache-first would
+ * have served the old artwork to every existing install forever -- bumping
+ * VERSION is what saves it, because activate drops every cache that is not the
+ * current one, icons included. Any future re-cut of the mark must bump VERSION
+ * in the same commit.
  */
-const VERSION = 'ebt-2026-09-18a';
+const VERSION = 'ebt-2026-09-18b';
 const SHELL   = ['./', 'app.css', 'app.js', 'manifest.json'];
 
 self.addEventListener('install', e => {

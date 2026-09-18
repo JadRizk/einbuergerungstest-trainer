@@ -1,17 +1,19 @@
 {
-  "name": "Einbürgerungstest — practice the official question catalogue",
+  "name": "Einbürgerungstest — practise the official question catalogue",
   "short_name": "Einbürgerungstest",
-  "description": "Practise all 460 questions of the official German citizenship test, with English explanations, a German glossary and a timed mock exam.",
-  "lang": "en",
+  "description": "All 460 questions of the official German citizenship test, explained in English — with a 361-term glossary and a timed mock exam. Works offline.",
+  "lang": "en-GB",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#EDF0EF",
   "theme_color": "#EDF0EF",
+  "categories": ["education", "books"],
   "icons": [
     { "src": "icon/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

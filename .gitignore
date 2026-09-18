@@ -1,0 +1,3 @@
+# Python leaves this behind if brand/build.py is imported rather than run.
+__pycache__/
+*.pyc
