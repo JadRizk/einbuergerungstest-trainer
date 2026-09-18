@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <title>Einbürgerungstest — practice the official question catalogue</title>
 <meta name="description" content="Practise all 460 questions of the official German citizenship test (Einbürgerungstest / Leben in Deutschland), with English explanations, a German glossary and a timed mock exam. Free, offline-capable, nothing tracked.">
@@ -18,74 +18,137 @@
 </head>
 <body>
 
-<header class="bar">
-  <div class="bar-in">
-    <div class="brand">Einbürgerungstest <span>· question catalogue</span></div>
-    <div class="modes" role="group" aria-label="Modus">
-      <button id="m-drill" aria-pressed="true">Practice</button>
-      <button id="m-flash" aria-pressed="false">Browse</button>
-      <button id="m-exam" aria-pressed="false">Exam</button>
-    </div>
-    <select class="pick" id="land" aria-label="Federal state"></select>
-    <select class="pick" id="filter" aria-label="Selection"></select>
-    <button class="icon" id="glosBtn" title="Open the glossary (G)">Glossary</button>
-    <button class="icon" id="setBtn" aria-expanded="false" title="Settings" aria-label="Settings"><span class="wide">Settings</span><span class="narrow">⚙</span></button>
-  </div>
+<a class="skip" href="#view">Skip to the question</a>
 
-  <div class="pop" id="pop" hidden>
-    <div class="opt-row" id="t-gloss" role="checkbox" tabindex="0" aria-checked="true">
-      <span class="lb">English explanations<em>Civic and legal terms are underlined. Hover or tap one to read it.</em></span>
-      <span class="sw"></span>
-    </div>
-    <div class="opt-row" id="t-shufq" role="checkbox" tabindex="0" aria-checked="false">
-      <span class="lb">Shuffle questions<em>Otherwise they follow catalogue order.</em></span><span class="sw"></span>
-    </div>
-    <div class="opt-row" id="t-shufa" role="checkbox" tabindex="0" aria-checked="false">
-      <span class="lb">Shuffle answers<em>Stops you memorising the position instead of the answer.</em></span><span class="sw"></span>
-    </div>
-    <hr>
-    <div class="speed" id="voicerow"><span>Voice</span><select id="voice" aria-label="German voice"></select></div>
-    <div class="speed" id="raterow"><span>Reading speed</span>
-      <select id="rate" aria-label="Reading speed">
-        <option value="0.7">Slow</option><option value="0.85">Relaxed</option>
-        <option value="1">Normal</option><option value="1.15">Brisk</option>
-      </select>
-    </div>
-    <div class="note" id="voicenote" hidden></div>
-    <hr>
-    <button class="danger" id="reset">Reset progress</button>
-  </div>
+<!-- ------------------------------------------------ top bar
+     On a phone this is deliberately almost empty: a menu button, where you
+     are in the catalogue, and nothing else. Everything else lives in the
+     drawer, which on a wide screen stops being a drawer and becomes a rail. -->
+<header class="bar">
+  <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="brand">Einbürgerungstest <span>· question catalogue</span></div>
+  <div class="barnow" id="barnow" aria-live="polite"></div>
 </header>
 
-<main id="view"><div class="empty"><b>Loading…</b>Fetching the question catalogue.</div></main>
+<div class="scrim" id="scrim" hidden></div>
 
-<div class="foot">
-  Questions: Federal Office for Migration and Refugees (BAMF), &bdquo;Gesamtfragenkatalog zum Test
-  Leben in Deutschland und zum Einbürgerungstest&ldquo;, dated 26 May 2025 — an official work under
-  § 5 UrhG, reproduced unaltered. Some images are reproduced from that catalogue; others have been redrawn.
-  This is not a BAMF service. The English explanations are a study aid and are not part of the official catalogue.
-  Your progress stays local to this browser.
-  Spotted a wrong answer or a confusing explanation?
-  <a href="https://github.com/JadRizk/einbuergerungstest-trainer/issues/new">Tell me about it</a>.
-</div>
+<!-- ------------------------------------------------ navigation
+     One copy of every control. CSS decides whether it is an overlaying
+     drawer (phone) or a permanent left rail (desktop). -->
+<nav class="nav" id="nav" aria-label="Main menu">
+  <div class="nav-head">
+    <span class="nav-title">Einbürgerungstest</span>
+    <button class="navclose" id="navclose" aria-label="Close the menu">✕</button>
+  </div>
 
-<div class="dock" id="dock">
-  <div class="dock-in">
-    <div class="dock-head">
-      <span id="dock-stat"></span>
-      <span class="legend">
-        <span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--edge)"></i>not seen</span>
-        <span><i style="background:var(--ok)"></i>correct</span>
-        <span><i style="background:var(--cellbad)"></i>wrong</span>
-        <span><i style="box-shadow:inset 0 0 0 1.5px var(--gold)"></i>state question</span>
-      </span>
-      <button class="fold" id="fold">hide</button>
+  <div class="nav-body">
+    <div class="nav-sec">
+      <h3>Mode</h3>
+      <div class="modes" role="group" aria-label="Mode">
+        <button id="m-drill" aria-pressed="true">Practice</button>
+        <button id="m-flash" aria-pressed="false">Browse</button>
+      </div>
+      <button class="bigbtn" id="m-exam">Sit a mock exam<em>33 questions · 60 minutes · 17 to pass</em></button>
     </div>
-    <div class="map" id="map"></div>
+
+    <div class="nav-sec">
+      <h3>Catalogue</h3>
+      <label class="field"><span>Federal state</span>
+        <select class="pick" id="land" aria-label="Federal state"></select></label>
+      <label class="field"><span>Selection</span>
+        <select class="pick" id="filter" aria-label="Selection"></select></label>
+      <button class="rowbtn" id="glosBtn">Glossary<em>361 German terms explained in English</em></button>
+    </div>
+
+    <div class="nav-sec">
+      <h3>Study options</h3>
+      <div class="opt-row" id="t-gloss" role="checkbox" tabindex="0" aria-checked="true">
+        <span class="lb">English explanations<em>Civic and legal terms are underlined. Tap one to read it.</em></span>
+        <span class="sw"></span>
+      </div>
+      <div class="opt-row" id="t-auto" role="checkbox" tabindex="0" aria-checked="true">
+        <span class="lb">Advance when correct<em>Moves on by itself after a right answer. Wrong answers always wait.</em></span>
+        <span class="sw"></span>
+      </div>
+      <div class="opt-row" id="t-shufq" role="checkbox" tabindex="0" aria-checked="false">
+        <span class="lb">Shuffle questions<em>Otherwise they follow catalogue order.</em></span><span class="sw"></span>
+      </div>
+      <div class="opt-row" id="t-shufa" role="checkbox" tabindex="0" aria-checked="false">
+        <span class="lb">Shuffle answers<em>Stops you memorising the position instead of the answer.</em></span><span class="sw"></span>
+      </div>
+    </div>
+
+    <div class="nav-sec">
+      <h3>Read aloud</h3>
+      <label class="field" id="voicerow"><span>Voice</span>
+        <select id="voice" aria-label="German voice"></select></label>
+      <label class="field" id="raterow"><span>Reading speed</span>
+        <select id="rate" aria-label="Reading speed">
+          <option value="0.7">Slow</option><option value="0.85">Relaxed</option>
+          <option value="1">Normal</option><option value="1.15">Brisk</option>
+        </select></label>
+      <div class="note" id="voicenote" hidden></div>
+    </div>
+
+    <div class="nav-sec">
+      <button class="danger" id="reset">Reset progress</button>
+    </div>
+
+    <details class="about">
+      <summary>About &amp; sources</summary>
+      <p>Questions: Federal Office for Migration and Refugees (BAMF), &bdquo;Gesamtfragenkatalog zum
+      Test Leben in Deutschland und zum Einbürgerungstest&ldquo;, dated 26 May 2025 — an official work
+      under § 5 UrhG, reproduced unaltered. Some images are reproduced from that catalogue; others
+      have been redrawn. This is not a BAMF service. The English explanations are a study aid and are
+      not part of the official catalogue. Your progress stays local to this browser.</p>
+      <p>Spotted a wrong answer or a confusing explanation?
+      <a href="https://github.com/JadRizk/einbuergerungstest-trainer/issues/new">Tell me about it</a>.</p>
+    </details>
+  </div>
+</nav>
+
+<!-- ------------------------------------------------ the question itself -->
+<main id="view" tabindex="-1"><div class="empty"><b>Loading…</b>Fetching the question catalogue.</div></main>
+
+<!-- ------------------------------------------------ progress
+     Desktop: a static bar across the bottom, as before.
+     Phone: a sheet that is either shut or open, nothing in between. -->
+<div class="dock" id="dock">
+  <button class="grab" id="grab" aria-expanded="false" aria-controls="dock-body" aria-label="Show your progress">
+    <span class="grab-bar"></span>
+    <span class="grab-txt" id="dock-stat"></span>
+  </button>
+
+  <div class="dock-body" id="dock-body">
+    <div class="dock-in">
+      <div class="stats" id="stats"></div>
+
+      <div class="dock-head">
+        <span class="legend">
+          <span><i style="background:var(--sunk);box-shadow:inset 0 0 0 1px var(--edge)"></i>not seen</span>
+          <span><i style="background:var(--ok)"></i>correct</span>
+          <span><i style="background:var(--cellbad)"></i>wrong</span>
+          <span><i style="box-shadow:inset 0 0 0 1.5px var(--gold)"></i>state question</span>
+        </span>
+        <button class="fold" id="fold">hide</button>
+      </div>
+      <div class="map" id="map"></div>
+    </div>
   </div>
 </div>
 
 <div id="tip" role="tooltip" hidden><b></b><span></span></div>
+
+<!-- ------------------------------------------------ fullscreen image
+     36 of the 39 picture questions answer with a pointer into the image
+     ("Bild 3", or a number on a map), so being able to see the image big
+     is not a nicety — it is how you answer at all. -->
+<div class="lens" id="lens" hidden>
+  <button class="lensclose" id="lensclose" aria-label="Close the picture">✕</button>
+  <img id="lensimg" alt="">
+</div>
 
 <div class="veil" id="veil" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="Glossary">

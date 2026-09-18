@@ -15,7 +15,7 @@
  *   font/ img/ icon/     cache-first    -- genuinely immutable; the name changes
  *                                          if the bytes do.
  */
-const VERSION = 'ebt-2026-09-17a';
+const VERSION = 'ebt-2026-09-18a';
 const SHELL   = ['./', 'app.css', 'app.js', 'manifest.json'];
 
 self.addEventListener('install', e => {

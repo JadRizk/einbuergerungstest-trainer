@@ -12,8 +12,8 @@ const [DATA, GLOS] = await Promise.all([
    jump down the page mid-read. */
 const IMG = {"aufgabe_130":[633,636],"aufgabe_176":[507,760],"aufgabe_187":[582,351],"aufgabe_21":[512,512],"aufgabe_226":[634,612],"aufgabe_55":[760,507],"baden-wurttemberg_1":[477,760],"baden-wurttemberg_8":[760,684],"bayern_1":[490,760],"bayern_8":[760,667],"berlin_1":[425,760],"berlin_8":[754,742],"brandenburg_aufgabe_1":[461,760],"brandenburg_aufgabe_8":[507,760],"bremen_1":[470,760],"bremen_8":[760,724],"hamburg_1":[481,760],"hamburg_8":[752,734],"hessen_1":[438,760],"hessen_8":[760,695],"mecklenburg-vorpommern_1":[510,760],"mecklenburg-vorpommern_8":[744,744],"niedersachsen_1":[496,760],"niedersachsen_8":[760,725],"nordrhein-westfalen_1":[473,760],"nordrhein-westfalen_8":[760,666],"rheinland-pfalz_1":[469,760],"rheinland-pfalz_8":[760,724],"saarland_1":[492,760],"saarland_8":[740,748],"sachsen-anhalt_1":[494,760],"sachsen-anhalt_8":[760,750],"sachsen_1":[433,760],"sachsen_8":[760,712],"schleswig-holstein_1":[454,760],"schleswig-holstein_8":[684,760],"thuringen_1":[527,760],"thuringen_8":[760,706]};
 
-/* Warm an image so stepping to it is instant. Idempotent: the exam re-renders
-   once a second for its timer. */
+/* Warm an image so stepping to it is instant. Idempotent: a question can be
+   rendered more than once before you move off it. */
 const imgWarm = new Set();
 function warm(key){
   if(!key || imgWarm.has(key)) return;
@@ -48,11 +48,12 @@ const topicEn=t=>TOPIC[t]||t;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
   idx:0, picked:null, stats:{}, exam:null,
-  gloss:true, shufQ:false, shufA:false, seed:1, mapOpen:true,
+  gloss:true, shufQ:false, shufA:false, auto:true, seed:1, mapOpen:true, railOpen:true,
+  exams:[],                             /* past mock scores, newest last */
   voice:'', rate:0.85
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,shufQ:S.shufQ,
-  shufA:S.shufA,seed:S.seed,mapOpen:S.mapOpen,
+  shufA:S.shufA,auto:S.auto,seed:S.seed,mapOpen:S.mapOpen,railOpen:S.railOpen,exams:S.exams,
   voice:S.voice,rate:S.rate}); }
 async function load(){
   const d=await store.get(KEY);
@@ -127,8 +128,9 @@ async function toClipboard(text){
     const done=document.execCommand('copy'); ta.remove(); return done;
   }catch(e){ return false; }
 }
-function toolsHtml(){
+function toolsHtml(q){
   return `<span class="tools">
+      ${q&&q.img?`<button class="copy" id="zoomBtn" type="button" title="Show the picture full screen" aria-label="Show the picture full screen">⤢<span class="wide"> Bigger</span></button>`:''}
       ${canSpeak?`<button class="copy" id="sayBtn" type="button" title="Read this question and its answers aloud in German (S)">Listen</button>`:''}
       <button class="copy" id="copyBtn" type="button" title="Copy the question and all four answers (C)">Copy</button>
       <a class="copy" id="gtBtn" target="_blank" rel="noopener noreferrer" title="Open this question in Google Translate">Translate</a>
@@ -201,22 +203,71 @@ function buildFilter(){
     +topics.map(t=>`<option value="t:${esc(t)}">${esc(topicEn(t))}</option>`).join('');
   filterSel.value=S.filter;
 }
-['drill','flash','exam'].forEach(m=>$('m-'+m).onclick=()=>setMode(m));
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=null;stopSpeech();render();};
-function setMode(m){
-  S.mode=m; S.picked=null; S.idx=0; stopSpeech(); if(m!=='exam') S.exam=null;
-  ['drill','flash','exam'].forEach(k=>$('m-'+k).setAttribute('aria-pressed',String(k===m)));
-  $('dock').style.display=(m==='exam')?'none':'';
-  syncDock();
-  filterSel.disabled=(m==='exam'); landSel.disabled=false;
-  render();
+/* ---------------- navigation drawer ----------------------------------------
+   One set of controls. Under 62rem it slides in over a scrim; above that the
+   stylesheet parks it as a permanent left rail and these handlers go quiet. */
+const body=document.body, nav=$('nav'), scrim=$('scrim'), burger=$('burger');
+const railed=()=>matchMedia('(min-width:62rem)').matches;
+function openNav(){
+  if(railed()) return;
+  body.classList.add('nav-open'); scrim.hidden=false;
+  burger.setAttribute('aria-expanded','true');
+  nav.querySelector('.navclose')?.focus();
 }
+function closeNav(){
+  body.classList.remove('nav-open'); scrim.hidden=true;
+  burger.setAttribute('aria-expanded','false');
+}
+const navOpen=()=>body.classList.contains('nav-open');
 
-/* settings popover */
-const pop=$('pop'), setBtn=$('setBtn');
-setBtn.onclick=e=>{e.stopPropagation(); const open=pop.hidden; pop.hidden=!open; setBtn.setAttribute('aria-expanded',String(open));};
-document.addEventListener('click',e=>{ if(!pop.hidden && !pop.contains(e.target)){pop.hidden=true; setBtn.setAttribute('aria-expanded','false');} });
+/* Above 62rem the same button collapses the rail instead of sliding a drawer
+   over the page -- the question column is the thing worth the pixels, and on
+   a laptop 17rem of permanent chrome is a lot to spend on controls you touch
+   once a session. */
+function applyRail(){
+  const off=!S.railOpen;
+  body.classList.toggle('rail-off', off);
+  burger.title = off ? 'Show the menu' : 'Hide the menu';
+  if(railed()) burger.setAttribute('aria-expanded', String(!off));
+  syncDock();
+}
+burger.onclick=()=>{
+  if(railed()){ S.railOpen=!S.railOpen; save(); applyRail(); return; }
+  navOpen()?closeNav():openNav();
+};
+$('navclose').onclick=closeNav;
+scrim.onclick=closeNav;
+
+/* ---------------- routes ----------------------------------------------------
+   The exam is a page of its own, so the Android back button and the desktop
+   window's back arrow both leave it instead of quitting the app. */
+const ROUTE={'#/browse':'flash','#/exam':'exam'};
+const HASH ={flash:'#/browse', exam:'#/exam', drill:'#/practice'};
+function go(mode){
+  if(location.hash===HASH[mode]){ applyRoute(); return; }
+  location.hash=HASH[mode];                  /* hashchange does the rest */
+}
+function applyRoute(){
+  const m=ROUTE[location.hash]||'drill';
+  const changed=(m!==S.mode);
+  S.mode=m;
+  if(changed){ S.picked=null; S.idx=0; stopSpeech(); }
+  if(m!=='exam') S.exam=null;
+  body.classList.toggle('exam', m==='exam');
+  $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
+  $('m-flash').setAttribute('aria-pressed',String(m==='flash'));
+  filterSel.disabled=(m==='exam');
+  closeNav(); setSheet(false);
+  render(); syncDock();
+}
+addEventListener('hashchange', applyRoute);
+$('m-drill').onclick=()=>go('drill');
+$('m-flash').onclick=()=>go('flash');
+$('m-exam').onclick =()=>go('exam');
+
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=null;stopSpeech();closeNav();render();};
+
 function toggle(id,key,after){
   const el=$(id);
   const flip=()=>{ S[key]=!S[key]; el.setAttribute('aria-checked',String(S[key])); save(); after&&after(); };
@@ -224,22 +275,81 @@ function toggle(id,key,after){
   el.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();} };
 }
 toggle('t-gloss','gloss',()=>{decoCache.clear(); hideTip(); render();});
+toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.idx=0; S.picked=null; S.exam=null; pop.hidden=true; setBtn.setAttribute('aria-expanded','false'); save(); render();
+  S.stats={}; S.exams=[]; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
 };
 $('fold').onclick=()=>{ S.mapOpen=!S.mapOpen; save(); paintDock(); };
 
-/* the dock is fixed, so reserve exactly its height at the bottom of the page */
-function syncDock(){
-  const d=$('dock');
-  const h=(d.style.display==='none') ? 0 : (d.offsetHeight||0);
-  document.body.style.setProperty('--dockh', (h?h+16:24)+'px');
+/* ---------------- progress sheet -------------------------------------------
+   Open or shut, nothing in between. The grab row is the whole hit target and
+   the only transform ever applied comes from a single class, so there is no
+   inline style left behind to fight the transition. On the desktop rail
+   layout the stylesheet pins it open and all of this goes quiet. */
+const dock=$('dock'), grab=$('grab');
+let sheetOn=false;
+function setSheet(open){
+  open=!!open && !railed();
+  sheetOn=open;
+  dock.style.transform='';                 /* never let a drag leak into the class state */
+  body.classList.toggle('sheet-open', open);
+  grab.setAttribute('aria-expanded', String(open));
+  grab.setAttribute('aria-label', open ? 'Hide your progress' : 'Show your progress');
+  if(open) paintDock();
 }
-if(window.ResizeObserver) new ResizeObserver(syncDock).observe($('dock'));
-addEventListener('resize',syncDock);
+/* How far down the sheet sits when shut. Read off body's resolved padding
+   rather than the --sab custom property: getPropertyValue hands back the raw
+   `env(...)` token, which parseFloat turns into NaN and the safe area silently
+   vanishes. The padding is the same value already resolved to pixels. */
+const shutBy=()=>Math.max(0,(dock.offsetHeight||0)-(parseFloat(getComputedStyle(body).paddingBottom)||0));
+
+/* Drag follows your finger, but releases to one of two places. A movement
+   under 6px is a tap, which toggles. */
+let drag=null, dragged=false;
+grab.addEventListener('pointerdown',e=>{
+  if(railed()) return;
+  dragged=false;
+  drag={y:e.clientY, open:sheetOn, moved:0, max:shutBy()};
+  try{ grab.setPointerCapture(e.pointerId); }catch(_){}
+});
+grab.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const dy=e.clientY-drag.y;
+  drag.moved=Math.max(drag.moved,Math.abs(dy));
+  if(drag.moved<5) return;
+  body.classList.add('sheet-drag');
+  const at=Math.min(drag.max, Math.max(0,(drag.open?0:drag.max)+dy));
+  dock.style.transform='translateY('+at+'px)';
+});
+function release(e){
+  if(!drag) return;
+  const d=drag; drag=null;
+  const dy=(e && typeof e.clientY==='number') ? e.clientY-d.y : 0;
+  body.classList.remove('sheet-drag');
+  if(d.moved>=6){ dragged=true; setSheet(dy<0); }   /* a real drag settles it here */
+  else dock.style.transform='';                     /* a tap: let click do the work */
+}
+grab.addEventListener('pointerup',release);
+grab.addEventListener('pointercancel',release);
+
+/* The toggle lives on click, not on pointerup, so Enter and Space on the
+   focused grab bar work too -- a drag suppresses the click it would emit. */
+grab.addEventListener('click',()=>{
+  if(dragged){ dragged=false; return; }
+  if(railed()) return;
+  setSheet(!sheetOn);
+});
+
+/* the dock is fixed, so reserve exactly its height under the question */
+function syncDock(){
+  const h=railed() ? (dock.offsetHeight||0) : 0;
+  body.style.setProperty('--dockh', (h?h+16:24)+'px');
+}
+if(window.ResizeObserver) new ResizeObserver(syncDock).observe(dock);
+addEventListener('resize',()=>{ syncDock(); applyRail(); if(railed()) setSheet(false); });
 
 /* ---------------- speech ----------------------------------------------------
    Web Speech API. The German voice comes from the operating system, so nothing
@@ -400,60 +510,110 @@ function paintGlos(term){
 
 /* ---------------- render ---------------- */
 const viewEl=$('view');
+
+/* 36 of the 39 picture questions answer with a pointer into the image --
+   "Bild 3", or a bare "2" labelling a region on a map. The option text
+   carries nothing the picture does not already say, so four stacked
+   full-width rows spend ~200px saying nothing. One row of four instead. */
+const POINTER=/^(?:Bild\s*)?\d+\.?$/i;
+const pointerOpts=q=>!!q.img && q.options.every(o=>POINTER.test(o.trim()));
+const ptrNum=o=>(/(\d+)/.exec(o)||[,'?'])[1];
+
+/* fullscreen picture: on a phone a map of Germany at 390px is not readable,
+   and on these questions reading it *is* answering. */
+const lens=$('lens'), lensImg=$('lensimg');
+function openLens(src,alt){ lensImg.src=src; lensImg.alt=alt||''; lens.hidden=false; }
+function closeLens(){ lens.hidden=true; lensImg.removeAttribute('src'); }
+$('lensclose').onclick=closeLens;
+lens.onclick=e=>{ if(e.target!==lensImg) closeLens(); };
+
+let autoTimer=null;
+const clearAuto=()=>{ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } };
+
+function shotHtml(q){
+  if(!q.img) return '';
+  const [w,h]=IMG[q.img]||[0,0];
+  return `<figure class="shot">
+    <img id="qimg" src="img/${q.img}.webp"${w?` width="${w}" height="${h}"`:''} decoding="async"
+         alt="Picture for question ${esc(String(q.num))}"></figure>`;
+}
+
+function optionsHtml(q, ord, revealed){
+  const ptr=pointerOpts(q);
+  return `<ul class="opts${ptr?' pointer':''}">${ord.map((orig,pos)=>{
+    let cls='opt', mark='';
+    if(revealed){
+      if(orig===q.answer){cls+=' right';mark='✓';}
+      else if(orig===S.picked){cls+=' wrong';mark='✗';}
+      else cls+=' dim';
+    }
+    const raw=q.options[orig];
+    return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}${ptr?` aria-label="${esc(raw)}"`:''}>
+      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw)}</span>`}
+      <span class="mark">${mark}</span></button></li>`;
+  }).join('')}</ul>`;
+}
+
 function render(){
+  clearAuto();
   landSel.value=S.land;
-  ['gloss','shufQ','shufA'].forEach((k,i)=>
-    $(['t-gloss','t-shufq','t-shufa'][i]).setAttribute('aria-checked',String(S[k])));
+  [['t-gloss','gloss'],['t-auto','auto'],['t-shufq','shufQ'],['t-shufa','shufA']]
+    .forEach(([id,k])=>$(id).setAttribute('aria-checked',String(S[k])));
   if(canSpeak) $('rate').value=String(S.rate);
   if(S.mode==='exam') return renderExam();
 
   const list=view();
   if(!list.length){
-    viewEl.innerHTML=`<div class="empty"><b>Nothing left</b>This selection is empty — pick another one above.</div>`;
-    paintDock(); return;
+    viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="empty">
+      <b>Nothing left</b>This selection is empty — pick another one from the menu.</div></div></div>`;
+    $('barnow').textContent=''; paintDock(); return;
   }
   if(S.idx>=list.length) S.idx=0;
   const q=list[S.idx], ord=optOrder(q);
   const revealed=(S.mode==='flash')||(S.picked!==null);
+  const right=revealed && S.picked===q.answer;
+  const atPos=ord.indexOf(q.answer)+1;
+  $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
 
-  viewEl.innerHTML=`
+  viewEl.innerHTML=`<div class="stage">
     <div class="meta">
-      <span>Question <b>${S.idx+1}</b> of <b>${list.length}</b></span>
       <span class="tag${q.state?' land':''}">${esc(q.state?q.state+' · no. '+q.num:topicEn(q.topic))}</span>
-      <span>Catalogue no. ${q.state?esc(q.state)+' '+q.num:q.num}</span>
-      ${toolsHtml()}
+      ${q.state?'':`<span class="catno"><span class="wide">Catalogue </span>no. ${q.num}</span>`}
+      ${toolsHtml(q)}
     </div>
-    <h1 class="q" lang="de">${deco(q.q)}</h1>
-    ${q.img?`<figure class="shot"><img src="img/${q.img}.webp" width="${IMG[q.img][0]}" height="${IMG[q.img][1]}" decoding="async" alt="Picture for question ${q.num}"></figure>`:''}
-    <ul class="opts">
-      ${ord.map((orig,pos)=>{
-        let cls='opt', mark='';
-        if(revealed){
-          if(orig===q.answer){cls+=' right';mark='✓';}
-          else if(orig===S.picked){cls+=' wrong';mark='✗';}
-          else cls+=' dim';
-        }
-        return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}>
-          <span class="cap">${pos+1}</span><span class="txt" lang="de">${deco(q.options[orig])}</span>
-          <span class="mark">${mark}</span></button></li>`;
-      }).join('')}
-    </ul>
-    <div class="act">
-      <button class="next quiet" id="prev">Back</button>
-      <button class="next" id="next">Next</button>
-      <span class="hint">
-        <span class="kbd">1</span>–<span class="kbd">4</span> answer
-        <span class="kbd">↵</span> next
-        <span class="kbd">←</span><span class="kbd">→</span> browse
-        ${canSpeak?`<span class="kbd">S</span> listen`:''}
-        <span class="kbd">C</span> copy
-        <span class="kbd">G</span> glossary
-      </span>
-    </div>`;
+    <div class="scroll" id="scroll">
+      <h1 class="q" lang="de">${deco(q.q)}</h1>
+      ${shotHtml(q)}
+    </div>
+    <div class="answers" id="answers">
+      ${optionsHtml(q,ord,revealed)}
+      <div class="act">
+        <button class="next quiet" id="prev">Back</button>
+        ${ (S.picked!==null)
+            ? `<span class="verdictline ${right?'ok':'bad'}">${right?'Correct':'The answer is '+atPos}</span>`
+            : `<span class="hint">
+                 <span class="kbd">1</span>–<span class="kbd">4</span> answer
+                 <span class="kbd">↵</span> next
+                 <span class="kbd">←</span><span class="kbd">→</span> browse
+                 ${canSpeak?`<span class="kbd">S</span> listen`:''}
+                 <span class="kbd">C</span> copy
+                 <span class="kbd">G</span> glossary
+               </span>` }
+        <button class="next grow" id="next">Next</button>
+      </div>
+    </div></div>`;
+
   viewEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.orig));
   $('next').onclick=()=>step(1);
   $('prev').onclick=()=>step(-1);
   wireTools(q, revealed);
+  const qi=$('qimg');
+  if(qi){
+    const show=()=>openLens(qi.currentSrc||qi.src, qi.alt);
+    qi.onclick=show; const zb=$('zoomBtn'); if(zb) zb.onclick=show;
+  }
+  const sc=$('scroll');
+  if(sc) $('answers').classList.toggle('stuck', sc.scrollHeight>sc.clientHeight+2);
   warm((list[(S.idx+1)%list.length]||{}).img);
   paintDock();
 }
@@ -463,13 +623,83 @@ function answer(orig){
   const q=view()[S.idx];
   S.picked=orig;
   const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
-  orig===q.answer? st.r++ : st.w++;
+  const right=(orig===q.answer);
+  right? st.r++ : st.w++;
   save(); render();
+  /* right answers move on by themselves; wrong ones wait, because the pause
+     after a wrong answer is the part that actually teaches you something */
+  if(right && S.auto){ autoTimer=setTimeout(()=>{ autoTimer=null; step(1); }, 700); }
 }
 function step(d){
+  clearAuto();
   const list=view();
+  if(!list.length) return;
   S.idx=(S.idx+d+list.length)%list.length;
   S.picked=null; hideTip(); stopSpeech(); render();
+  const sc=$('scroll'); if(sc) sc.scrollTop=0;
+}
+
+/* ---------------- the numbers -----------------------------------------------
+   Laplace-smoothed per question, so one lucky guess is not "mastered" and an
+   unseen question sits at exactly 0.5 instead of needing a special case. */
+const pOf=q=>{ const s=S.stats[q.id], r=s?s.r:0, w=s?s.w:0; return (r+1)/(r+w+2); };
+const mean=a=>a.length? a.reduce((x,y)=>x+y,0)/a.length : 0.5;
+/* the real exam is 30 general + 3 from your state, and 17 of 33 passes */
+const projected=()=>Math.round(30*mean(general.map(pOf)) + 3*mean(landQs().map(pOf)));
+/* With no answers at all every question sits at the 0.5 prior, which projects
+   to exactly 17 -- the pass mark. Telling a brand-new user they are already
+   scraping a pass is worse than telling them nothing, so below this many
+   answers there is no estimate to give. */
+const MIN_PROJ=12;
+const attempted=()=>pool().filter(q=>S.stats[q.id]).length;
+const canProject=()=>attempted()>=MIN_PROJ;
+
+function paintStats(){
+  const el=$('stats');
+  const p=pool();
+  const done=p.filter(q=>S.stats[q.id]).length;
+  const weak=p.filter(q=>{const s=S.stats[q.id]; return s&&s.w>s.r;}).length;
+  const unseen=p.length-done;
+  const proj=projected(), passed=proj>=17, known=canProject();
+
+  const topics=[...new Set(general.map(q=>q.topic))]
+    .map(t=>{ const qs=general.filter(q=>q.topic===t);
+      return {t, n:qs.length, solid:qs.filter(q=>{const s=S.stats[q.id];return s&&s.r>=s.w;}).length}; })
+    .sort((a,b)=>b.n-a.n);
+
+  const past=S.exams.slice(-6).reverse();
+
+  el.innerHTML=`
+    <p class="headline"><span class="big ${known?(passed?'pass':'fail'):'none'}">${known?proj:'—'}</span>
+      <span class="of">/ 33 projected · 17 passes</span></p>
+    <p class="headnote">${known
+      ? `Estimated from how you have answered so far, drawn the way the real exam is:
+         30 general questions and 3 from ${esc(S.land)}.`
+      : `Answer ${MIN_PROJ-attempted()} more question${MIN_PROJ-attempted()===1?'':'s'} and this
+         becomes a real estimate of how you would score.`}</p>
+
+    <div class="chips">
+      <button class="chip${S.filter==='unseen'?' on':''}" data-f="unseen"><b>${unseen}</b>not seen yet</button>
+      <button class="chip${S.filter==='wrong'?' on':''}" data-f="wrong"><b>${weak}</b>shaky</button>
+      <button class="chip${S.filter==='all'?' on':''}" data-f="all"><b>${done}</b>attempted</button>
+    </div>
+
+    ${past.length?`<div class="brk"><h4>Past mock exams</h4><div class="exams">
+      ${past.map(e=>`<span class="ex ${e.s>=17?'pass':'fail'}">${e.s}/33</span>`).join('')}
+    </div></div>`:''}
+
+    <div class="brk"><h4>By topic</h4>
+      ${topics.map(t=>`<button class="trow" data-f="t:${esc(t.t)}">
+        <span class="nm">${esc(topicEn(t.t))}</span>
+        <span class="num">${t.solid}/${t.n}</span>
+        <span class="bar2"><i style="width:${Math.round(t.solid/t.n*100)}%"></i></span>
+      </button>`).join('')}
+    </div>`;
+
+  el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
+    S.filter=b.dataset.f; filterSel.value=S.filter;
+    S.idx=0; S.picked=null; stopSpeech(); setSheet(false); render();
+  });
 }
 
 /* ---------------- catalogue map ---------------- */
@@ -478,10 +708,15 @@ function paintDock(){
   const done=p.filter(q=>S.stats[q.id]).length;
   const solid=p.filter(q=>S.stats[q.id]&&S.stats[q.id].r>=S.stats[q.id].w).length;
   const weak=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>S.stats[q.id].r).length;
-  $('dock-stat').innerHTML=`<b>${done}</b> of <b>${p.length}</b> attempted · <b>${solid}</b> solid · <b>${weak}</b> shaky`;
+  $('dock-stat').innerHTML= (railed() || !canProject())
+    ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${solid}</b> solid · <b>${weak}</b> shaky`
+    : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
+  if(!railed() && sheetOn) paintStats();
   $('fold').textContent=S.mapOpen?'hide':'show';
   map.hidden=!S.mapOpen;
-  if(!S.mapOpen){ syncDock(); return; }
+  /* the grid is hidden below the rail breakpoint, so don't build 310 buttons
+     on every render of a phone that will never show them */
+  if(!S.mapOpen || !railed()){ syncDock(); return; }
   const cur=list[S.idx];
   map.innerHTML='';
   p.forEach(q=>{
@@ -496,7 +731,7 @@ function paintDock(){
       const l=view(), at=l.findIndex(x=>x.id===q.id);
       if(at<0){ S.filter='all'; filterSel.value='all'; S.idx=view().findIndex(x=>x.id===q.id); }
       else S.idx=at;
-      S.picked=null; stopSpeech(); render();
+      S.picked=null; stopSpeech(); setSheet(false); render();
     };
     map.appendChild(b);
   });
@@ -506,44 +741,91 @@ function paintDock(){
 /* ---------------- exam ---------------- */
 const draw=(a,n)=>{const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[x[i],x[j]]=[x[j],x[i]];}return x.slice(0,n);};
 function startExam(){
-  S.exam={ids:draw(general,30).concat(draw(landQs(),3)).map(q=>q.id),answers:{},at:0,started:Date.now(),done:false};
+  S.exam={ids:draw(general,30).concat(draw(landQs(),3)).map(q=>q.id),answers:{},at:0,started:Date.now(),done:false,scored:false};
   render();
 }
+const EXAM_SECS=3600;
+const examLeft=()=>Math.max(0,EXAM_SECS-Math.floor((Date.now()-S.exam.started)/1000));
+const fmtLeft=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+
+/* The clock used to re-render the whole question every second, which meant
+   re-running 361 glossary regexes a second and throwing away the DOM under
+   the reader's finger. Only the clock changes, so only the clock is touched. */
+let examTick=null;
+const stopTick=()=>{ if(examTick){ clearInterval(examTick); examTick=null; } };
+function startTick(){
+  stopTick();
+  examTick=setInterval(()=>{
+    if(S.mode!=='exam'||!S.exam||S.exam.done) return stopTick();
+    const c=$('clock'); if(!c) return stopTick();
+    const left=examLeft();
+    c.textContent=fmtLeft(left); c.classList.toggle('low',left<300);
+    if(left<=0){ stopTick(); S.exam.done=true; render(); }
+  },1000);
+}
+
+function examOptionsHtml(q, ord, chosen){
+  const ptr=pointerOpts(q);
+  return `<ul class="opts${ptr?' pointer':''}">${ord.map((orig,pos)=>{
+    const raw=q.options[orig];
+    return `<li><button class="opt${chosen===orig?' picked':''}" data-orig="${orig}"${ptr?` aria-label="${esc(raw)}"`:''}>
+      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw)}</span>`}
+      <span class="mark"></span></button></li>`;
+  }).join('')}</ul>`;
+}
+
 function renderExam(){
+  stopTick();
+  $('barnow').textContent='';
   if(!S.exam){
-    viewEl.innerHTML=`<div class="panel"><h2>Mock exam</h2>
+    viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="panel">
+      <h2>Mock exam</h2>
       <p>33 questions, exactly like the real test: 30 general ones and 3 from ${esc(S.land)}.
       You get 60 minutes, and you pass with 17 correct answers. Nothing is marked until the end.</p>
-      <button class="next" id="go">Start the exam</button></div>`;
-    $('go').onclick=startExam; return;
+      <div class="act">
+        <button class="next" id="go">Start the exam</button>
+        <button class="next quiet" id="leave">Back to practice</button>
+      </div></div></div></div>`;
+    $('go').onclick=startExam;
+    $('leave').onclick=()=>go('drill');
+    return;
   }
   if(S.exam.done) return renderResult();
-  const q=Q.find(x=>x.id===S.exam.ids[S.exam.at]), ord=optOrder(q);
-  const left=Math.max(0,3600-Math.floor((Date.now()-S.exam.started)/1000));
+  const left=examLeft();
   if(left===0){ S.exam.done=true; return renderResult(); }
-  const mm=String(Math.floor(left/60)).padStart(2,'0'), ss=String(left%60).padStart(2,'0');
+
+  const q=Q.find(x=>x.id===S.exam.ids[S.exam.at]), ord=optOrder(q);
   const chosen=S.exam.answers[q.id];
+  const answered=Object.keys(S.exam.answers).length;
 
   viewEl.innerHTML=`
-    <div class="meta">
-      <span>Question <b>${S.exam.at+1}</b> of <b>33</b></span>
-      <span class="tag${q.state?' land':''}">${esc(q.state||topicEn(q.topic))}</span>
-      <span class="timer ${left<300?'low':''}">${mm}:${ss} left</span>
-      <span>${Object.keys(S.exam.answers).length} answered</span>
-      ${toolsHtml()}
+    <div class="exambar">
+      <button class="quit" id="quit">Quit</button>
+      <span class="pos">${S.exam.at+1} / 33</span>
+      <span>${answered} answered</span>
+      <span class="clock ${left<300?'low':''}" id="clock">${fmtLeft(left)}</span>
+      <span class="prog"><i style="width:${Math.round((S.exam.at+1)/33*100)}%"></i></span>
     </div>
-    <h1 class="q" lang="de">${deco(q.q)}</h1>
-    ${q.img?`<figure class="shot"><img src="img/${q.img}.webp" width="${IMG[q.img][0]}" height="${IMG[q.img][1]}" decoding="async" alt="Picture for this question"></figure>`:''}
-    <ul class="opts">
-      ${ord.map((orig,pos)=>`<li><button class="opt${chosen===orig?' right':''}" data-orig="${orig}">
-        <span class="cap">${pos+1}</span><span class="txt" lang="de">${deco(q.options[orig])}</span>
-        <span class="mark"></span></button></li>`).join('')}
-    </ul>
-    <div class="act">
-      <button class="next quiet" id="prev" ${S.exam.at===0?'disabled':''}>Back</button>
-      <button class="next" id="fwd">${S.exam.at===32?'See results':'Next'}</button>
-      <span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer <span class="kbd">↵</span> next ${canSpeak?`<span class="kbd">S</span> listen `:''}<span class="kbd">C</span> copy</span>
+    <div class="stage">
+      <div class="meta">
+        <span class="tag${q.state?' land':''}">${esc(q.state||topicEn(q.topic))}</span>
+        ${toolsHtml(q)}
+      </div>
+      <div class="scroll" id="scroll">
+        <h1 class="q" lang="de">${deco(q.q)}</h1>
+        ${shotHtml(q)}
+      </div>
+      <div class="answers" id="answers">
+        ${examOptionsHtml(q,ord,chosen)}
+        <div class="act">
+          <button class="next quiet" id="prev" ${S.exam.at===0?'disabled':''}>Back</button>
+          <span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer
+            <span class="kbd">↵</span> next ${canSpeak?`<span class="kbd">S</span> listen `:''}<span class="kbd">C</span> copy</span>
+          <button class="next grow" id="fwd">${S.exam.at===32?'See results':'Next'}</button>
+        </div>
+      </div>
     </div>`;
+
   viewEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     S.exam.answers[q.id]=+b.dataset.orig;
     if(S.exam.at<32) S.exam.at++; else S.exam.done=true;
@@ -551,30 +833,44 @@ function renderExam(){
   });
   $('prev').onclick=()=>{S.exam.at--;render();};
   $('fwd').onclick=()=>{ if(S.exam.at<32){S.exam.at++;render();} else {S.exam.done=true;render();} };
+  $('quit').onclick=()=>{ if(confirm('Leave this exam? Your answers will be discarded.')){ S.exam=null; go('drill'); } };
   wireTools(q, false);
+  const qi=$('qimg');
+  if(qi){ const show=()=>openLens(qi.currentSrc||qi.src, qi.alt); qi.onclick=show; const zb=$('zoomBtn'); if(zb) zb.onclick=show; }
+  const sc=$('scroll');
+  if(sc) $('answers').classList.toggle('stuck', sc.scrollHeight>sc.clientHeight+2);
   warm((Q.find(x=>x.id===S.exam.ids[S.exam.at+1])||{}).img);
-  clearTimeout(window._tick);
-  window._tick=setTimeout(()=>{ if(S.mode==='exam'&&S.exam&&!S.exam.done) render(); },1000);
+  startTick();
 }
 function renderResult(){
-  clearTimeout(window._tick);
+  stopTick();
+  /* scoring writes to your per-question record, so it must happen exactly
+     once -- this screen re-renders whenever a setting is toggled */
+  const fresh=!S.exam.scored;
   let score=0;
   const rows=S.exam.ids.map((id,n)=>{
     const q=Q.find(x=>x.id===id), a=S.exam.answers[id], ok=(a===q.answer);
     if(ok) score++;
-    const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0}); ok?st.r++:st.w++;
+    if(fresh){ const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0}); ok?st.r++:st.w++; }
     return `<div class="row"><span class="n">${n+1}</span><span class="s ${ok?'ok':'bad'}">${ok?'✓':'✗'}</span>
       <span class="b" lang="de">${deco(q.q)}<em>Correct: ${deco(q.options[q.answer])}${ok?'':' · You chose: '+(a==null?'—':deco(q.options[a]))}</em></span></div>`;
   }).join('');
-  save();
+  if(fresh){
+    S.exam.scored=true;
+    S.exams.push({s:score, at:Date.now()});
+    if(S.exams.length>20) S.exams=S.exams.slice(-20);
+    save();
+  }
   const passed=score>=17;
-  viewEl.innerHTML=`<div class="panel">
+  viewEl.innerHTML=`<div class="stage"><div class="scroll">
+    <div class="panel">
       <p class="score">${score}<small> / 33 correct</small></p>
       <p class="verdict ${passed?'pass':'fail'}">${passed?'Passed — the threshold is 17 correct answers.':'Not passed — you need at least 17 correct.'}</p>
       <div class="act"><button class="next" id="again">New exam</button>
       <button class="next quiet" id="back">Back to practice</button></div></div>
-    <div class="panel"><h2>All 33 questions</h2><div class="rows">${rows}</div></div>`;
-  $('again').onclick=startExam; $('back').onclick=()=>setMode('drill');
+    <div class="panel"><h2>All 33 questions</h2><div class="rows">${rows}</div></div>
+  </div></div>`;
+  $('again').onclick=startExam; $('back').onclick=()=>go('drill');
 }
 
 /* ---------------- keyboard ---------------- */
@@ -584,7 +880,7 @@ document.addEventListener('keydown',e=>{
     return;
   }
   const k=e.key;
-  if(k==='Escape'){ stopSpeech(); if(!veil.hidden) closeGlos(); else if(!pop.hidden){pop.hidden=true;setBtn.setAttribute('aria-expanded','false');} else hideTip(); return; }
+  if(k==='Escape'){ stopSpeech(); if(!lens.hidden) closeLens(); else if(!veil.hidden) closeGlos(); else if(navOpen()) closeNav(); else hideTip(); return; }
   if(!veil.hidden) return;
   if(k==='g'||k==='G'){ e.preventDefault(); openGlos(); return; }
   if(k==='c'||k==='C'){
@@ -616,7 +912,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ---------------- boot ---------------- */
-(async()=>{ await load(); buildFilter(); initSpeech(); setMode('drill'); })();
+(async()=>{ await load(); buildFilter(); initSpeech(); applyRail(); applyRoute(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has

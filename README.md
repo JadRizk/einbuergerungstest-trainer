@@ -34,9 +34,9 @@ states. The exam you sit draws 33 of them.
 
 | | |
 | --- | --- |
-| **Practice** | One question at a time with immediate feedback, tracking what you have already answered. Narrow it to questions you have never seen, or to ones you keep getting wrong. |
+| **Practice** | One question at a time with immediate feedback, tracking what you have already answered. Narrow it to questions you have never seen, or to ones you keep getting wrong. A right answer moves on by itself; a wrong one waits, because that pause is where the learning happens. |
 | **Browse** | Read straight through the catalogue without being quizzed. |
-| **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. |
+| **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. Runs full screen as its own route, so the back button leaves the exam rather than the app, and past scores are kept. |
 
 ## While you study
 
@@ -52,6 +52,10 @@ states. The exam you sit draws 33 of them.
 - **Copy or translate** any question with one click, for looking something up elsewhere or
   pasting it into your own notes.
 - **Pick your state** to get the right 10 regional questions.
+- **Picture questions answer with a pointer.** In 36 of the 39, the options read only "Bild 3"
+  or a bare "2" labelling a region on a map — nothing the picture does not already say. They are
+  drawn as one row of four buttons rather than four full-width rows, and the picture opens full
+  screen on a tap, which is how you read a small region on a map of Germany at 390px.
 
 <table>
 <tr>
@@ -107,7 +111,7 @@ no bundler: `git push` is the deploy.
 | --- | --- |
 | `index.html` | The shell — markup only |
 | `app.css` | All styling, and the self-hosted `@font-face` |
-| `app.js` | The whole app, an ES module, ~600 lines |
+| `app.js` | The whole app, an ES module, ~800 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
 | `img/` | The 38 question images, fetched only when a question needs one |
@@ -117,6 +121,16 @@ no bundler: `git push` is the deploy.
 
 The data is fetched at runtime rather than inlined, so a change to the styling does not make
 returning visitors re-download the catalogue. First load is **95 KB** over the wire.
+
+### One layout, placed two ways
+
+There is a single set of controls in the markup; CSS decides where it lives. Below `62rem` it is
+a drawer behind the menu button, above it a permanent left rail that the same button collapses.
+The answers use `position: sticky` rather than being pinned: a short question has no gap above
+them, and a tall picture question still keeps them on screen. Progress is a bottom sheet on a
+phone — shut or open, no half-way — and the bar across the bottom on a wide screen. The 310-cell
+grid is wide-screen only, where 9px cells read as one glanceable image; at a thumb-sized 26px it
+would be two dozen rows of squares saying less than the numbers above it.
 
 <details>
 <summary><b>If you change something</b> — caching rules worth knowing first</summary>
