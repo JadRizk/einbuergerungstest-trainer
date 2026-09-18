@@ -208,15 +208,28 @@ function buildFilter(){
    stylesheet parks it as a permanent left rail and these handlers go quiet. */
 const body=document.body, nav=$('nav'), scrim=$('scrim'), burger=$('burger');
 const railed=()=>matchMedia('(min-width:62rem)').matches;
+let navReturn=null;                     /* where focus came from */
 function openNav(){
   if(railed()) return;
+  navReturn=document.activeElement;
   body.classList.add('nav-open'); scrim.hidden=false;
   burger.setAttribute('aria-expanded','true');
+  /* Only the drawer is a modal. Above the breakpoint this same element is a
+     permanent rail, so the dialog role is put on and taken off rather than
+     sitting in the markup telling a screen reader the rail is a dialog. */
+  nav.setAttribute('role','dialog');
+  nav.setAttribute('aria-modal','true');
   nav.querySelector('.navclose')?.focus();
 }
 function closeNav(){
+  const was=navOpen();
   body.classList.remove('nav-open'); scrim.hidden=true;
   burger.setAttribute('aria-expanded','false');
+  nav.removeAttribute('role'); nav.removeAttribute('aria-modal');
+  /* Put focus back where it started instead of dropping it on <body>, which
+     sends a keyboard or screen-reader user to the top of the document. */
+  if(was){ const back=(navReturn&&document.contains(navReturn))?navReturn:burger; back.focus(); }
+  navReturn=null;
 }
 const navOpen=()=>body.classList.contains('nav-open');
 
@@ -237,6 +250,25 @@ burger.onclick=()=>{
 };
 $('navclose').onclick=closeNav;
 scrim.onclick=closeNav;
+
+/* While the drawer is open, Tab must not walk out of it into the question
+   behind -- which it did, reaching the Listen/Copy buttons after 15 stops. */
+const NAVSTOPS='button,select,summary,a[href],input,[tabindex]:not([tabindex="-1"])';
+addEventListener('keydown',e=>{
+  if(e.key!=='Tab'||!navOpen()) return;
+  /* Content inside a collapsed <details> still reports an offsetParent in
+     Chrome, so it has to be excluded by hand -- otherwise the last stop is
+     computed as the link inside "About & sources", the wrap never fires at
+     the summary, and focus leaks to the question behind. */
+  const f=[...nav.querySelectorAll(NAVSTOPS)].filter(el=>
+    !el.disabled && el.offsetParent!==null &&
+    !(el.tagName!=='SUMMARY' && el.closest('details:not([open])')));
+  if(!f.length) return;
+  const first=f[0], last=f[f.length-1], at=document.activeElement;
+  if(e.shiftKey&&at===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey&&at===last){ e.preventDefault(); first.focus(); }
+  else if(!nav.contains(at)){ e.preventDefault(); first.focus(); }
+});
 
 /* ---------------- routes ----------------------------------------------------
    The exam is a page of its own, so the Android back button and the desktop
@@ -348,7 +380,21 @@ function syncDock(){
   body.style.setProperty('--dockh', (h?h+16:24)+'px');
 }
 if(window.ResizeObserver) new ResizeObserver(syncDock).observe(dock);
-addEventListener('resize',()=>{ syncDock(); applyRail(); if(railed()) setSheet(false); });
+let wasRailed=railed();
+addEventListener('resize',()=>{
+  const now=railed();
+  if(now!==wasRailed){
+    wasRailed=now;
+    /* The drawer and the rail are one set of controls, so an open drawer must
+       not survive into a rail. And the grid is only built above the
+       breakpoint: nothing else repaints on a resize, so a window widened from
+       a phone showed the legend with no grid under it until the next render. */
+    closeNav();
+    paintDock();
+  }
+  syncDock(); applyRail();
+  if(now) setSheet(false);
+});
 
 /* ---------------- speech ----------------------------------------------------
    Web Speech API. The German voice comes from the operating system, so nothing
