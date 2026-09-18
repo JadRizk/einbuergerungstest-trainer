@@ -343,7 +343,6 @@ body.sheet-drag .dock{transition:none}
 .dock-head{display:none; align-items:center; gap:.8rem; flex-wrap:wrap; font-size:.79rem; color:var(--muted); margin-bottom:.5rem}
 .legend{display:flex; gap:.7rem; flex-wrap:wrap}
 .legend i{display:inline-block; width:.6rem; height:.6rem; border-radius:2px; margin-right:.28rem; vertical-align:-1px}
-.fold{margin-left:auto; background:transparent; border:0; color:var(--muted); cursor:pointer; font-size:.79rem; padding:.3rem}
 
 /* cells big enough to actually hit with a thumb */
 .map{display:none; grid-template-columns:repeat(auto-fill,minmax(1.6rem,1fr)); gap:4px}

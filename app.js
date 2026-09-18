@@ -48,16 +48,16 @@ const topicEn=t=>TOPIC[t]||t;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
   idx:0, picked:null, stats:{}, exam:null,
-  gloss:true, shufQ:false, shufA:false, auto:true, seed:1, mapOpen:true, railOpen:true,
+  gloss:true, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   exams:[],                             /* past mock scores, newest last */
   voice:'', rate:0.85
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,shufQ:S.shufQ,
-  shufA:S.shufA,auto:S.auto,seed:S.seed,mapOpen:S.mapOpen,railOpen:S.railOpen,exams:S.exams,
+  shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
   voice:S.voice,rate:S.rate}); }
 async function load(){
   const d=await store.get(KEY);
-  if(d){ delete d.dark; delete d.mode; delete d.speed; Object.assign(S,d); }
+  if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
 }
 
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -282,7 +282,6 @@ $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
   S.stats={}; S.exams=[]; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
 };
-$('fold').onclick=()=>{ S.mapOpen=!S.mapOpen; save(); paintDock(); };
 
 /* ---------------- progress sheet -------------------------------------------
    Open or shut, nothing in between. The grab row is the whole hit target and
@@ -712,11 +711,12 @@ function paintDock(){
     ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${solid}</b> solid · <b>${weak}</b> shaky`
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
-  $('fold').textContent=S.mapOpen?'hide':'show';
-  map.hidden=!S.mapOpen;
-  /* the grid is hidden below the rail breakpoint, so don't build 310 buttons
-     on every render of a phone that will never show them */
-  if(!S.mapOpen || !railed()){ syncDock(); return; }
+  /* The grid is not optional on a wide screen. It costs 46px and hiding it
+     saved too little to be worth a control -- and a collapsed dock left the
+     legend on screen explaining colours that were no longer there.
+     It stays hidden below the rail breakpoint, so don't build 310 buttons on
+     every render of a phone that will never show them. */
+  if(!railed()){ syncDock(); return; }
   const cur=list[S.idx];
   map.innerHTML='';
   p.forEach(q=>{
