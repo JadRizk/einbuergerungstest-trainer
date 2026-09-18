@@ -12,7 +12,7 @@ No build step, no server, no account, no tracking. Open it and it works, includi
 ![Questions](https://img.shields.io/badge/questions-460-0B6357?style=flat-square)
 ![Glossary](https://img.shields.io/badge/glossary-361%20terms-0B6357?style=flat-square)
 ![Offline](https://img.shields.io/badge/offline-installable%20PWA-0B6357?style=flat-square)
-![First load](https://img.shields.io/badge/first%20load-95%20KB-0B6357?style=flat-square)
+![First load](https://img.shields.io/badge/first%20load-97%20KB-0B6357?style=flat-square)
 ![Dependencies](https://img.shields.io/badge/dependencies-none-0B6357?style=flat-square)
 ![Code licence](https://img.shields.io/badge/code-MIT-0B6357?style=flat-square)
 
@@ -61,7 +61,7 @@ states. The exam you sit draws 33 of them.
 <table>
 <tr>
 <td width="50%">
-  <img src="docs/image-question.webp" alt="A picture question asking which coat of arms belongs to Berlin, showing four state coats of arms">
+  <img src="docs/image-question.webp" alt="A picture question asking which coat of arms belongs to Berlin, showing four state coats of arms above a row of four numbered buttons">
   <p align="center"><em>Picture questions, including all 16 states' coats of arms</em></p>
 </td>
 <td width="50%">
@@ -73,7 +73,7 @@ states. The exam you sit draws 33 of them.
 
 ## On your phone
 
-<img src="docs/mobile.webp" alt="The app on a phone, with the layout adapted to a narrow screen" width="300" align="right">
+<img src="docs/mobile.webp" alt="The app on a phone: the controls collapsed behind a menu button, an answered question with the wrong choice in red and the correct one in green, and the progress sheet resting at the bottom" width="300" align="right">
 
 Open the link and use **Add to Home Screen**. It then launches like an app and works with no
 connection.
