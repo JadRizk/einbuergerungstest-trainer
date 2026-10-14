@@ -22,7 +22,7 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-09-18d';
+const VERSION = 'ebt-2026-10-10a';
 const SHELL   = ['./', 'app.css', 'app.js', 'manifest.json'];
 
 self.addEventListener('install', e => {
