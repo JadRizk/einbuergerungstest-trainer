@@ -31,13 +31,14 @@ states. The exam you sit draws 33 of them.
 
 ---
 
-## Three ways to study
+## Four ways to study
 
 | | |
 | --- | --- |
 | **Practice** | One question at a time with immediate feedback, tracking what you have already answered. Narrow it to questions you have never seen, or to ones you keep getting wrong. A right answer moves on by itself; a wrong one waits, because that pause is where the learning happens. |
 | **Browse** | Read straight through the catalogue without being quizzed. |
-| **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. Runs full screen as its own route, so the back button leaves the exam rather than the app, and past scores are kept. |
+| **Hooks** | A recognition drill for questions you have already worked through: one rare word in the stem, one word that appears in no other option. Scan for the first, pick the option carrying the second. It is for recall, not comprehension — do the understanding in Practice first. Answers here are not counted in your statistics. |
+| **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. Runs full screen as its own route, so the back button leaves the exam rather than the app, and past scores are kept. You can also draw from only what you have already answered, or from a range of catalogue numbers — handy while working through the catalogue in order. |
 
 ## While you study
 
@@ -115,6 +116,7 @@ no bundler: `git push` is the deploy.
 | `app.js` | The whole app, an ES module, ~800 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
+| `data/hooks.json` | One memory hook per question, for Hooks mode — derived, fetched only when that mode is opened |
 | `img/` | The 38 question images, fetched only when a question needs one |
 | `font/` | Archivo variable, latin subset, self-hosted |
 | `sw.js` | Service worker — offline support and caching |
