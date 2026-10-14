@@ -49,12 +49,14 @@ const S={
   land:'Berlin', mode:'drill', filter:'all',
   idx:0, picked:null, stats:{}, exam:null,
   gloss:true, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
+  hgrade:'all',                         /* hooks mode: which grades to show */
+  escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
   voice:'', rate:0.85
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,shufQ:S.shufQ,
   shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  voice:S.voice,rate:S.rate}); }
+  voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
@@ -189,6 +191,195 @@ function view(){
   return r? l.slice().sort((a,b)=>r.get(a.id)-r.get(b.id)) : l;
 }
 
+/* ---------------- hooks: the recognition aid --------------------------------
+   data/hooks.json is derived from the catalogue, not part of it: per question
+   one rare word in the stem (the trigger) and one string that appears in no
+   other option (the token). Fetched on first use rather than at boot, because
+   most visitors never open this mode and it is another 77 KB.
+
+   A hook is a way to recognise a question you have already learnt. It is not a
+   way to work out an answer you do not know -- nothing in the wording tells you
+   which option is right, which is the whole reason this file has to exist. */
+let HOOKS=null, hooksErr=null, hooksWait=null;
+const GRADEN={
+  A:'trigger unique in your 310, and the token never appears in a wrong option anywhere',
+  B:'one of those two holds',
+  C:'the token is distinctive only inside this question',
+  D:'no single distinctive word, so a verbatim phrase is given',
+  V:'picture question — the token is the image to point at'
+};
+function loadHooks(){
+  if(hooksWait) return hooksWait;
+  hooksWait=fetch('data/hooks.json')
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(j=>{ HOOKS=new Map(j.hooks.map(h=>[h.id,h])); })
+    .catch(e=>{ hooksErr=e; hooksWait=null; });   /* let the next attempt refetch */
+  return hooksWait;
+}
+const hookList=()=>{
+  const l=view().filter(q=>HOOKS.has(q.id));
+  if(S.hgrade==='all') return l;
+  if(S.hgrade==='exact') return l.filter(q=>HOOKS.get(q.id).match==='exact');
+  if(S.hgrade==='amb')   return l.filter(q=>HOOKS.get(q.id).stem_ambiguous);
+  return l.filter(q=>HOOKS.get(q.id).grade===S.hgrade);
+};
+
+/* Wrap each needle where it occurs, leaving the rest escaped. Overlapping or
+   missing needles are dropped rather than mangling the string. */
+function hiLite(text, needles, cls, whole){
+  const ns=(Array.isArray(needles)?needles:[needles]).filter(Boolean);
+  if(!ns.length) return esc(text);
+  if(whole) return `<mark class="${cls}">${esc(text)}</mark>`;
+  const hits=[];
+  for(const n of ns){
+    let i=text.indexOf(n);
+    if(i<0) i=text.toLowerCase().indexOf(n.toLowerCase());
+    if(i>=0) hits.push([i,i+n.length]);
+  }
+  hits.sort((a,b)=>a[0]-b[0]);
+  let out='',last=0;
+  for(const [a,b] of hits){
+    if(a<last) continue;
+    out+=esc(text.slice(last,a))+`<mark class="${cls}">${esc(text.slice(a,b))}</mark>`;
+    last=b;
+  }
+  return out+esc(text.slice(last));
+}
+
+function hookCard(h, revealed){
+  const flags=[];
+  if(h.match==='exact') flags.push('the right option is <b>exactly</b> this — a wrong one contains it as well');
+  if(h.stem_ambiguous)  flags.push('another question has the same stem — <b>ignore the stem</b> and go by the token');
+  if(h.kind==='number') flags.push('the answer is a number');
+  if(h.kind==='image')  flags.push('point at the picture');
+  /* The token's gloss would give the answer away, so it waits for the reveal --
+     which can leave nothing to list at all. An empty <dl> still draws its rule
+     and its padding, so it has to be skipped rather than rendered empty. */
+  const row=(de,en)=>`<div><dt lang="de">${esc(de)}</dt><dd>${esc(en)}</dd></div>`;
+  const glosses=[];
+  if(h.trigger_en) glosses.push(row(h.trigger, h.trigger_en));
+  if(revealed && h.token_en) glosses.push(row(h.token, h.token_en));
+  return `<div class="hook">
+    <div class="hookline">
+      <span class="grade g-${h.grade}" title="${esc(GRADEN[h.grade]||'')}">${h.grade}</span>
+      <span class="hw trig" lang="de">${esc(h.trigger)}</span>
+      ${h.trigger2?`<span class="hplus" lang="de">+&nbsp;${esc(h.trigger2)}</span>`:''}
+      <span class="harrow" aria-hidden="true">&rarr;</span>
+      <span class="hw tok${revealed?'':' veiled'}" lang="de">${revealed?esc(h.token):'tap an answer'}</span>
+    </div>
+    ${glosses.length?`<dl class="hooken">${glosses.join('')}</dl>`:''}
+    ${flags.length?`<p class="hookflag">${flags.join(' · ')}</p>`:''}
+  </div>`;
+}
+
+function hookOptionsHtml(q, ord, revealed, h){
+  if(pointerOpts(q)) return optionsHtml(q,ord,revealed);
+  return `<ul class="opts">${ord.map((orig,pos)=>{
+    let cls='opt', mark='';
+    if(revealed){
+      if(orig===q.answer){cls+=' right';mark='✓';}
+      else if(orig===S.picked){cls+=' wrong';mark='✗';}
+      else cls+=' dim';
+    }
+    const raw=q.options[orig];
+    const txt=(revealed && orig===q.answer)
+      ? hiLite(raw, h.token, 'tok', h.match==='exact')
+      : esc(raw);
+    return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}>
+      <span class="cap">${pos+1}</span><span class="txt" lang="de">${txt}</span>
+      <span class="mark">${mark}</span></button></li>`;
+  }).join('')}</ul>`;
+}
+
+/* Kept short: a <select> is as wide as its longest option, and this one shares
+   a row with the topic tag on a 390px phone. */
+const HGRADES=[['all','All hooks'],['A','Grade A'],['B','Grade B'],
+  ['C','Grade C · weak'],['D','Grade D · phrase'],['V','Pictures'],
+  ['exact','Exact match'],['amb','Shared stem']];
+
+function renderHooks(){
+  if(!HOOKS){
+    viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="empty">
+      <b>${hooksErr?'Could not load the hooks':'Loading…'}</b>
+      ${hooksErr
+        ? (navigator.onLine===false
+            ? 'You are offline, and the hooks have not been downloaded yet. Open this mode once while connected and it will work offline afterwards.'
+            : esc(String(hooksErr.message||hooksErr))+'<br><button class="next" id="retry">Try again</button>')
+        : 'Fetching data/hooks.json.'}
+      </div></div></div>`;
+    const rb=$('retry');
+    if(rb) rb.onclick=()=>{ hooksErr=null; render(); };
+    $('barnow').textContent='';
+    /* Only auto-fetch while no error is standing: without this guard the
+       failed render would refetch, fail, and render again, forever. The retry
+       button clears the error, which is what lets the next attempt through. */
+    if(!hooksErr) loadHooks().then(()=>{ if(S.mode==='hooks') render(); });
+    paintDock(); return;
+  }
+  const list=hookList();
+  const counts=(()=>{
+    const c={all:0};
+    view().forEach(q=>{
+      const h=HOOKS.get(q.id); if(!h) return;
+      c.all++; c[h.grade]=(c[h.grade]||0)+1;
+      if(h.match==='exact') c.exact=(c.exact||0)+1;
+      if(h.stem_ambiguous)  c.amb=(c.amb||0)+1;
+    });
+    return c;
+  })();
+  const sel=`<label class="hpick"><span class="vh">Which hooks</span><select id="hgrade">${
+    HGRADES.map(([v,l])=>`<option value="${v}"${S.hgrade===v?' selected':''}>${esc(l)}${
+      counts[v]?' ('+counts[v]+')':''}</option>`).join('')}</select></label>`;
+
+  if(!list.length){
+    viewEl.innerHTML=`<div class="stage"><div class="meta">${sel}</div><div class="scroll"><div class="empty">
+      <b>Nothing here</b>No question in this selection has that kind of hook.</div></div></div>`;
+    $('barnow').textContent=''; $('hgrade').onchange=e=>{S.hgrade=e.target.value;S.idx=0;S.picked=null;render();};
+    paintDock(); return;
+  }
+  if(S.idx>=list.length) S.idx=0;
+  const q=list[S.idx], h=HOOKS.get(q.id), ord=optOrder(q);
+  const revealed=(S.picked!==null);
+  const right=revealed && S.picked===q.answer;
+  $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
+
+  viewEl.innerHTML=`<div class="stage">
+    <div class="meta">
+      <span class="tag${q.state?' land':''}">${esc(q.state?q.state+' · no. '+q.num:topicEn(q.topic))}</span>
+      ${q.state?'':`<span class="catno"><span class="wide">Catalogue </span>no. ${q.num}</span>`}
+      ${sel}
+    </div>
+    <div class="scroll" id="scroll">
+      ${hookCard(h, revealed)}
+      <h1 class="q" lang="de">${hiLite(q.q,[h.trigger,h.trigger2],'trig')}</h1>
+      ${shotHtml(q)}
+    </div>
+    <div class="answers" id="answers">
+      ${hookOptionsHtml(q,ord,revealed,h)}
+      <div class="act">
+        <button class="next quiet" id="prev">Back</button>
+        ${ revealed
+            ? `<span class="verdictline ${right?'ok':'bad'}">${right?'The hook held':'The token was '+esc(h.token)}</span>`
+            : `<span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer
+                 <span class="kbd">↵</span> next <span class="kbd">←</span><span class="kbd">→</span> browse</span>` }
+        <button class="next grow" id="next">Next</button>
+      </div>
+    </div></div>`;
+
+  viewEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.orig));
+  $('next').onclick=()=>step(1);
+  $('prev').onclick=()=>step(-1);
+  $('hgrade').onchange=e=>{S.hgrade=e.target.value;S.idx=0;S.picked=null;render();};
+  const qi=$('qimg');
+  if(qi){ const show=()=>openLens(qi.currentSrc||qi.src, qi.alt); qi.onclick=show; }
+  const sc=$('scroll');
+  if(sc) $('answers').classList.toggle('stuck', sc.scrollHeight>sc.clientHeight+2);
+  paintDock();
+}
+
+/* The list the mode is actually stepping through. */
+const curList=()=>(S.mode==='hooks'&&HOOKS)?hookList():view();
+
 /* ---------------- controls ---------------- */
 const $=id=>document.getElementById(id);
 const landSel=$('land'), filterSel=$('filter');
@@ -273,8 +464,8 @@ addEventListener('keydown',e=>{
 /* ---------------- routes ----------------------------------------------------
    The exam is a page of its own, so the Android back button and the desktop
    window's back arrow both leave it instead of quitting the app. */
-const ROUTE={'#/browse':'flash','#/exam':'exam'};
-const HASH ={flash:'#/browse', exam:'#/exam', drill:'#/practice'};
+const ROUTE={'#/browse':'flash','#/exam':'exam','#/hooks':'hooks'};
+const HASH ={flash:'#/browse', exam:'#/exam', hooks:'#/hooks', drill:'#/practice'};
 function go(mode){
   if(location.hash===HASH[mode]){ applyRoute(); return; }
   location.hash=HASH[mode];                  /* hashchange does the rest */
@@ -288,6 +479,8 @@ function applyRoute(){
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
   $('m-flash').setAttribute('aria-pressed',String(m==='flash'));
+  $('m-hooks').setAttribute('aria-pressed',String(m==='hooks'));
+  if(m==='hooks') loadHooks();
   filterSel.disabled=(m==='exam');
   closeNav(); setSheet(false);
   render(); syncDock();
@@ -295,6 +488,7 @@ function applyRoute(){
 addEventListener('hashchange', applyRoute);
 $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
+$('m-hooks').onclick=()=>go('hooks');
 $('m-exam').onclick =()=>go('exam');
 
 landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();closeNav();render();};
@@ -606,6 +800,7 @@ function render(){
     .forEach(([id,k])=>$(id).setAttribute('aria-checked',String(S[k])));
   if(canSpeak) $('rate').value=String(S.rate);
   if(S.mode==='exam') return renderExam();
+  if(S.mode==='hooks') return renderHooks();
 
   const list=view();
   if(!list.length){
@@ -665,19 +860,25 @@ function render(){
 
 function answer(orig){
   if(S.mode==='flash'||S.picked!==null) return;
-  const q=view()[S.idx];
+  const q=curList()[S.idx];
+  if(!q) return;
   S.picked=orig;
-  const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
   const right=(orig===q.answer);
-  right? st.r++ : st.w++;
-  save(); render();
+  /* Hooks mode is a rehearsal of what you already learnt, not an attempt at
+     the question, so it stays out of the statistics and out of the map. */
+  if(S.mode!=='hooks'){
+    const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
+    right? st.r++ : st.w++;
+    save();
+  }
+  render();
   /* right answers move on by themselves; wrong ones wait, because the pause
      after a wrong answer is the part that actually teaches you something */
   if(right && S.auto){ autoTimer=setTimeout(()=>{ autoTimer=null; step(1); }, 700); }
 }
 function step(d){
   clearAuto();
-  const list=view();
+  const list=curList();
   if(!list.length) return;
   S.idx=(S.idx+d+list.length)%list.length;
   S.picked=null; hideTip(); stopSpeech(); render();
@@ -730,7 +931,7 @@ function paintStats(){
     </div>
 
     ${past.length?`<div class="brk"><h4>Past mock exams</h4><div class="exams">
-      ${past.map(e=>`<span class="ex ${e.s>=17?'pass':'fail'}">${e.s}/33</span>`).join('')}
+      ${past.map(e=>`<span class="ex ${e.s>=(e.p||17)?'pass':'fail'}">${e.s}/${e.n||33}</span>`).join('')}
     </div></div>`:''}
 
     <div class="brk"><h4>By topic</h4>
@@ -749,7 +950,9 @@ function paintStats(){
 
 /* ---------------- catalogue map ---------------- */
 function paintDock(){
-  const p=pool(), list=view(), map=$('map');
+  /* curList(), not view(): in Hooks mode S.idx indexes the graded subset, so
+     reading or writing it against view() lands on an unrelated question. */
+  const p=pool(), list=curList(), map=$('map');
   const done=p.filter(q=>S.stats[q.id]).length;
   const solid=p.filter(q=>S.stats[q.id]&&S.stats[q.id].r>=S.stats[q.id].w).length;
   const weak=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>S.stats[q.id].r).length;
@@ -774,9 +977,18 @@ function paintDock(){
     b.className=cls;
     b.title=(q.state?q.state+' '+q.num:'Question '+q.num)+' — '+q.q.slice(0,70);
     b.onclick=()=>{
-      const l=view(), at=l.findIndex(x=>x.id===q.id);
-      if(at<0){ S.filter='all'; filterSel.value='all'; S.idx=view().findIndex(x=>x.id===q.id); }
-      else S.idx=at;
+      /* Not in the current selection: drop the narrower filter first and only
+         widen the catalogue selection if that was not what was hiding it, so a
+         selection the user still needs is not discarded. */
+      let at=curList().findIndex(x=>x.id===q.id);
+      if(at<0 && S.mode==='hooks' && S.hgrade!=='all'){
+        S.hgrade='all'; at=curList().findIndex(x=>x.id===q.id);
+      }
+      if(at<0){
+        S.filter='all'; filterSel.value='all';
+        at=Math.max(0, curList().findIndex(x=>x.id===q.id));
+      }
+      S.idx=at;
       S.picked=null; stopSpeech(); setSheet(false); render();
     };
     map.appendChild(b);
@@ -786,12 +998,55 @@ function paintDock(){
 
 /* ---------------- exam ---------------- */
 const draw=(a,n)=>{const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[x[i],x[j]]=[x[j],x[i]];}return x.slice(0,n);};
-function startExam(){
-  S.exam={ids:draw(general,30).concat(draw(landQs(),3)).map(q=>q.id),answers:{},at:0,started:Date.now(),done:false,scored:false};
-  render();
-}
+
+/* The real exam is 30 general + 3 from your state, and 17 of those 33 pass.
+   Narrowing the draw to a range you have actually studied keeps the shape but
+   not necessarily the length: if fewer than 30 general questions qualify, the
+   paper is shorter and the pass mark moves with it, so 'passed' keeps meaning
+   the same share of correct answers rather than silently getting easier. */
+const EXAM_GEN=30, EXAM_LAND=3, EXAM_PASS=17, EXAM_LEN=EXAM_GEN+EXAM_LAND;
+/* Your state always has its full 10 questions, so the state section can never
+   be the thing that empties a draw -- only the general pool can. Below this
+   many eligible general questions there is no exam worth sitting. */
+const EXAM_MIN_GEN=5;
 const EXAM_SECS=3600;
-const examLeft=()=>Math.max(0,EXAM_SECS-Math.floor((Date.now()-S.exam.started)/1000));
+const seen=q=>{const st=S.stats[q.id]; return !!st && (st.r+st.w)>0;};
+function examEligible(){
+  const lo=Math.min(S.efrom,S.eto), hi=Math.max(S.efrom,S.eto);
+  switch(S.escope){
+    /* Both scopes narrow the general pool only -- the control says so, and your
+       state has just 10 questions, so there is nothing worth narrowing there. */
+    case 'seen':  return {gen:general.filter(seen), land:landQs()};
+    case 'range': return {gen:general.filter(q=>q.num>=lo&&q.num<=hi), land:landQs()};
+    default:      return {gen:general, land:landQs()};
+  }
+}
+function examPlan(){
+  const {gen,land}=examEligible();
+  const ng=Math.min(EXAM_GEN,gen.length), nl=Math.min(EXAM_LAND,land.length);
+  const total=ng+nl;
+  /* keep the real 17-of-33 share; never let a one-question paper pass on nothing */
+  const pass=total?Math.max(1,Math.round(total*EXAM_PASS/EXAM_LEN)):0;
+  /* the clock scales with the paper too, or a 13-question draw would carry the
+     full hour and teach the wrong sense of pace */
+  const secs=Math.max(300,Math.round(total*EXAM_SECS/EXAM_LEN));
+  return {gen,land,ng,nl,total,pass,secs,
+          ok:(ng>=EXAM_MIN_GEN),
+          full:(total===EXAM_LEN),               /* real length and pass mark */
+          narrow:(gen.length<general.length)};   /* pool actually restricted  */
+}
+function startExam(){
+  const p=examPlan();
+  if(!p.ok) return;
+  S.exam={ids:draw(p.gen,p.ng).concat(draw(p.land,p.nl)).map(q=>q.id),
+          answers:{},at:0,started:Date.now(),done:false,scored:false,
+          pass:p.pass, full:p.full, narrow:p.narrow, secs:p.secs};
+  save(); render();
+}
+const examLen =()=>S.exam.ids.length;
+const examPass=()=>S.exam.pass!=null?S.exam.pass:EXAM_PASS;
+const examSecs=()=>S.exam.secs||EXAM_SECS;
+const examLeft=()=>Math.max(0,examSecs()-Math.floor((Date.now()-S.exam.started)/1000));
 const fmtLeft=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 
 /* The clock used to re-render the whole question every second, which meant
@@ -826,13 +1081,64 @@ function renderExam(){
   if(!S.exam){
     viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="panel">
       <h2>Mock exam</h2>
-      <p>33 questions, exactly like the real test: 30 general ones and 3 from ${esc(S.land)}.
-      You get 60 minutes, and you pass with 17 correct answers. Nothing is marked until the end.</p>
+      <p>The real test is 33 questions — 30 general and 3 from ${esc(S.land)} — in 60 minutes,
+      passed with 17 correct. Nothing is marked until the end.</p>
+      <div class="scope">
+        <label class="field"><span>Draw the general questions from</span>
+          <select class="pick" id="escope">
+            <option value="all">The whole catalogue — the real thing</option>
+            <option value="seen">Only ones I have answered before</option>
+            <option value="range">A range of catalogue numbers</option>
+          </select></label>
+        <div class="rangerow" id="rangerow">
+          <label class="field"><span>From</span>
+            <input type="number" id="efrom" min="1" max="300" step="1" value="${S.efrom}"></label>
+          <label class="field"><span>To</span>
+            <input type="number" id="eto" min="1" max="300" step="1" value="${S.eto}"></label>
+        </div>
+        <p class="note" id="scopenote"></p>
+      </div>
       <div class="act">
         <button class="next" id="go">Start the exam</button>
         <button class="next quiet" id="leave">Back to practice</button>
       </div></div></div></div>`;
-    $('go').onclick=startExam;
+    const sc=$('escope'), rr=$('rangerow'), note=$('scopenote'), goBtn=$('go');
+    sc.value=S.escope;
+    const paint=()=>{
+      const p=examPlan();
+      rr.hidden=(S.escope!=='range');
+      goBtn.disabled=!p.ok;
+      const n=p.gen.length;
+      note.innerHTML = !p.ok
+        ? (S.escope==='seen'
+            ? `Only ${n} general question${n===1?'':'s'} answered so far — you need at least ${EXAM_MIN_GEN} before an exam can be drawn.`
+            : `Only ${n} general question${n===1?'':'s'} in that range — widen it to at least ${EXAM_MIN_GEN}.`)
+        : p.full
+          ? `${n} general question${n===1?'':'s'} eligible → the full <b>${p.ng} + ${p.nl}</b> paper, <b>${p.pass}</b> to pass.`
+            + (p.narrow?' Full length, but drawn from a slice — not a readiness check.':'')
+          : `${n} general question${n===1?'':'s'} eligible → a <b>${p.ng} + ${p.nl}</b> paper,
+             <b>${p.pass}</b> to pass in <b>${Math.round(p.secs/60)}</b> minutes. Shorter than the real thing.`;
+    };
+    sc.onchange=e=>{ S.escope=e.target.value; save(); paint(); };
+    /* oninput keeps the note live while typing; onchange is where the value is
+       clamped and written back, so the field can never disagree with the plan. */
+    /* oninput keeps the note live while typing but does not persist: save()
+       serialises the whole state blob, and holding an arrow key would write it
+       once per keystroke. onchange is the commit -- clamp, write back, save. */
+    const num=(el,key)=>{
+      const commit=(settle)=>{
+        const v=parseInt(el.value,10);
+        if(!Number.isFinite(v)){ if(settle) el.value=S[key]; return; }
+        S[key]=Math.min(300,Math.max(1,v));
+        if(settle){ el.value=S[key]; save(); }
+        paint();
+      };
+      el.oninput =()=>commit(false);
+      el.onchange=()=>commit(true);
+    };
+    num($('efrom'),'efrom'); num($('eto'),'eto');
+    paint();
+    goBtn.onclick=startExam;
     $('leave').onclick=()=>go('drill');
     return;
   }
@@ -847,10 +1153,10 @@ function renderExam(){
   viewEl.innerHTML=`
     <div class="exambar">
       <button class="quit" id="quit">Quit</button>
-      <span class="pos">${S.exam.at+1} / 33</span>
+      <span class="pos">${S.exam.at+1} / ${examLen()}</span>
       <span>${answered} answered</span>
       <span class="clock ${left<300?'low':''}" id="clock">${fmtLeft(left)}</span>
-      <span class="prog"><i style="width:${Math.round((S.exam.at+1)/33*100)}%"></i></span>
+      <span class="prog"><i style="width:${Math.round((S.exam.at+1)/examLen()*100)}%"></i></span>
     </div>
     <div class="stage">
       <div class="meta">
@@ -867,18 +1173,18 @@ function renderExam(){
           <button class="next quiet" id="prev" ${S.exam.at===0?'disabled':''}>Back</button>
           <span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer
             <span class="kbd">↵</span> next ${canSpeak?`<span class="kbd">S</span> listen `:''}<span class="kbd">C</span> copy</span>
-          <button class="next grow" id="fwd">${S.exam.at===32?'See results':'Next'}</button>
+          <button class="next grow" id="fwd">${S.exam.at===examLen()-1?'See results':'Next'}</button>
         </div>
       </div>
     </div>`;
 
   viewEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     S.exam.answers[q.id]=+b.dataset.orig;
-    if(S.exam.at<32) S.exam.at++; else S.exam.done=true;
+    if(S.exam.at<examLen()-1) S.exam.at++; else S.exam.done=true;
     render();
   });
   $('prev').onclick=()=>{S.exam.at--;render();};
-  $('fwd').onclick=()=>{ if(S.exam.at<32){S.exam.at++;render();} else {S.exam.done=true;render();} };
+  $('fwd').onclick=()=>{ if(S.exam.at<examLen()-1){S.exam.at++;render();} else {S.exam.done=true;render();} };
   $('quit').onclick=()=>{ if(confirm('Leave this exam? Your answers will be discarded.')){ S.exam=null; go('drill'); } };
   wireTools(q, false);
   const qi=$('qimg');
@@ -903,18 +1209,23 @@ function renderResult(){
   }).join('');
   if(fresh){
     S.exam.scored=true;
-    S.exams.push({s:score, at:Date.now()});
+    S.exams.push({s:score, at:Date.now(), n:examLen(), p:examPass()});
     if(S.exams.length>20) S.exams=S.exams.slice(-20);
     save();
   }
-  const passed=score>=17;
+  const passed=score>=examPass();
   viewEl.innerHTML=`<div class="stage"><div class="scroll">
     <div class="panel">
-      <p class="score">${score}<small> / 33 correct</small></p>
-      <p class="verdict ${passed?'pass':'fail'}">${passed?'Passed — the threshold is 17 correct answers.':'Not passed — you need at least 17 correct.'}</p>
+      <p class="score">${score}<small> / ${examLen()} correct</small></p>
+      <p class="verdict ${passed?'pass':'fail'}">${passed
+        ?`Passed — the threshold is ${examPass()} correct answer${examPass()===1?'':'s'}.`
+        :`Not passed — you need at least ${examPass()}.`}</p>
+      ${(S.exam.full&&!S.exam.narrow)?'':`<p class="note">${S.exam.full
+          ? 'Full length, but drawn from a slice of the catalogue — not a readiness check.'
+          : 'A short practice paper. The real one is 30 + 3 with 17 to pass.'}</p>`}
       <div class="act"><button class="next" id="again">New exam</button>
       <button class="next quiet" id="back">Back to practice</button></div></div>
-    <div class="panel"><h2>All 33 questions</h2><div class="rows">${rows}</div></div>
+    <div class="panel"><h2>All ${examLen()} questions</h2><div class="rows">${rows}</div></div>
   </div></div>`;
   $('again').onclick=startExam; $('back').onclick=()=>go('drill');
 }
@@ -949,7 +1260,7 @@ document.addEventListener('keydown',e=>{
     if(!b) return;
     if(!b.disabled){ b.click(); return; }
     if(canSpeak){                              /* already answered: read that one back */
-      const q=view()[S.idx];
+      const q=curList()[S.idx];
       if(q) say(sentence(q, +b.dataset.orig));
     }
   }
@@ -969,6 +1280,9 @@ function warmAll(){
   const c = navigator.connection;
   if(c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ''))) return;
   Object.keys(IMG).forEach(k => warm(k));
+  /* 77 KB so Hooks mode is not the one mode that needs a connection. Same
+     budget rules as the images: idle only, and never on a metered link. */
+  if(!HOOKS) fetch('data/hooks.json').catch(()=>{});
 }
 
 /* Only worth the bytes once a service worker is actually controlling the page.

@@ -120,7 +120,7 @@ body.nav-open .nav{transform:translateX(0)}
    padding, so the value never lands on the same edge as its label. Dropping
    the native appearance puts the text exactly where the padding says, and we
    draw the chevron ourselves. */
-.field select, .pick{
+.field select, .field input[type=number], .pick{
   appearance:none; -webkit-appearance:none;
   width:100%; background:var(--card); border:1px solid var(--edge); border-radius:8px;
   padding:.55rem 2.3rem .55rem 12px; font-size:.9rem; cursor:pointer;
@@ -129,7 +129,7 @@ body.nav-open .nav{transform:translateX(0)}
   background-repeat:no-repeat;
   background-position:right 12px center;
 }
-.field select:hover, .pick:hover{border-color:var(--muted)}
+.field select:hover, .field input[type=number]:hover, .pick:hover{border-color:var(--muted)}
 .pick:disabled{opacity:.45; cursor:default}
 .field[hidden]{display:none}
 
@@ -482,3 +482,72 @@ body.exam .nav{transform:translateX(-101%)}
 }
 
 @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
+
+/* ------------------------------------------------ hooks mode
+   The recognition aid: a trigger word in the stem, a token in the right
+   option. Two highlight colours carry the whole idea, so they are the only
+   new hues here -- the trigger borrows the glossary's gold, the token the
+   accent green that already means "this is the right answer". */
+/* Do not set max-width here, and keep `auto` on the side margins: both would
+   override the `.scroll>*` rule that gives the question and the options their
+   shared column, and the card would stop lining up with them. */
+.hook{
+  background:var(--card); border:1px solid var(--rule); border-radius:10px;
+  padding:.72rem .85rem; margin:0 auto .9rem;
+}
+.hookline{display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; font-size:1.05rem}
+.hookline .hw{font-weight:600; letter-spacing:-.01em}
+.hookline .trig{border-bottom:2px solid var(--gold)}
+.hookline .tok{background:var(--okbg); color:var(--ok); border-radius:5px; padding:.05rem .3rem}
+.hookline .tok.veiled{background:var(--sunk); color:var(--muted); font-weight:400; font-size:.86rem}
+.hookline .hplus{font-size:.86rem; color:var(--muted)}
+.hookline .harrow{color:var(--muted)}
+.grade{
+  flex:0 0 auto; width:1.45rem; height:1.45rem; border-radius:5px; display:grid; place-items:center;
+  font-size:.8rem; font-weight:700; background:var(--sunk); color:var(--muted);
+  border:1px solid var(--edge); cursor:help;
+}
+.grade.g-A{background:var(--ok); border-color:var(--ok); color:var(--card)}
+.grade.g-B{background:var(--okbg); border-color:var(--ok); color:var(--ok)}
+.grade.g-C{background:var(--goldbg); border-color:var(--gold); color:var(--gold)}
+.grade.g-D{background:var(--nobg); border-color:var(--no); color:var(--no)}
+.grade.g-V{background:var(--goldbg); border-color:var(--gold); color:var(--gold)}
+.hooken{margin:.55rem 0 0; padding:.55rem 0 0; border-top:1px solid var(--soft); font-size:.82rem}
+.hooken div{display:flex; gap:.45rem; margin:0 0 .22rem}
+.hooken div:last-child{margin-bottom:0}
+.hooken dt{flex:0 0 auto; font-weight:600; color:var(--ink)}
+.hooken dd{margin:0; color:var(--muted); min-width:0}
+.hookflag{margin:.5rem 0 0; font-size:.78rem; line-height:1.4; color:var(--gold)}
+.hookflag b{font-weight:700}
+
+/* the stem's trigger, and the token inside the right option */
+.q mark.trig, .opt mark.tok{background:transparent; color:inherit}
+.q mark.trig{border-bottom:2px solid var(--gold); font-weight:700}
+.opt mark.tok{background:#C9E4D6; border-radius:4px; padding:.02rem .18rem; font-weight:700}
+
+/* min-width:0 lets it shrink below its intrinsic width instead of pushing the
+   meta row wider than the screen. */
+.hpick{margin-left:auto; min-width:0; flex:0 1 auto}
+.hpick select{
+  font-size:.82rem; padding:.28rem 1.4rem .28rem .5rem; min-height:2rem;
+  border:1px solid var(--edge); border-radius:8px; background:var(--card); color:var(--muted);
+  appearance:none; cursor:pointer; max-width:100%; text-overflow:ellipsis;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 13px) 50%, calc(100% - 8px) 50%;
+  background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
+}
+.vh{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+
+/* ------------------------------------------------ exam scope */
+.scope{margin:0 0 1rem; max-width:30rem}
+.scope .note{padding-top:.1rem}
+.scope .note b{color:var(--ink)}
+.rangerow{display:flex; gap:.6rem}
+.rangerow .field{flex:1 1 0; min-width:0}
+.rangerow[hidden]{display:none}
+/* the number spinner carries no meaning here and crowds a narrow field */
+.field input[type=number]{padding-right:12px; background-image:none; cursor:text}
+.field input[type=number]::-webkit-outer-spin-button,
+.field input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.field input[type=number]{-moz-appearance:textfield}
+.next:disabled{opacity:.45; cursor:default}
