@@ -18,8 +18,10 @@
   --sunk:#F1F4F4;
   --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
   --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B; --nobg:#FAE4E2;
-  --cellbad:#D9534F;                   /* map only: lighter red so the grid reads
-                                          light-vs-dark, not green-vs-red        */
+  /* map only. Four shades of right, the darkest being --ok, and one red. No
+     red clears all four greens under dichromacy, so a wrong cell is slashed */
+  --cellbad:#D9534F;
+  --cellok1:#ABE0C0; --cellok2:#72B68F; --cellok3:#3E815D;
   --tipbg:#152227; --tipink:#F2F5F4;
   --shell:62rem; --rail:17rem; color-scheme:light;
   --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -355,8 +357,21 @@ body.sheet-drag .dock{transition:none}
 .cell{aspect-ratio:1; border-radius:4px; background:var(--sunk); border:0; padding:0; cursor:pointer;
   min-height:1.6rem; box-shadow:inset 0 0 0 1px var(--edge)}
 .cell:hover{outline:1.5px solid var(--ink); outline-offset:1px}
-.cell.ok{background:var(--ok); box-shadow:none}
-.cell.bad{background:var(--cellbad); box-shadow:none}
+.cell.g1,.cell.g2,.cell.g3,.cell.g4,.cell.bad{box-shadow:none}
+.cell.g1,.legend .g1{background:var(--cellok1)}
+.cell.g2,.legend .g2{background:var(--cellok2)}
+.cell.g3,.legend .g3{background:var(--cellok3)}
+.cell.g4,.legend .g4{background:var(--ok)}
+/* the slash is the ✗ a bare square cannot carry: under protanopia the red
+   lands on the third green, and colour alone would call it right */
+.cell.bad,.legend .bad{background:
+  linear-gradient(to top right, transparent calc(50% - .8px), var(--card) calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)),
+  var(--cellbad)}
+.legend .g0{background:var(--sunk); box-shadow:inset 0 0 0 1px var(--edge)}
+.legend .land{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.legend .ramp i{margin-right:2px}
+.legend .ramp i:first-of-type{margin-left:.35rem}
+.legend .ramp i:last-of-type{margin-right:.28rem}
 .cell.land{box-shadow:inset 0 0 0 1.5px var(--gold)!important}
 .cell.now{outline:2px solid var(--ink); outline-offset:1px}
 
@@ -466,9 +481,8 @@ body.exam .nav{transform:translateX(-101%)}
     height:auto; max-height:70dvh; border-radius:0; box-shadow:none;
     transform:none!important;
   }
-  .grab{padding:.55rem 1.5rem .1rem; cursor:default; display:flex; touch-action:auto}
-  .grab-txt{font-size:.79rem}
-  .dock-in{padding:.2rem 1.5rem .75rem; max-width:calc(var(--shell) + 3rem); margin:0 auto}
+  .grab{display:none}                  /* the legend says it; the numbers are the sheet's */
+  .dock-in{padding:.55rem 1.5rem .75rem; max-width:calc(var(--shell) + 3rem); margin:0 auto}
   .stats{display:none}                 /* the numbers are a phone-sheet thing */
   .dock-body{overflow:visible}
   .dock-head{display:flex}

@@ -876,6 +876,11 @@ const solid=q=>{ const s=S.stats[q.id];
   if(!s) return false;
   return 'c' in s ? s.c>0 : s.r>s.w; };
 const shaky=q=>!!S.stats[q.id] && !solid(q);
+/* How well you know a solid question, as one of the map's four greens: right
+   answers minus wrong ones, so five right after two misses sits with three
+   right and none wrong. A question you have just fixed shows the lightest
+   green however many misses it took, never no colour at all. */
+const shade=q=>{ const s=S.stats[q.id]; return Math.min(4, Math.max(1, s.r-s.w)); };
 
 /* Laplace-smoothed per question, so one lucky guess is not "mastered" and an
    unseen question sits at exactly 0.5 instead of needing a special case. */
@@ -945,7 +950,8 @@ function paintDock(){
   const done=p.filter(q=>S.stats[q.id]).length;
   const nSolid=p.filter(solid).length;
   const weak=p.filter(shaky).length;
-  $('dock-stat').innerHTML= (railed() || !canProject())
+  /* the phone sheet's resting strip; a wide screen hides it for the legend */
+  $('dock-stat').innerHTML= !canProject()
     ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${nSolid}</b> solid · <b>${weak}</b> shaky`
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
@@ -960,7 +966,7 @@ function paintDock(){
   p.forEach(q=>{
     const b=document.createElement('button'), st=S.stats[q.id];
     let cls='cell';
-    if(st) cls+=solid(q)?' ok':' bad';
+    if(st) cls+=solid(q)?' g'+shade(q):' bad';
     if(q.state) cls+=' land';
     if(cur&&q.id===cur.id) cls+=' now';
     b.className=cls;

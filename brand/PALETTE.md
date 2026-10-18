@@ -88,6 +88,9 @@ breaks the pin.
 | `--no` | `#B3332B` | wrong |
 | `--nobg` | `#FAE4E2` | wrong, as a ground |
 | `--cellbad` | `#D9534F` | map-only lighter red |
+| `--cellok1` | `#ABE0C0` | map-only right, lightest |
+| `--cellok2` | `#72B68F` | map-only right, light |
+| `--cellok3` | `#3E815D` | map-only right, dark |
 
 ---
 
@@ -157,8 +160,10 @@ accent leaves no open hue that also *means* correct or wrong, so the colours
 stay and the information is carried elsewhere:
 
 - Every answer row renders `✓` or `✗` as a glyph — `app.js:546-547`, `app.js:855`.
-- Every progress-map legend entry carries its word: *not seen*, *correct*,
-  *wrong*, *state question*.
+- Every progress-map legend entry carries its word: *Less … More* around the
+  shades of right, *wrong last time*, *state question*.
+- A wrong map cell carries a light diagonal slash, the ✗ a bare square has no
+  room for. See *The four greens* below.
 - The state marker on a map cell is an inset **ring**, not a fill.
 
 **The one place colour stands alone is the progress map**, where a cell is a
@@ -178,6 +183,31 @@ the lighter red buys a lightness gap (8.16:1 vs 3.45:1 against paper) that
 survives dichromacy, so the grid reads light-vs-dark rather than green-vs-red.
 The CSS comment claiming this is now **verified rather than asserted**.
 `#D9534F` is a fill and never text, so its 3.45:1 is not a floor breach.
+
+### The four greens
+
+The map shades a right cell by right answers minus wrong ones, 1 to 4+, using
+`--cellok1` `--cellok2` `--cellok3` and `--ok`. The ramp sits on hue 158° at
+OKLCH lightness .86 / .72 / .55 / .40 (the last is `--ok` itself).
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  status "g1:#ABE0C0,g2:#72B68F,g3:#3E815D,g4:#0F5132,bad:#D9534F" --accent "#0B6357" --ground "#EDF0EF"
+```
+
+| Pair | ΔE | Condition | Verdict |
+|---|---|---|---|
+| adjacent greens, worst (g1 ↔ g2) | 13.7 | protan | PASS |
+| g2 ↔ wrong | 10.4 | deutan | WARN |
+| g3 ↔ wrong | **3.7** | protan | **collapses** |
+| g4 ↔ wrong | 12.8 | protan | PASS |
+
+**No red clears all four greens.** A sweep of reds over hue 10–40°, lightness
+.35–.85 and chroma .08–.24 found nothing better than ΔE 10.6 against the
+nearest green. Any red sits somewhere inside a light-to-dark ramp, and protan
+simulation puts it on one of the steps. So the map stops relying on colour
+there: a wrong cell is slashed in `--card`. Not-seen cells keep their `--edge`
+ring, which is what separates them from the lightest green (ΔE 9.3).
 
 **Severity ordering is inverted and stays that way.** Success is 1.58× louder
 than warning. In a study tool the reader is scanning for what they got *right*
