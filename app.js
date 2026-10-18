@@ -897,11 +897,12 @@ function step(d){
 /* ---------------- the numbers -----------------------------------------------
    Each question keeps a lifetime tally (r, w) and its current run of correct
    answers (c). The tally feeds the projection; the run decides solid or shaky.
-   A miss makes a question shaky at once, however often you got it right
-   before -- judged on the tally alone, it stayed green until the misses
-   outnumbered the hits. Once missed, it takes two right in a row to be solid
-   again, so a single lucky guess does not clear it; a question never missed
-   is solid after one. Records saved before `c` existed fall back to the
+   Your latest answer decides: a miss makes a question shaky at once, however
+   often you got it right before, and the next right answer makes it solid
+   again. Judged on the tally alone, it stayed green until the misses
+   outnumbered the hits. Requiring two right in a row after a miss was tried
+   and dropped -- a right answer that left the question red read as the app
+   not registering it. Records saved before `c` existed fall back to the
    tally, and a tie there counts as shaky because the order is unknown. */
 function record(q,ok){
   const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
@@ -909,7 +910,7 @@ function record(q,ok){
 }
 const solid=q=>{ const s=S.stats[q.id];
   if(!s) return false;
-  return 'c' in s ? s.c>=(s.w?2:1) : s.r>s.w; };
+  return 'c' in s ? s.c>0 : s.r>s.w; };
 const shaky=q=>!!S.stats[q.id] && !solid(q);
 
 /* Laplace-smoothed per question, so one lucky guess is not "mastered" and an
