@@ -10,7 +10,8 @@
   --edge:#788584; --rule:#DBE2E1; --soft:#E7EBEA; --sunk:#F1F4F4;
   --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
   --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B;
-  --tipbg:#152227; --tipink:#F2F5F4;
+  --tipbg:#152227; --tipink:#F2F5F4; --tipline:#152227;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 
   /* arrow kinds */
   --k-elect:#0B6357; --k-appt:#8A5A12; --k-ctl:#2F5DA8; --k-form:#33465E; --k-bg:#6E7B79;   /* >=3:1 on white, as a line must be */
@@ -19,12 +20,55 @@
   --exe:#F8F0DC;  --exe-s:#8A5A12;
   --jud:#ECE8F4;  --jud-s:#5B4B8A;
   --head:#E5EAF1; --head-s:#33465E;
+  --colhov:#EBF0EF;                    /* a column under the pointer */
+  --exe-grp:#FCF8EE;                   /* the government group, inside the executive */
 
   --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --panel:21rem;
   --page:100rem;
   color-scheme:light;
 }
+/* Dark: the same values as app.css, plus the chart's own, lifted the same way
+   (same hue, lightness only) and measured in brand/PALETTE.md. Written twice,
+   for the system setting and for an explicit choice; brand/check-colours.mjs
+   asserts both copies agree with each other and with app.css. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE; --dim:#98A8AB;
+    --edge:#717D7E; --rule:#313A3B; --soft:#273031; --sunk:#151E21;
+    --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
+    --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B;
+    --tipbg:#2F3A3D; --tipink:#E4EBEB; --tipline:#717D7E;
+    --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --k-elect:#6AB5A6; --k-appt:#D6A866; --k-ctl:#7CA5E9; --k-form:#92A6C1; --k-bg:#768381;
+    --leg:#21322D;  --leg-s:#6AB5A6;
+    --exe:#352917;  --exe-s:#D6A866;
+    --jud:#302A3B;  --jud-s:#A79AD8;
+    --head:#272E38; --head-s:#92A6C1;
+    --colhov:#1B2525;
+    --exe-grp:#2B261B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE; --dim:#98A8AB;
+  --edge:#717D7E; --rule:#313A3B; --soft:#273031; --sunk:#151E21;
+  --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
+  --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B;
+  --tipbg:#2F3A3D; --tipink:#E4EBEB; --tipline:#717D7E;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --k-elect:#6AB5A6; --k-appt:#D6A866; --k-ctl:#7CA5E9; --k-form:#92A6C1; --k-bg:#768381;
+  --leg:#21322D;  --leg-s:#6AB5A6;
+  --exe:#352917;  --exe-s:#D6A866;
+  --jud:#302A3B;  --jud-s:#A79AD8;
+  --head:#272E38; --head-s:#92A6C1;
+  --colhov:#1B2525;
+  --exe-grp:#2B261B;
+  color-scheme:dark;
+}
+/* theme.js sets this for the instant a theme changes, so every surface
+   switches at once instead of each running its own colour transition */
+.theming, .theming *, .theming *::before, .theming *::after{transition:none!important}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.5;
@@ -48,7 +92,7 @@ button,select{font:inherit; color:inherit}
 .pick{
   appearance:none; -webkit-appearance:none; min-width:12rem; background:var(--card); border:1px solid var(--edge);
   border-radius:8px; padding:.45rem 2.3rem .45rem 12px; font-size:.9rem; cursor:pointer; min-height:2.5rem;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image:var(--chev);
   background-repeat:no-repeat; background-position:right 12px center;
 }
 .pick:hover{border-color:var(--muted)}
@@ -94,7 +138,7 @@ button,select{font:inherit; color:inherit}
 .col rect{fill:var(--sunk); stroke:var(--soft)}
 .col text{font-size:13px; font-weight:700; text-anchor:middle; fill:var(--muted); letter-spacing:.08em; text-transform:uppercase}
 .col{cursor:pointer}
-.col:hover rect{fill:#EBF0EF}
+.col:hover rect{fill:var(--colhov)}
 
 .legis rect{fill:none; stroke:var(--leg-s); stroke-width:1.3; stroke-dasharray:5 4; opacity:.7}
 .legis text{font-size:12px; fill:var(--leg-s); font-weight:600}
@@ -117,7 +161,7 @@ button,select{font:inherit; color:inherit}
 .b-volk rect{fill:var(--card); stroke:var(--ink); stroke-width:2}
 .b-volk .name{font-size:17px}
 .b-volk .sub{font-size:13px}
-.grp.b-exe rect{fill:#FCF8EE}
+.grp.b-exe rect{fill:var(--exe-grp)}
 .node:hover rect, .node.sel rect{stroke-width:3}
 /* An outline on an SVG <g> is not painted everywhere, so focus is drawn on
    the shapes themselves. */
@@ -156,7 +200,7 @@ svg.focusing .edge:not(.lit){opacity:.1}
 .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
 
 /* ---------------- tooltip ---------------- */
-.tip{position:fixed; z-index:50; max-width:20rem; background:var(--tipbg); color:var(--tipink);
+.tip{position:fixed; z-index:50; max-width:20rem; background:var(--tipbg); color:var(--tipink); border:1px solid var(--tipline);
      padding:.5rem .7rem; border-radius:9px; font-size:.84rem; line-height:1.4; pointer-events:none;
      box-shadow:0 6px 20px rgba(10,18,20,.22)}
 .tip b{display:block; font-weight:600}
@@ -200,7 +244,7 @@ body:not(.has-sel) .close{display:none}
 .q li{display:flex; gap:.4rem; padding:.08rem 0}
 .q li.ok{color:var(--ok); font-weight:600}
 .q li.no{color:var(--dim)}
-.q li.no s{text-decoration-color:rgba(92,110,116,.5)}
+.q li.no s{text-decoration-color:color-mix(in srgb, var(--dim) 50%, transparent)}
 
 .guide{margin:.7rem 0 0; padding-left:1.2rem; font-size:.86rem; color:var(--muted)}
 .guide li{margin:.3rem 0}

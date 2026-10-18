@@ -9,17 +9,26 @@ This palette was **not designed by this pass** — it was already shipping in
 `app.css`. What this pass did was measure it. Two findings changed nothing and
 one is recorded as open; see *Unverified*.
 
+The dark theme **was** designed, in a second pass (18 October 2026), and every
+dark value below was measured the same way. Its rule: the same paper with the
+light off. Same hues, same low chroma, no new colour — only lightness moves.
+
 ---
 
 ## Ground
 
-| | Value | Role |
-|---|---|---|
-| Canvas | `#EDF0EF` | Page ground — every ratio below is measured against this |
-| Surface | `#FFFFFF` | Cards, the question itself, sheets |
-| Sunk | `#F1F4F4` | Inset wells, unanswered map cells |
+| | Light | Dark | Role |
+|---|---|---|---|
+| Canvas | `#EDF0EF` | `#10191B` | Page ground — every ratio below is measured against this |
+| Surface | `#FFFFFF` | `#192426` | Cards, the question itself, sheets |
+| Sunk | `#F1F4F4` | `#151E21` | Inset wells, unanswered map cells |
 
-Light only. `color-scheme:light` is declared and there is no dark variant.
+Two themes. Light is the default; dark follows the system setting, and a
+System / Light / Dark choice in the drawer overrides it.
+
+The dark canvas is OKLCH L 0.205 on hue 215° at C 0.014 — the green-cast
+grey of `--ink`, not black. In both themes a card is **lighter** than the
+canvas, so "raised" means the same thing in either.
 
 ---
 
@@ -61,36 +70,78 @@ ships green anyway, and the mitigation is structural rather than chromatic:
 
 **D · Accent-ink.** White, at 7.15:1.
 
+### The dark accent
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs accent "#6AB5A6" --ground "#10191B"
+```
+
+| | |
+|---|---|
+| Accent | `#6AB5A6` |
+| OKLCH | L 0.720 · C 0.079 · H 179.7° |
+| Contrast vs canvas | 7.45:1 |
+| Accent-ink | `#10191B` (the dark canvas) at 7.45:1 |
+
+The same teal with the lightness lifted: hue and chroma match `#0B6357` to
+within a degree and 0.001. It is flagged achromatic for the same reason and
+kept for the same reason.
+
+**A · Series.** L 0.720, outside the band. Still not a series colour.
+
+**B · Status hues.** Blocked: **H 0–15°**, **H 335–355°**. Advisory (tritan):
+**H 230–255°**. Lifting the accent opens far more of the wheel than in light.
+
+**C · Success.** Green **is** available on dark by the validator's rule (worst
+ΔE 17.3, tritan). The glyphs stay regardless: one rule for both themes.
+
+**D · Accent-ink.** Dark, not white. The dark canvas colour, at 7.45:1.
+
 ---
 
 ## Primitives
 
 Named by appearance. These are the names that actually exist in `app.css`.
 **One token per row** — `brand/check-colours.mjs` pairs each name with the hex
-beside it and asserts it still matches `app.css`, so a combined row silently
-breaks the pin.
+**immediately** beside it and asserts it still matches `app.css`, so a combined
+row silently breaks the pin. That is why *Light* is the first column: it is the
+value the check pins. The *Dark* column is not pinned yet — see *Unverified*.
 
-| Token | Value | Named for |
-|---|---|---|
-| `--paper` | `#EDF0EF` | the page |
-| `--card` | `#FFFFFF` | raised surfaces |
-| `--sunk` | `#F1F4F4` | wells |
-| `--ink` | `#152227` | near-black, green-cast |
-| `--muted` | `#4F6167` | body grey |
-| `--dim` | `#5C6E74` | rejected answers |
-| `--edge` | `#788584` | control borders |
-| `--rule` | `#DBE2E1` | decorative divider |
-| `--soft` | `#E7EBEA` | decorative divider, lighter |
-| `--accent` | `#0B6357` | the teal |
-| `--gold` | `#8A5A12` | regional marker |
-| `--ok` | `#0F5132` | correct |
-| `--okbg` | `#DEEDE4` | correct, as a ground |
-| `--no` | `#B3332B` | wrong |
-| `--nobg` | `#FAE4E2` | wrong, as a ground |
-| `--cellbad` | `#D9534F` | map-only lighter red |
-| `--cellok1` | `#ABE0C0` | map-only right, lightest |
-| `--cellok2` | `#72B68F` | map-only right, light |
-| `--cellok3` | `#3E815D` | map-only right, dark |
+`--picked` and `--gloss` do not exist yet; they name two colours `app.css`
+hard-codes today (`#E3EEEB` three times, `#C9E4D6` once), which dark mode has
+to be able to change. The check skips a name `:root` does not have.
+
+| Token | Light | Dark | Named for |
+|---|---|---|---|
+| `--paper` | `#EDF0EF` | `#10191B` | the page |
+| `--card` | `#FFFFFF` | `#192426` | raised surfaces |
+| `--sunk` | `#F1F4F4` | `#151E21` | wells |
+| `--ink` | `#152227` | `#E4EBEB` | the text, green-cast |
+| `--muted` | `#4F6167` | `#ABBBBE` | body grey |
+| `--dim` | `#5C6E74` | `#98A8AB` | rejected answers |
+| `--edge` | `#788584` | `#717D7E` | control borders |
+| `--rule` | `#DBE2E1` | `#313A3B` | decorative divider |
+| `--soft` | `#E7EBEA` | `#273031` | decorative divider, quieter |
+| `--accent` | `#0B6357` | `#6AB5A6` | the teal |
+| `--gold` | `#8A5A12` | `#D6A866` | regional marker |
+| `--goldbg` | `#F8F0DC` | `#352917` | regional, as a ground |
+| `--ok` | `#0F5132` | `#7FCB9E` | correct |
+| `--okbg` | `#DEEDE4` | `#1B3125` | correct, as a ground |
+| `--no` | `#B3332B` | `#EB827B` | wrong |
+| `--nobg` | `#FAE4E2` | `#3F2220` | wrong, as a ground |
+| `--cellbad` | `#D9534F` | `#972622` | map-only red |
+| `--cellok1` | `#ABE0C0` | `#214D34` | map-only right, faintest |
+| `--cellok2` | `#72B68F` | `#367854` | map-only right, faint |
+| `--cellok3` | `#3E815D` | `#56A276` | map-only right, strong |
+| `--tipbg` | `#152227` | `#2F3A3D` | tooltip ground |
+| `--tipink` | `#F2F5F4` | `#E4EBEB` | tooltip text |
+| `--tipline` | `#152227` | `#717D7E` | tooltip edge: its own ground in light, `--edge` in dark |
+| `--picked` | `#E3EEEB` | `#1F3531` | a chosen answer, chip or copy button |
+| `--gloss` | `#C9E4D6` | `#284B3B` | a glossed word |
+
+*Faintest* to *strong* names how far a green sits from the page, which is the
+opposite direction in each theme: light greens are faint on light paper, dark
+greens are faint on dark.
 
 ---
 
@@ -119,6 +170,57 @@ Every text-bearing token clears 4.5:1 on **both** grounds. The single
 sub-floor token is `--edge`, which is a boundary role and is verified never to
 carry text.
 
+### Roles, dark
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  text "#E4EBEB,#ABBBBE,#98A8AB,#717D7E,#6AB5A6,#D6A866,#7FCB9E,#EB827B" --ground "#10191B"
+# and again with --ground "#192426" for the card column
+```
+
+| Role | Maps to | Ratio on paper | Ratio on card |
+|---|---|---|---|
+| line | `--edge` `#717D7E` | 4.19:1 | 3.74:1 |
+| ink | `--ink` `#E4EBEB` | 14.77:1 | 13.15:1 |
+| ink-muted | `--muted` `#ABBBBE` | 8.99:1 | 8.01:1 |
+| ink-subtle | `--dim` `#98A8AB` | 7.24:1 | 6.45:1 |
+| accent | `--accent` `#6AB5A6` | 7.45:1 | 6.64:1 |
+| accent-ink | `#10191B` | 7.45:1 on accent | — |
+| warning | `--gold` `#D6A866` | 8.20:1 | 7.30:1 |
+| critical | `--no` `#EB827B` | 6.81:1 | 6.06:1 |
+| success | `--ok` `#7FCB9E` | 9.29:1 | 8.28:1 |
+
+Text on the tinted grounds, each measured with `text … --ground` on the tint:
+
+| Text | Ground | Ratio |
+|---|---|---|
+| `--ok` | `--okbg` `#1B3125` | 7.23:1 |
+| `--no` | `--nobg` `#3F2220` | 5.48:1 |
+| `--gold` | `--goldbg` `#352917` | 6.52:1 |
+| `--ink` / `--accent` | `--picked` `#1F3531` | 10.78:1 / 5.44:1 |
+| `--ink` | `--gloss` `#284B3B` | 8.05:1 |
+| `--ink` / `--muted` | `--tipbg` `#2F3A3D` | 9.69:1 / 5.90:1 |
+
+Every dark text token clears 6:1 on both grounds. `--edge` clears 3:1 on
+paper, card and sunk (3.98:1), as a control border must.
+
+**The tooltip is not inverted in dark.** In light it is ink-on-paper turned
+over — a dark box on a light page. Turned over again it would be a near-white
+box on a dark page, the brightest thing on screen for a hint. It is instead
+a raised grey (`--tipbg`) with an `--edge` border (`--tipline`, which in light is
+the tooltip's own ground and so invisible). The exam bar is the same strip and uses the same two tokens, so it
+does not turn into a bright band across the top of a dark page.
+
+**`--ink` fills stay inverted.** *Next*, the pressed mode button and the skip
+link are `--ink` with `--paper` text, so in dark they become a light button
+with dark text, 14.77:1. That is the one bright thing on a dark page, and it
+is the primary action, which is the point of it.
+
+**Question images keep a white plate.** They are scans of the official
+catalogue — maps, coats of arms, ballot papers — and inverting them would
+change what they show. In dark they sit on `#FFFFFF`, dimmed, as the lens
+already does.
+
 **The primary form device.** Borders, not elevation. Three tiers:
 
 | Tier | Weight | Means |
@@ -134,8 +236,11 @@ scrim, the lens) and is always a soft dark shadow, never a brand colour.
 `border-color` change. They are different properties, so they can co-occur
 without either being lost — the current map cell carries both.
 
+Shadows barely read on the dark canvas. That costs little: borders were the
+primary device already, and the three elevations keep their borders.
+
 **Deliberately absent.** No *info* role (the accent serves), no second accent,
-no dark theme, no chart series.
+no chart series, and no colour that exists in only one theme.
 
 ---
 
@@ -214,6 +319,99 @@ than warning. In a study tool the reader is scanning for what they got *right*
 as much as what they got wrong, and "correct" is the state the interface is
 built to produce. Recorded as a deliberate inversion, not an oversight.
 
+### Status, dark
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  status "warning:#D6A866,critical:#EB827B,success:#7FCB9E" --accent "#6AB5A6" --ground "#10191B"
+```
+
+| Pair | ΔE | Condition | Verdict |
+|---|---|---|---|
+| warning ↔ accent | 8.5 | protan | FAIL — reads as the accent |
+| critical ↔ accent | 7.1 | deutan | FAIL — reads as the accent |
+| success ↔ accent | 7.2 | protan | FAIL — reads as the accent |
+| warning ↔ critical | 5.1 | deutan | WARN |
+| warning ↔ success | 6.8 | deutan | WARN |
+| critical ↔ success | 6.0 | deutan | WARN |
+
+The same profile as light, accepted for the same reason and mitigated by the
+same glyphs. Severity is inverted the same way: success 1.13× louder than
+warning, warning 1.20× louder than critical.
+
+### The map, dark
+
+On a light page *more correct* means *darker*. On a dark page it has to mean
+**brighter**, so the ramp runs the other way: faint dark green up to `--ok`,
+and the wrong cell drops to a dark red so it still separates by lightness.
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  status "g1:#214D34,g2:#367854,g3:#56A276,g4:#7FCB9E,bad:#972622" --accent "#6AB5A6" --ground "#10191B"
+```
+
+| Pair | ΔE | Condition | Verdict |
+|---|---|---|---|
+| adjacent greens, worst (g3 ↔ g4) | 12.9 | deutan | PASS |
+| g1 ↔ wrong | **3.0** | protan | **collapses** |
+| g2 ↔ wrong | 7.6 | deutan | WARN |
+| g3 ↔ wrong | 19.4 | deutan | PASS |
+| g4 ↔ wrong | **32.1** | deutan | **PASS** |
+| not seen `#151E21` ↔ g1 | 15.8 | deutan | PASS |
+
+The pair the light map rests on — mastered against wrong — is far stronger
+here, 32.1 against 12.8. The collapse moves from the third green to the first,
+and the slash covers it the same way; in dark the slash is drawn in the dark
+`--card`. Not-seen cells now separate from the faintest green by colour alone,
+which light could not do.
+
+**The cost:** the dark red is a quieter fill. `#972622` is 2.22:1 against the
+canvas, where light's `#D9534F` is 3.45:1. A wrong cell is found by its
+slash and by being the only red, not by contrast with the page.
+
+---
+
+## Organigramm
+
+`organigramm.css` repeats the shared tokens (the check asserts each matches
+`app.css`, in both themes) and adds its own: four arrow kinds and four branch
+tints. Dark values follow the same rule — same hue, lightness lifted.
+
+```bash
+VP=~/.claude/skills/design-direction/scripts/validate-palette.mjs
+node $VP text "#6AB5A6,#D6A866,#7CA5E9,#92A6C1,#768381" --ground "#192426"   # arrows on the chart card
+node $VP text "#E4EBEB,#ABBBBE" --ground "#21322D"                           # and each tint in turn
+```
+
+| Token | Light | Dark | Named for |
+|---|---|---|---|
+| `--k-elect` | `#0B6357` | `#6AB5A6` | arrow: elects (the accent) |
+| `--k-appt` | `#8A5A12` | `#D6A866` | arrow: appoints (the gold) |
+| `--k-ctl` | `#2F5DA8` | `#7CA5E9` | arrow: controls |
+| `--k-form` | `#33465E` | `#92A6C1` | arrow: forms, leads |
+| `--k-bg` | `#6E7B79` | `#768381` | arrow: background only |
+| `--leg` | `#E2F0EB` | `#21322D` | legislative tint |
+| `--jud` | `#ECE8F4` | `#302A3B` | judicial tint |
+| `--jud-s` | `#5B4B8A` | `#A79AD8` | judicial stroke |
+| `--head` | `#E5EAF1` | `#272E38` | head of state tint |
+| `--head-s` | `#33465E` | `#92A6C1` | head of state stroke |
+| `--colhov` | `#EBF0EF` | `#1B2525` | a column under the pointer |
+| `--exe-grp` | `#FCF8EE` | `#2B261B` | the government, inside the executive |
+
+`--leg-s` and `--exe-s` are the accent and the gold; `--exe` is `--goldbg`.
+
+| Dark measurement | Ratio |
+|---|---|
+| arrow verbs on the card: elect / appt / ctl / form | 6.64 / 7.30 / 6.37 / 6.39:1 |
+| `--k-bg` line on the card (its verb is `--dim`, 6.45:1) | 4.04:1 |
+| `--ink` / `--muted` on leg · exe · jud · head · exe-grp | ≥ 11.15:1 / ≥ 6.79:1 |
+| each branch stroke on its own tint | ≥ 5.30:1 |
+| tooltip `#9FD8C9` / `#E8C98A` on dark `--tipbg` | 7.33 / 7.33:1 |
+| exam clock `#FF9A92` on dark `--tipbg` | 5.74:1 |
+
+`--k-ctl` and `--k-form` are both blue and sit close in either theme; they are
+told apart by the line: a control arrow is dashed, a forming one solid.
+
 ---
 
 ## Type scale
@@ -258,6 +456,11 @@ radius at 192px and must not be drawn as a hard square.
 | `--no` `#B3332B` for map cells | too dark to separate from success by lightness | ΔE 2.8 (protan) vs `#0F5132` — replaced by `#D9534F` at ΔE 12.8 |
 | A saturated teal accent | rejected on thesis, not measurement | reads as a consumer app; institutional register requires low chroma |
 | Black-red-gold tricolour | implies official endorsement | refused in `BRAND.md` references |
+| Dark canvas `#0B1417` (L 0.185) | rejected on thesis | near-black reads as a night mode, not as paper in low light |
+| Dark accent `#64BEAD` (C 0.091) | rejected on thesis | stronger than the light teal; the two themes would carry different accents |
+| Dark map red `#CB4641` | separation from the middle greens | 3.82:1 on the canvas against 2.22:1, but ΔE 4.9 / 8.0 (protan / deutan) against g2 / g3 |
+| First dark green `#225338` | adjacent-green separation | ΔE 11.9 (deutan) against g2 — darkened to `#214D34` at 13.8 |
+| White tooltip in dark | glare | the light tooltip turned over; brightest element on screen for a hint |
 
 ---
 
@@ -273,6 +476,13 @@ radius at 192px and must not be drawn as a hard square.
   is defended above on thesis grounds, but no saturated candidate was drawn and
   compared. What would falsify the defence: the mark failing to read at 16px,
   which is tested in Stage 03.
+- **The *Dark* column is not pinned.** `check-colours.mjs` reads the first hex
+  after a token name, which is the light one. Until it learns to read the dark
+  block in `app.css`, a dark value can drift from this table silently. Extending
+  the check ships with the dark theme, not after it.
+- **Dark has only been measured, not rendered.** The values above come from the
+  validator and a mock-up, not from the app running in dark. The dimmed white
+  plate behind question images has no measured number at all.
 - **Contrast is measured against flat grounds only.** The phone progress sheet
   overlays content at partial opacity; the effective ratio behind it was not
   computed.

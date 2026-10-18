@@ -52,11 +52,12 @@ const S={
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
   streak:0, bestStreak:0,               /* right answers in a row in Practice */
-  voice:'', rate:0.85
+  voice:'', rate:0.85,
+  theme:'system'                        /* or 'light' / 'dark'; theme.js reads it before paint */
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
   shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
+  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto,theme:S.theme}); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
@@ -453,6 +454,9 @@ toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
+const THEMES=['system','light','dark'];
+const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
+THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
   S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
@@ -748,6 +752,7 @@ function render(){
   landSel.value=S.land;
   [['t-gloss','gloss'],['t-hooks','hooks'],['t-auto','auto'],['t-shufq','shufQ'],['t-shufa','shufA']]
     .forEach(([id,k])=>$(id).setAttribute('aria-checked',String(S[k])));
+  paintThemeBtns();
   if(canSpeak) $('rate').value=String(S.rate);
   if(S.mode==='exam') return renderExam();
 
@@ -1264,7 +1269,7 @@ document.addEventListener('keydown',e=>{
 /* ---------------- boot ---------------- */
 /* The hooks are fetched now, not on the first miss, so the card is there when
    that miss comes. render() asks for them too, and re-renders once they land. */
-(async()=>{ await load(); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
+(async()=>{ await load(); window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has

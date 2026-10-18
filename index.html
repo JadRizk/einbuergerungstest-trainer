@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 
 <!-- Fetched before the identity block below so the render path is not held up
      behind two dozen meta tags the parser has to walk first. -->
@@ -19,7 +19,10 @@
 <title>Einbürgerungstest — all 460 questions, explained in English</title>
 <meta name="description" content="All 460 questions of the official German citizenship test, explained in English — with a 361-term glossary and a timed mock exam. Works offline.">
 <link rel="canonical" href="https://jadrizk.github.io/einbuergerungstest-trainer/">
-<meta name="theme-color" content="#EDF0EF">
+<meta name="theme-color" content="#EDF0EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10191B" media="(prefers-color-scheme: dark)">
+<!-- after the theme-color metas, which it pins; before the body, which it themes -->
+<script src="theme.js"></script>
 
 <link rel="icon" href="icon/favicon.ico" sizes="32x32">
 <link rel="icon" href="icon/favicon.svg" type="image/svg+xml">
@@ -126,6 +129,15 @@
           <option value="1">Normal</option><option value="1.15">Brisk</option>
         </select></label>
       <div class="note" id="voicenote" hidden></div>
+    </div>
+
+    <div class="nav-sec">
+      <h3>Appearance</h3>
+      <div class="modes" role="group" aria-label="Appearance">
+        <button id="th-system" aria-pressed="true">System</button>
+        <button id="th-light" aria-pressed="false">Light</button>
+        <button id="th-dark" aria-pressed="false">Dark</button>
+      </div>
     </div>
 
     <div class="nav-sec">
