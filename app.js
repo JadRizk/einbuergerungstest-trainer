@@ -4,6 +4,11 @@
 
 import { level as levelOf, solid as solidOf } from './grade.js';
 import { json, esc } from './util.js';
+import { drawer, learnHTML, remember } from './nav.js';
+
+/* the shared half of the menu goes in before the catalogue is awaited */
+document.getElementById('learn').innerHTML=learnHTML('practice');
+remember(document.getElementById('settings'));
 
 const [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 
@@ -340,34 +345,14 @@ function buildFilter(){
   filterSel.value=S.filter;
 }
 /* ---------------- navigation drawer ----------------------------------------
-   One set of controls. Under 62rem it slides in over a scrim; above that the
-   stylesheet parks it as a permanent left rail and these handlers go quiet. */
-const body=document.body, nav=$('nav'), scrim=$('scrim'), burger=$('burger');
-const railed=()=>matchMedia('(min-width:62rem)').matches;
-let navReturn=null;                     /* where focus came from */
-function openNav(){
-  if(railed()) return;
-  navReturn=document.activeElement;
-  body.classList.add('nav-open'); scrim.hidden=false;
-  burger.setAttribute('aria-expanded','true');
-  /* Only the drawer is a modal. Above the breakpoint this same element is a
-     permanent rail, so the dialog role is put on and taken off rather than
-     sitting in the markup telling a screen reader the rail is a dialog. */
-  nav.setAttribute('role','dialog');
-  nav.setAttribute('aria-modal','true');
-  nav.querySelector('.navclose')?.focus();
-}
-function closeNav(){
-  const was=navOpen();
-  body.classList.remove('nav-open'); scrim.hidden=true;
-  burger.setAttribute('aria-expanded','false');
-  nav.removeAttribute('role'); nav.removeAttribute('aria-modal');
-  /* Put focus back where it started instead of dropping it on <body>, which
-     sends a keyboard or screen-reader user to the top of the document. */
-  if(was){ const back=(navReturn&&document.contains(navReturn))?navReturn:burger; back.focus(); }
-  navReturn=null;
-}
-const navOpen=()=>body.classList.contains('nav-open');
+   One set of controls. Under 62rem nav.js slides it in over a scrim; above
+   that the stylesheet parks it as a permanent left rail and the drawer goes
+   quiet. */
+const body=document.body, burger=$('burger');
+const RAIL='(min-width:62rem)';
+const railed=()=>matchMedia(RAIL).matches;
+const {close:closeNav, isOpen:navOpen}=
+  drawer({rail:RAIL, onRail:()=>{ S.railOpen=!S.railOpen; save(); applyRail(); }});
 
 /* Above 62rem the same button collapses the rail instead of sliding a drawer
    over the page -- the question column is the thing worth the pixels, and on
@@ -380,31 +365,6 @@ function applyRail(){
   if(railed()) burger.setAttribute('aria-expanded', String(!off));
   syncDock();
 }
-burger.onclick=()=>{
-  if(railed()){ S.railOpen=!S.railOpen; save(); applyRail(); return; }
-  navOpen()?closeNav():openNav();
-};
-$('navclose').onclick=closeNav;
-scrim.onclick=closeNav;
-
-/* While the drawer is open, Tab must not walk out of it into the question
-   behind -- which it did, reaching the Listen/Copy buttons after 15 stops. */
-const NAVSTOPS='button,select,summary,a[href],input,[tabindex]:not([tabindex="-1"])';
-addEventListener('keydown',e=>{
-  if(e.key!=='Tab'||!navOpen()) return;
-  /* Content inside a collapsed <details> still reports an offsetParent in
-     Chrome, so it has to be excluded by hand -- otherwise the last stop is
-     computed as the link inside "About & sources", the wrap never fires at
-     the summary, and focus leaks to the question behind. */
-  const f=[...nav.querySelectorAll(NAVSTOPS)].filter(el=>
-    !el.disabled && el.offsetParent!==null &&
-    !(el.tagName!=='SUMMARY' && el.closest('details:not([open])')));
-  if(!f.length) return;
-  const first=f[0], last=f[f.length-1], at=document.activeElement;
-  if(e.shiftKey&&at===first){ e.preventDefault(); last.focus(); }
-  else if(!e.shiftKey&&at===last){ e.preventDefault(); first.focus(); }
-  else if(!nav.contains(at)){ e.preventDefault(); first.focus(); }
-});
 
 /* ---------------- routes ----------------------------------------------------
    The exam is a page of its own, so the Android back button and the desktop
@@ -420,6 +380,10 @@ function applyRoute(){
      the setting on and lands on Practice, without a history entry to go back
      into. */
   if(location.hash==='#/hooks'){ S.hooks=true; save(); history.replaceState(null,'','#/practice'); }
+  /* The glossary is a sheet of this page, so the menu on the chart and the
+     timeline links here for it: Practice, with the sheet open. */
+  const glos=location.hash==='#/glossary';
+  if(glos) history.replaceState(null,'','#/practice');
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
@@ -431,6 +395,7 @@ function applyRoute(){
   filterSel.disabled=(m==='exam');
   closeNav(); setSheet(false);
   render(); syncDock();
+  if(glos) openGlos();
 }
 addEventListener('hashchange', applyRoute);
 $('m-drill').onclick=()=>go('drill');

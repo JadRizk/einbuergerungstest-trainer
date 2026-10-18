@@ -8,6 +8,7 @@
 <!-- Fetched before the identity block below so the render path is not held up
      behind two dozen meta tags the parser has to walk first. -->
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="app.css">
 <link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
 <link rel="preload" as="fetch" type="application/json" href="data/glossary.json" crossorigin>
@@ -80,70 +81,70 @@
 
   <div class="nav-body">
     <div class="nav-sec">
-      <h3>Mode</h3>
+      <h3>Practise</h3>
       <div class="modes" role="group" aria-label="Mode">
         <button id="m-drill" aria-pressed="true">Practice</button>
         <button id="m-flash" aria-pressed="false">Browse</button>
       </div>
       <button class="bigbtn" id="m-exam">Sit a mock exam<em>33 questions · 60 minutes · 17 to pass</em></button>
-    </div>
-
-    <div class="nav-sec">
-      <h3>Catalogue</h3>
       <label class="field"><span>Federal state</span>
         <select class="pick" id="land" aria-label="Federal state"></select></label>
       <label class="field"><span>Selection</span>
         <select class="pick" id="filter" aria-label="Selection"></select></label>
-      <button class="rowbtn" id="glosBtn">Glossary<em>361 German terms explained in English</em></button>
-      <a class="rowbtn" href="organigramm.html">Wer wählt wen?<em>Who elects whom — the state as a chart, built from the catalogue</em></a>
     </div>
 
-    <div class="nav-sec">
-      <h3>Study options</h3>
-      <div class="opt-row" id="t-gloss" role="checkbox" tabindex="0" aria-checked="true">
-        <span class="lb">English explanations<em>Civic and legal terms are underlined. Tap one to read it.</em></span>
-        <span class="sw"></span>
-      </div>
-      <div class="opt-row" id="t-hooks" role="checkbox" tabindex="0" aria-checked="false">
-        <span class="lb">Show hooks<em>A rare word in the question and a word only the right answer has, for recognising questions you have learnt. A miss always shows its hook.</em></span>
-        <span class="sw"></span>
-      </div>
-      <div class="opt-row" id="t-auto" role="checkbox" tabindex="0" aria-checked="true">
-        <span class="lb">Advance when correct<em>Moves on by itself after a right answer. Wrong answers always wait.</em></span>
-        <span class="sw"></span>
-      </div>
-      <div class="opt-row" id="t-shufq" role="checkbox" tabindex="0" aria-checked="false">
-        <span class="lb">Shuffle questions<em>Your mistakes come up first, and a miss comes back a few questions later. Off: catalogue order.</em></span><span class="sw"></span>
-      </div>
-      <div class="opt-row" id="t-shufa" role="checkbox" tabindex="0" aria-checked="false">
-        <span class="lb">Shuffle answers<em>Stops you memorising the position instead of the answer.</em></span><span class="sw"></span>
-      </div>
-    </div>
+    <!-- the glossary, the chart and the timeline: filled from nav.js, the
+         same list the other pages show -->
+    <div class="nav-sec" id="learn"></div>
 
-    <div class="nav-sec">
-      <h3>Read aloud</h3>
-      <label class="field" id="voicerow"><span>Voice</span>
-        <select id="voice" aria-label="German voice"></select></label>
-      <label class="field" id="raterow"><span>Reading speed</span>
-        <select id="rate" aria-label="Reading speed">
-          <option value="0.7">Slow</option><option value="0.85">Relaxed</option>
-          <option value="1">Normal</option><option value="1.15">Brisk</option>
-        </select></label>
-      <div class="note" id="voicenote" hidden></div>
-    </div>
-
-    <div class="nav-sec">
-      <h3>Appearance</h3>
-      <div class="modes" role="group" aria-label="Appearance">
-        <button id="th-system" aria-pressed="true">System</button>
-        <button id="th-light" aria-pressed="false">Light</button>
-        <button id="th-dark" aria-pressed="false">Dark</button>
+    <details class="nav-fold" id="settings"><summary>Settings</summary>
+      <div class="nav-sec">
+        <h3>Study options</h3>
+        <div class="opt-row" id="t-gloss" role="checkbox" tabindex="0" aria-checked="true">
+          <span class="lb">English explanations<em>Civic and legal terms are underlined. Tap one to read it.</em></span>
+          <span class="sw"></span>
+        </div>
+        <div class="opt-row" id="t-hooks" role="checkbox" tabindex="0" aria-checked="false">
+          <span class="lb">Show hooks<em>A rare word in the question and a word only the right answer has, for recognising questions you have learnt. A miss always shows its hook.</em></span>
+          <span class="sw"></span>
+        </div>
+        <div class="opt-row" id="t-auto" role="checkbox" tabindex="0" aria-checked="true">
+          <span class="lb">Advance when correct<em>Moves on by itself after a right answer. Wrong answers always wait.</em></span>
+          <span class="sw"></span>
+        </div>
+        <div class="opt-row" id="t-shufq" role="checkbox" tabindex="0" aria-checked="false">
+          <span class="lb">Shuffle questions<em>Your mistakes come up first, and a miss comes back a few questions later. Off: catalogue order.</em></span><span class="sw"></span>
+        </div>
+        <div class="opt-row" id="t-shufa" role="checkbox" tabindex="0" aria-checked="false">
+          <span class="lb">Shuffle answers<em>Stops you memorising the position instead of the answer.</em></span><span class="sw"></span>
+        </div>
       </div>
-    </div>
 
-    <div class="nav-sec">
-      <button class="danger" id="reset">Reset progress</button>
-    </div>
+      <div class="nav-sec">
+        <h3>Read aloud</h3>
+        <label class="field" id="voicerow"><span>Voice</span>
+          <select id="voice" aria-label="German voice"></select></label>
+        <label class="field" id="raterow"><span>Reading speed</span>
+          <select id="rate" aria-label="Reading speed">
+            <option value="0.7">Slow</option><option value="0.85">Relaxed</option>
+            <option value="1">Normal</option><option value="1.15">Brisk</option>
+          </select></label>
+        <div class="note" id="voicenote" hidden></div>
+      </div>
+
+      <div class="nav-sec">
+        <h3>Appearance</h3>
+        <div class="modes" role="group" aria-label="Appearance">
+          <button id="th-system" aria-pressed="true">System</button>
+          <button id="th-light" aria-pressed="false">Light</button>
+          <button id="th-dark" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+
+      <div class="nav-sec">
+        <button class="danger" id="reset">Reset progress</button>
+      </div>
+    </details>
 
     <details class="about">
       <summary>About &amp; sources</summary>

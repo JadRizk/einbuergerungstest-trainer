@@ -11,7 +11,10 @@
    The state-specific labels (term length, voting age, what the head of
    government is called) are likewise lifted from that state's ten questions. */
 
-import { json, esc, read } from './util.js';
+import { json, esc, read, write } from './util.js';
+import { mountNav } from './nav.js';
+
+mountNav('chart');
 
 let DATA, GLOS;
 try {
@@ -28,7 +31,6 @@ const GL = new Map(GLOS.map(g => [g.de, g.en]));
 const $ = id => document.getElementById(id);
 
 /* ---------------- preferences: the app's state, our own toggles ---------------- */
-const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 /* The app's own blob is read, never written: the app keeps `land` in memory
    and would overwrite any change made here on its next save. The chart starts
    on the app's state and remembers its own choice from then on. */

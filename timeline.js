@@ -12,8 +12,10 @@
 
 import { json, esc, read } from './util.js';
 import { level, solid } from './grade.js';
+import { mountNav } from './nav.js';
 
 document.documentElement.classList.add('js');
+mountNav('timeline');
 
 const $ = id => document.getElementById(id);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');

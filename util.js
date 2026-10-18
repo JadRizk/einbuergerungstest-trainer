@@ -5,5 +5,7 @@ export const json = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.s
 
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* a localStorage value, or null when it is missing, unreadable or blocked */
+/* a localStorage value, or null when it is missing, unreadable or blocked;
+   and the write, which fails quietly where storage is blocked */
 export const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+export const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
