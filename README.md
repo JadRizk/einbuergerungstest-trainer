@@ -17,7 +17,7 @@ No build step, no server, no account, no tracking. Open it and it works, includi
 ![Code licence](https://img.shields.io/badge/code-MIT-0B6357?style=flat-square)
 
 <a href="https://jadrizk.github.io/einbuergerungstest-trainer/">
-  <img src="docs/practice.webp" alt="The practice view after a miss: the question's hook above it, the German question with civic terms underlined for English glosses, the wrong answer marked in red and the correct one in green, and a progress map of all 310 questions along the bottom, its cells running from slashed reds through a dashed grey to greens" width="880">
+  <img src="docs/practice.webp" alt="The practice view after a miss, with the menu on the left grouped into Practise, Learn and Settings: the question's hook above it, the German question with civic terms underlined for English glosses, the wrong answer marked in red and the correct one in green, and a progress map of all 310 questions along the bottom, its cells running from slashed reds through a dashed grey to greens" width="880">
 </a>
 
 </div>
@@ -31,13 +31,30 @@ states. The exam you sit draws 33 of them.
 
 ---
 
-## Three ways to study
+Everything sits in one menu, the same on every page: **Practise**, **Learn**, and **Settings**,
+which stays folded until you open it.
+
+## Practise
 
 | | |
 | --- | --- |
 | **Practice** | One question at a time with immediate feedback, tracking what you have already answered. Narrow it to questions you have never seen, or to ones you keep getting wrong. A right answer moves on by itself; a wrong one waits, because that pause is where the learning happens. |
 | **Browse** | Read straight through the catalogue without being quizzed. |
 | **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. Runs full screen as its own route, so the back button leaves the exam rather than the app, and past scores are kept. You can also draw from only what you have already answered, or from a range of catalogue numbers — handy while working through the catalogue in order. |
+
+## Learn
+
+Three ways to understand the questions rather than memorise them.
+
+| | |
+| --- | --- |
+| **Glossary** | 361 German civic and legal terms, each with a plain-English explanation, searchable in German or English. |
+| **Who elects whom** | A chart of who elects, appoints and scrutinises whom — Bund, Länder, Kommunen and the EU. Each body keeps the German name the questions use, with its English name beneath. Every box and arrow opens the catalogue questions behind it, and your state's own labels (term, voting age, what the head of government is called) are read from its ten questions. |
+| **How it happened** | The history questions on one timeline: 27 events from 1933 to 2002, which between them answer 77 of the catalogue's questions. The line splits into West and East Germany in 1949, the Wall fills in between them from 1961 to 1989, and the two join again in 1990. Each event opens to the questions it answers, with their answers and the wrong option it is most easily confused with, and shows how many of them you already know. |
+
+<div align="center">
+  <img src="docs/timeline.webp" alt="The timeline at 1949: under the heading Two German states, the line forks into West Germany (Bundesrepublik) in blue and East Germany (DDR) in gold, with the founding of each state on its own side" width="880">
+</div>
 
 ## While you study
 
@@ -63,11 +80,6 @@ states. The exam you sit draws 33 of them.
   Your best is kept with your progress.
 - **Copy or translate** any question with one click, for looking something up elsewhere or
   pasting it into your own notes.
-- **Who elects whom.** A chart of who elects, appoints and scrutinises whom — Bund, Länder,
-  Kommunen and the EU. Each body keeps the German name the questions use, with its English name
-  beneath. Every box and arrow opens the catalogue questions behind it, and your state's own
-  labels (term, voting age, what the head of government is called) are read from its ten
-  questions.
 - **Pick your state** to get the right 10 regional questions.
 - **Picture questions answer with a pointer.** In 36 of the 39, the options read only "Bild 3"
   or a bare "2" labelling a region on a map — nothing the picture does not already say. They are
@@ -129,7 +141,7 @@ no bundler: `git push` is the deploy.
 | `index.html` | The shell — markup only |
 | `tokens.css` | The colours both pages share, light and dark |
 | `app.css` | All the app's styling, and the self-hosted `@font-face` |
-| `app.js` | The whole app, an ES module, ~800 lines |
+| `app.js` | The practice app, an ES module, ~1,300 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
 | `data/hooks.json` | One memory hook per question — derived, fetched after the page loads and never waited for |
