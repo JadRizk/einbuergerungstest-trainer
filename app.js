@@ -75,9 +75,10 @@ const S={
   voice:'', rate:0.85,
   theme:'system'                        /* or 'light' / 'dark'; theme.js reads it before paint */
 };
-function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
-  shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto,theme:S.theme}); }
+/* what outlives the tab; the rest of S is where you are right now */
+const SAVED=['land','stats','gloss','hooks','shufQ','shufA','auto','seed','railOpen','exams',
+  'bestStreak','voice','rate','escope','efrom','eto','theme'];
+function save(){ store.set(KEY,Object.fromEntries(SAVED.map(k=>[k,S[k]]))); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
@@ -434,12 +435,23 @@ toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0;
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
-/* The chart and the timeline save a theme chosen in their menu into this
-   blob too. Taken up here, or this tab's next save would put its old one back. */
+/* Another tab saved: a second Practice tab, or the chart or the timeline
+   with a theme chosen in their menu. Everything it saved is taken up at
+   once, or this tab's next save would put its own old copy back over it --
+   answers included. Only the redraw waits while an answer is on screen or
+   an exam is running; the next step draws the new state. */
 addEventListener('storage',e=>{
   if(e.key!==KEY) return;
-  let t; try{ t=JSON.parse(e.newValue)?.theme; }catch(err){ return; }
-  if(THEMES.includes(t) && t!==S.theme){ S.theme=t; window.theme?.set(t); paintThemeBtns(); }
+  let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
+  if(!d) return;
+  const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
+  for(const k of SAVED) if(k in d) S[k]=d[k];
+  if(!THEMES.includes(S.theme)) S.theme=was.theme;
+  if(S.theme!==was.theme) window.theme?.set(S.theme);
+  if(S.railOpen!==was.railOpen) applyRail();
+  if(S.voice!==was.voice) paintVoices();
+  paintThemeBtns();
+  if(S.picked===null && !(S.exam && !S.exam.done)) render();
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
