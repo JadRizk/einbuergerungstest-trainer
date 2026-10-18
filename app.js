@@ -2,10 +2,10 @@
    Data lives in data/*.json and is fetched here, so a UI change does not make
    returning visitors re-download the 460-question catalogue. */
 
-const [DATA, GLOS] = await Promise.all([
-  fetch('data/questions.json').then(r => r.json()),
-  fetch('data/glossary.json').then(r => r.json())
-]);
+import { level as levelOf, solid as solidOf } from './grade.js';
+import { json, esc } from './util.js';
+
+const [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 
 /* Intrinsic pixel size of every question image, read from the WebP headers.
    Used only to reserve the box before the image arrives, so answers do not
@@ -62,8 +62,6 @@ async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
 }
-
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------------- glossary decoration ---------------- */
 const GC=GLOS.map(g=>({de:g.de,en:g.en,cat:g.cat,re:new RegExp(g.rx,'g')}));
@@ -282,8 +280,7 @@ const GRADEN={
    next attempt waits for the next render that wants a hook. */
 function loadHooks(){
   if(hooksWait) return hooksWait;
-  hooksWait=fetch('data/hooks.json')
-    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  hooksWait=json('data/hooks.json')
     .then(j=>{ HOOKS=new Map(j.hooks.map(h=>[h.id,h])); })
     .catch(()=>{ hooksWait=null; });
   return hooksWait;
@@ -865,34 +862,14 @@ function paintStreak(){
 
 /* ---------------- the numbers -----------------------------------------------
    Each question keeps a lifetime tally (r, w) and its current run of correct
-   answers (c). The tally feeds the projection; together they place the
-   question on one scale, which the map draws and solid or shaky reads:
-     -3..-1  red, by how far the misses outrun the hits
-      0      even: one right since a miss, or the tally level
-      1..4   green, by right answers minus wrong ones
-   A first answer goes straight to its colour: right is the faintest green.
-   A miss turns any question red, however often you got it right before. The
-   next right answer makes it even, and the one after that gives back the
-   green the tally has earned -- so a question you know well and slip on
-   once costs two right answers, and one you have mostly missed climbs
-   through the reds first. Two right in a row after a miss was tried once
-   before and dropped, because a right answer that left the cell red read as
-   the app not registering it; going red to grey is the visible step that
-   answer was missing. Only green is solid. Records saved before `c` existed
-   fall back to the tally, and a tie there counts as a miss because the order
-   is unknown. */
+   answers (c). The tally feeds the projection; grade.js turns the three into
+   the level the map draws and solid or shaky reads. */
 function record(q,ok){
   const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
   if(ok){ st.r++; st.c=(st.c||0)+1; } else { st.w++; st.c=0; }
 }
-const level=q=>{ const s=S.stats[q.id];
-  if(!s) return null;
-  const net=s.r-s.w, c='c' in s ? s.c : (s.r>s.w ? 2 : 0);
-  if(net<0) return Math.max(-3, net);
-  if(c===0) return -1;
-  if((c===1 && s.w>0) || net===0) return 0;    /* the first right since a miss, or level */
-  return Math.min(4, net); };
-const solid=q=>level(q)>0;
+const level=q=>levelOf(S.stats[q.id]);
+const solid=q=>solidOf(S.stats[q.id]);
 const shaky=q=>!!S.stats[q.id] && !solid(q);
 
 /* Laplace-smoothed per question, so one lucky guess is not "mastered" and an
