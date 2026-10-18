@@ -48,13 +48,12 @@ const topicEn=t=>TOPIC[t]||t;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
   idx:0, picked:null, pin:null, again:null, stats:{}, exam:null,
-  gloss:true, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
-  hgrade:'all',                         /* hooks mode: which grades to show */
+  gloss:true, hooks:false, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
   voice:'', rate:0.85
 };
-function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,shufQ:S.shufQ,
+function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
   shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
   voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
 async function load(){
@@ -66,10 +65,9 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 /* ---------------- glossary decoration ---------------- */
 const GC=GLOS.map(g=>({de:g.de,en:g.en,cat:g.cat,re:new RegExp(g.rx,'g')}));
-const decoCache=new Map();
-function deco(text){
-  if(!S.gloss) return esc(text);
-  if(decoCache.has(text)) return decoCache.get(text);
+const glossCache=new Map();
+function glossHits(text){
+  if(glossCache.has(text)) return glossCache.get(text);
   const mask=new Array(text.length).fill(false), hits=[];
   for(const g of GC){
     g.re.lastIndex=0; let m;
@@ -82,16 +80,51 @@ function deco(text){
       hits.push([a,b,g.de,g.en]);
     }
   }
-  hits.sort((x,y)=>x[0]-y[0]);
-  let out='',last=0;
-  for(const [a,b,de,en] of hits){
-    out+=esc(text.slice(last,a))
-      +`<span class="gl" data-de="${esc(de)}" data-en="${esc(en)}">${esc(text.slice(a,b))}</span>`;
-    last=b;
+  glossCache.set(text,hits);
+  return hits;
+}
+
+/* Where a needle sits in a text, case-insensitively as a fallback. */
+function locate(text, needle){
+  if(!needle) return null;
+  let i=text.indexOf(needle);
+  if(i<0) i=text.toLowerCase().indexOf(needle.toLowerCase());
+  return i<0 ? null : [i, i+needle.length];
+}
+
+/* Escape a text, underline its glossary terms, and wrap each of `marks`
+   ([a,b,cls] -- a hook's trigger or token) in a <mark>. The two overlap far
+   more often than not: 255 of the 474 triggers are themselves glossary terms
+   or sit inside one, and so do 174 of the tokens. Nested ranges become nested
+   elements, so a trigger keeps its tap-to-read gloss. None of them cross in
+   the catalogue as it stands; if one ever does, the mark wins and that gloss
+   is dropped rather than producing tags that close out of order. */
+function deco(text, marks=[]){
+  const ms=[];
+  for(const m of [...marks].sort((x,y)=>x[0]-y[0]))
+    if(!ms.length || m[0]>=ms[ms.length-1][1]) ms.push(m);
+  const crosses=(x,y)=>x[0]<y[1] && y[0]<x[1]
+    && !(x[0]<=y[0] && x[1]>=y[1]) && !(y[0]<=x[0] && y[1]>=x[1]);
+  const els=[
+    ...ms.map(([a,b,cls])=>({a, b, mark:1, open:`<mark class="${cls}">`, close:'</mark>'})),
+    ...(S.gloss ? glossHits(text) : []).filter(g=>!ms.some(m=>crosses(g,m)))
+      .map(([a,b,de,en])=>({a, b, mark:0,
+        open:`<span class="gl" data-de="${esc(de)}" data-en="${esc(en)}">`, close:'</span>'}))
+  ].sort((x,y)=>x.a-y.a || y.b-x.b || y.mark-x.mark);   /* outer first; a mark outside an equal gloss */
+  let out='', at=0;
+  const open=[];
+  const shut=upto=>{
+    while(open.length && open[open.length-1].b<=upto){
+      const e=open.pop(); out+=esc(text.slice(at,e.b))+e.close; at=e.b;
+    }
+  };
+  for(const e of els){
+    shut(e.a);
+    out+=esc(text.slice(at,e.a))+e.open; at=e.a;
+    open.push(e);
   }
-  out+=esc(text.slice(last));
-  decoCache.set(text,out);
-  return out;
+  shut(Infinity);
+  return out+esc(text.slice(at));
 }
 
 /* ---------------- text built for pasting into a translator ----------------
@@ -226,13 +259,16 @@ function view(){
 /* ---------------- hooks: the recognition aid --------------------------------
    data/hooks.json is derived from the catalogue, not part of it: per question
    one rare word in the stem (the trigger) and one string that appears in no
-   other option (the token). Fetched on first use rather than at boot, because
-   most visitors never open this mode and it is another 77 KB.
+   other option (the token). With "Show hooks" on, the card sits above every
+   question and keeps its token back until you answer. With it off, the card
+   turns up only after a miss -- the moment the hook is worth learning, and the
+   miss comes back a few questions later to try it on. Fetched at boot but
+   never waited for: it is an aid, and no question is held back for it.
 
    A hook is a way to recognise a question you have already learnt. It is not a
    way to work out an answer you do not know -- nothing in the wording tells you
    which option is right, which is the whole reason this file has to exist. */
-let HOOKS=null, hooksErr=null, hooksWait=null;
+let HOOKS=null, hooksWait=null;
 const GRADEN={
   A:'trigger unique in your 310, and the token never appears in a wrong option anywhere',
   B:'one of those two holds',
@@ -240,42 +276,28 @@ const GRADEN={
   D:'no single distinctive word, so a verbatim phrase is given',
   V:'picture question — the token is the image to point at'
 };
+/* A failed fetch is not retried in a loop: only a success re-renders, so the
+   next attempt waits for the next render that wants a hook. */
 function loadHooks(){
   if(hooksWait) return hooksWait;
   hooksWait=fetch('data/hooks.json')
     .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(j=>{ HOOKS=new Map(j.hooks.map(h=>[h.id,h])); })
-    .catch(e=>{ hooksErr=e; hooksWait=null; });   /* let the next attempt refetch */
+    .catch(()=>{ hooksWait=null; });
   return hooksWait;
 }
-const hookList=()=>{
-  const l=view().filter(q=>HOOKS.has(q.id));
-  if(S.hgrade==='all') return l;
-  if(S.hgrade==='exact') return l.filter(q=>HOOKS.get(q.id).match==='exact');
-  if(S.hgrade==='amb')   return l.filter(q=>HOOKS.get(q.id).stem_ambiguous);
-  return l.filter(q=>HOOKS.get(q.id).grade===S.hgrade);
-};
+const hookWanted=q=>S.mode!=='exam' && (S.hooks || (S.picked!==null && S.picked!==q.answer));
+const hookFor=q=>(hookWanted(q) && HOOKS && HOOKS.get(q.id)) || null;
 
-/* Wrap each needle where it occurs, leaving the rest escaped. Overlapping or
-   missing needles are dropped rather than mangling the string. */
-function hiLite(text, needles, cls, whole){
-  const ns=(Array.isArray(needles)?needles:[needles]).filter(Boolean);
-  if(!ns.length) return esc(text);
-  if(whole) return `<mark class="${cls}">${esc(text)}</mark>`;
-  const hits=[];
-  for(const n of ns){
-    let i=text.indexOf(n);
-    if(i<0) i=text.toLowerCase().indexOf(n.toLowerCase());
-    if(i>=0) hits.push([i,i+n.length]);
-  }
-  hits.sort((a,b)=>a[0]-b[0]);
-  let out='',last=0;
-  for(const [a,b] of hits){
-    if(a<last) continue;
-    out+=esc(text.slice(last,a))+`<mark class="${cls}">${esc(text.slice(a,b))}</mark>`;
-    last=b;
-  }
-  return out+esc(text.slice(last));
+/* The ranges deco() wraps: the trigger(s) in the stem, the token in the right
+   option -- or the whole option, when only an exact match tells it apart. */
+const stemMarks=(q,h)=>!h ? [] :
+  [h.trigger,h.trigger2].map(n=>locate(q.q,n)).filter(Boolean).map(r=>[...r,'trig']);
+function tokenMarks(raw,h){
+  if(!h) return [];
+  if(h.match==='exact') return [[0,raw.length,'tok']];
+  const r=locate(raw,h.token);
+  return r ? [[...r,'tok']] : [];
 }
 
 function hookCard(h, revealed){
@@ -303,114 +325,6 @@ function hookCard(h, revealed){
     ${flags.length?`<p class="hookflag">${flags.join(' · ')}</p>`:''}
   </div>`;
 }
-
-function hookOptionsHtml(q, ord, revealed, h){
-  if(pointerOpts(q)) return optionsHtml(q,ord,revealed);
-  return `<ul class="opts">${ord.map((orig,pos)=>{
-    let cls='opt', mark='';
-    if(revealed){
-      if(orig===q.answer){cls+=' right';mark='✓';}
-      else if(orig===S.picked){cls+=' wrong';mark='✗';}
-      else cls+=' dim';
-    }
-    const raw=q.options[orig];
-    const txt=(revealed && orig===q.answer)
-      ? hiLite(raw, h.token, 'tok', h.match==='exact')
-      : esc(raw);
-    return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}>
-      <span class="cap">${pos+1}</span><span class="txt" lang="de">${txt}</span>
-      <span class="mark">${mark}</span></button></li>`;
-  }).join('')}</ul>`;
-}
-
-/* Kept short: a <select> is as wide as its longest option, and this one shares
-   a row with the topic tag on a 390px phone. */
-const HGRADES=[['all','All hooks'],['A','Grade A'],['B','Grade B'],
-  ['C','Grade C · weak'],['D','Grade D · phrase'],['V','Pictures'],
-  ['exact','Exact match'],['amb','Shared stem']];
-
-function renderHooks(){
-  if(!HOOKS){
-    viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="empty">
-      <b>${hooksErr?'Could not load the hooks':'Loading…'}</b>
-      ${hooksErr
-        ? (navigator.onLine===false
-            ? 'You are offline, and the hooks have not been downloaded yet. Open this mode once while connected and it will work offline afterwards.'
-            : esc(String(hooksErr.message||hooksErr))+'<br><button class="next" id="retry">Try again</button>')
-        : 'Fetching data/hooks.json.'}
-      </div></div></div>`;
-    const rb=$('retry');
-    if(rb) rb.onclick=()=>{ hooksErr=null; render(); };
-    $('barnow').textContent='';
-    /* Only auto-fetch while no error is standing: without this guard the
-       failed render would refetch, fail, and render again, forever. The retry
-       button clears the error, which is what lets the next attempt through. */
-    if(!hooksErr) loadHooks().then(()=>{ if(S.mode==='hooks') render(); });
-    paintDock(); return;
-  }
-  const list=hookList();
-  const counts=(()=>{
-    const c={all:0};
-    view().forEach(q=>{
-      const h=HOOKS.get(q.id); if(!h) return;
-      c.all++; c[h.grade]=(c[h.grade]||0)+1;
-      if(h.match==='exact') c.exact=(c.exact||0)+1;
-      if(h.stem_ambiguous)  c.amb=(c.amb||0)+1;
-    });
-    return c;
-  })();
-  const sel=`<label class="hpick"><span class="vh">Which hooks</span><select id="hgrade">${
-    HGRADES.map(([v,l])=>`<option value="${v}"${S.hgrade===v?' selected':''}>${esc(l)}${
-      counts[v]?' ('+counts[v]+')':''}</option>`).join('')}</select></label>`;
-
-  if(!list.length){
-    viewEl.innerHTML=`<div class="stage"><div class="meta">${sel}</div><div class="scroll"><div class="empty">
-      <b>Nothing here</b>No question in this selection has that kind of hook.</div></div></div>`;
-    $('barnow').textContent=''; $('hgrade').onchange=e=>{S.hgrade=e.target.value;S.idx=0;S.picked=null;render();};
-    paintDock(); return;
-  }
-  if(S.idx>=list.length) S.idx=0;
-  const q=list[S.idx], h=HOOKS.get(q.id), ord=optOrder(q);
-  const revealed=(S.picked!==null);
-  const right=revealed && S.picked===q.answer;
-  $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
-
-  viewEl.innerHTML=`<div class="stage">
-    <div class="meta">
-      <span class="tag${q.state?' land':''}">${esc(q.state?q.state+' · no. '+q.num:topicEn(q.topic))}</span>
-      ${q.state?'':`<span class="catno"><span class="wide">Catalogue </span>no. ${q.num}</span>`}
-      ${sel}
-    </div>
-    <div class="scroll" id="scroll">
-      ${hookCard(h, revealed)}
-      <h1 class="q" lang="de">${hiLite(q.q,[h.trigger,h.trigger2],'trig')}</h1>
-      ${shotHtml(q)}
-    </div>
-    <div class="answers" id="answers">
-      ${hookOptionsHtml(q,ord,revealed,h)}
-      <div class="act">
-        <button class="next quiet" id="prev">Back</button>
-        ${ revealed
-            ? `<span class="verdictline ${right?'ok':'bad'}">${right?'The hook held':'The token was '+esc(h.token)}</span>`
-            : `<span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer
-                 <span class="kbd">↵</span> next <span class="kbd">←</span><span class="kbd">→</span> browse</span>` }
-        <button class="next grow" id="next">Next</button>
-      </div>
-    </div></div>`;
-
-  viewEl.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(+b.dataset.orig));
-  $('next').onclick=()=>step(1);
-  $('prev').onclick=()=>step(-1);
-  $('hgrade').onchange=e=>{S.hgrade=e.target.value;S.idx=0;S.picked=null;render();};
-  const qi=$('qimg');
-  if(qi){ const show=()=>openLens(qi.currentSrc||qi.src, qi.alt); qi.onclick=show; }
-  const sc=$('scroll');
-  if(sc) $('answers').classList.toggle('stuck', sc.scrollHeight>sc.clientHeight+2);
-  paintDock();
-}
-
-/* The list the mode is actually stepping through. */
-const curList=()=>(S.mode==='hooks'&&HOOKS)?hookList():view();
 
 /* ---------------- controls ---------------- */
 const $=id=>document.getElementById(id);
@@ -496,13 +410,17 @@ addEventListener('keydown',e=>{
 /* ---------------- routes ----------------------------------------------------
    The exam is a page of its own, so the Android back button and the desktop
    window's back arrow both leave it instead of quitting the app. */
-const ROUTE={'#/browse':'flash','#/exam':'exam','#/hooks':'hooks'};
-const HASH ={flash:'#/browse', exam:'#/exam', hooks:'#/hooks', drill:'#/practice'};
+const ROUTE={'#/browse':'flash','#/exam':'exam'};
+const HASH ={flash:'#/browse', exam:'#/exam', drill:'#/practice'};
 function go(mode){
   if(location.hash===HASH[mode]){ applyRoute(); return; }
   location.hash=HASH[mode];                  /* hashchange does the rest */
 }
 function applyRoute(){
+  /* Hooks used to be a mode of its own. An old link or bookmark to it turns
+     the setting on and lands on Practice, without a history entry to go back
+     into. */
+  if(location.hash==='#/hooks'){ S.hooks=true; save(); history.replaceState(null,'','#/practice'); }
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
@@ -511,8 +429,6 @@ function applyRoute(){
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
   $('m-flash').setAttribute('aria-pressed',String(m==='flash'));
-  $('m-hooks').setAttribute('aria-pressed',String(m==='hooks'));
-  if(m==='hooks') loadHooks();
   filterSel.disabled=(m==='exam');
   closeNav(); setSheet(false);
   render(); syncDock();
@@ -520,7 +436,6 @@ function applyRoute(){
 addEventListener('hashchange', applyRoute);
 $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
-$('m-hooks').onclick=()=>go('hooks');
 $('m-exam').onclick =()=>go('exam');
 
 landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();closeNav();render();};
@@ -532,7 +447,8 @@ function toggle(id,key,after){
   el.onclick=flip;
   el.onkeydown=e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();flip();} };
 }
-toggle('t-gloss','gloss',()=>{decoCache.clear(); hideTip(); render();});
+toggle('t-gloss','gloss',()=>{hideTip(); render();});
+toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
@@ -809,7 +725,7 @@ function shotHtml(q){
          alt="Picture for question ${esc(String(q.num))}"></figure>`;
 }
 
-function optionsHtml(q, ord, revealed){
+function optionsHtml(q, ord, revealed, h){
   const ptr=pointerOpts(q);
   return `<ul class="opts${ptr?' pointer':''}">${ord.map((orig,pos)=>{
     let cls='opt', mark='';
@@ -819,8 +735,9 @@ function optionsHtml(q, ord, revealed){
       else cls+=' dim';
     }
     const raw=q.options[orig];
+    const marks=(revealed && orig===q.answer) ? tokenMarks(raw,h) : [];
     return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}${ptr?` aria-label="${esc(raw)}"`:''}>
-      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw)}</span>`}
+      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw,marks)}</span>`}
       <span class="mark">${mark}</span></button></li>`;
   }).join('')}</ul>`;
 }
@@ -828,11 +745,10 @@ function optionsHtml(q, ord, revealed){
 function render(){
   clearAuto();
   landSel.value=S.land;
-  [['t-gloss','gloss'],['t-auto','auto'],['t-shufq','shufQ'],['t-shufa','shufA']]
+  [['t-gloss','gloss'],['t-hooks','hooks'],['t-auto','auto'],['t-shufq','shufQ'],['t-shufa','shufA']]
     .forEach(([id,k])=>$(id).setAttribute('aria-checked',String(S[k])));
   if(canSpeak) $('rate').value=String(S.rate);
   if(S.mode==='exam') return renderExam();
-  if(S.mode==='hooks') return renderHooks();
 
   const list=view();
   if(!list.length){
@@ -845,6 +761,8 @@ function render(){
   const revealed=(S.mode==='flash')||(S.picked!==null);
   const right=revealed && S.picked===q.answer;
   const atPos=ord.indexOf(q.answer)+1;
+  const h=hookFor(q);
+  if(hookWanted(q) && !HOOKS) loadHooks().then(()=>{ if(HOOKS && S.mode!=='exam' && !autoTimer) render(); });
   $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
 
   viewEl.innerHTML=`<div class="stage">
@@ -854,11 +772,12 @@ function render(){
       ${toolsHtml(q)}
     </div>
     <div class="scroll" id="scroll">
-      <h1 class="q" lang="de">${deco(q.q)}</h1>
+      ${h?hookCard(h, revealed):''}
+      <h1 class="q" lang="de">${deco(q.q, stemMarks(q,h))}</h1>
       ${shotHtml(q)}
     </div>
     <div class="answers" id="answers">
-      ${optionsHtml(q,ord,revealed)}
+      ${optionsHtml(q,ord,revealed,h)}
       <div class="act">
         <button class="next quiet" id="prev">Back</button>
         ${ (S.picked!==null)
@@ -892,16 +811,12 @@ function render(){
 
 function answer(orig){
   if(S.mode==='flash'||S.picked!==null) return;
-  const q=curList()[S.idx];
+  const q=view()[S.idx];
   if(!q) return;
   S.picked=orig; S.pin=q.id;
   const right=(orig===q.answer);
-  /* Hooks mode is a rehearsal of what you already learnt, not an attempt at
-     the question, so it stays out of the statistics and out of the map. */
-  if(S.mode!=='hooks'){
-    record(q,right);
-    save();
-  }
+  record(q,right);
+  save();
   S.again=(!right && S.mode==='drill' && S.shufQ) ? q.id : null;
   render();
   /* right answers move on by themselves; wrong ones wait, because the pause
@@ -910,14 +825,14 @@ function answer(orig){
 }
 function step(d){
   clearAuto();
-  let list=curList();
+  let list=view();
   if(!list.length) return;
   /* pick the target by id before letting go of the held question: releasing
      it can drop it from the list and shift every index after it */
   const to=list[(S.idx+d+list.length)%list.length];
   if(S.again!==null){ requeue(list,S.again,to); S.again=null; }
   S.picked=null;
-  list=curList();
+  list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
@@ -1006,9 +921,7 @@ function paintStats(){
 
 /* ---------------- catalogue map ---------------- */
 function paintDock(){
-  /* curList(), not view(): in Hooks mode S.idx indexes the graded subset, so
-     reading or writing it against view() lands on an unrelated question. */
-  const p=pool(), list=curList(), map=$('map');
+  const p=pool(), list=view(), map=$('map');
   const done=p.filter(q=>S.stats[q.id]).length;
   const nSolid=p.filter(solid).length;
   const weak=p.filter(shaky).length;
@@ -1033,17 +946,13 @@ function paintDock(){
     b.className=cls;
     b.title=(q.state?q.state+' '+q.num:'Question '+q.num)+' — '+q.q.slice(0,70);
     b.onclick=()=>{
-      /* Not in the current selection: drop the narrower filter first and only
-         widen the catalogue selection if that was not what was hiding it, so a
-         selection the user still needs is not discarded. */
+      /* Not in the current selection: widen it to everything, since the
+         question you tapped is the one you asked for. */
       S.picked=null;                     /* releases the held question first */
-      let at=curList().findIndex(x=>x.id===q.id);
-      if(at<0 && S.mode==='hooks' && S.hgrade!=='all'){
-        S.hgrade='all'; at=curList().findIndex(x=>x.id===q.id);
-      }
+      let at=view().findIndex(x=>x.id===q.id);
       if(at<0){
         S.filter='all'; filterSel.value='all';
-        at=Math.max(0, curList().findIndex(x=>x.id===q.id));
+        at=Math.max(0, view().findIndex(x=>x.id===q.id));
       }
       S.idx=at;
       stopSpeech(); setSheet(false); render();
@@ -1319,7 +1228,7 @@ document.addEventListener('keydown',e=>{
     if(!b) return;
     if(!b.disabled){ b.click(); return; }
     if(canSpeak){                              /* already answered: read that one back */
-      const q=curList()[S.idx];
+      const q=view()[S.idx];
       if(q) say(sentence(q, +b.dataset.orig));
     }
   }
@@ -1328,7 +1237,9 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ---------------- boot ---------------- */
-(async()=>{ await load(); buildFilter(); initSpeech(); applyRail(); applyRoute(); })();
+/* The hooks are fetched now, not on the first miss, so the card is there when
+   that miss comes. render() asks for them too, and re-renders once they land. */
+(async()=>{ await load(); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has
@@ -1339,9 +1250,6 @@ function warmAll(){
   const c = navigator.connection;
   if(c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ''))) return;
   Object.keys(IMG).forEach(k => warm(k));
-  /* 77 KB so Hooks mode is not the one mode that needs a connection. Same
-     budget rules as the images: idle only, and never on a metered link. */
-  if(!HOOKS) fetch('data/hooks.json').catch(()=>{});
 }
 
 /* Only worth the bytes once a service worker is actually controlling the page.
