@@ -31,13 +31,12 @@ states. The exam you sit draws 33 of them.
 
 ---
 
-## Four ways to study
+## Three ways to study
 
 | | |
 | --- | --- |
 | **Practice** | One question at a time with immediate feedback, tracking what you have already answered. Narrow it to questions you have never seen, or to ones you keep getting wrong. A right answer moves on by itself; a wrong one waits, because that pause is where the learning happens. |
 | **Browse** | Read straight through the catalogue without being quizzed. |
-| **Hooks** | A recognition drill for questions you have already worked through: one rare word in the stem, one word that appears in no other option. Scan for the first, pick the option carrying the second. It is for recall, not comprehension — do the understanding in Practice first. Answers here are not counted in your statistics. |
 | **Exam** | 33 questions under real conditions: 30 general and 3 from your state, nothing marked until you finish. 17 correct is a pass. Runs full screen as its own route, so the back button leaves the exam rather than the app, and past scores are kept. You can also draw from only what you have already answered, or from a range of catalogue numbers — handy while working through the catalogue in order. |
 
 ## While you study
@@ -45,6 +44,12 @@ states. The exam you sit draws 33 of them.
 - **English explanations.** Civic and legal terms in the German questions are underlined; hover
   or tap one for a plain-English gloss. 361 terms, matched in their inflected forms too — so
   *Ministerpräsidenten* is recognised, not just *Ministerpräsident*.
+- **Hooks.** A recognition aid for questions you have already worked through: one rare word in
+  the question, one word that appears in no other option. Scan for the first, pick the option
+  carrying the second. Turn on *Show hooks* to see the hook above every question, its answer
+  word held back until you answer; with it off, a hook appears only when you miss, so you have
+  it when that question comes back. It is for recall, not comprehension — do the understanding
+  first.
 - **Read aloud.** Questions can be spoken by the browser's German voice, with a choice of voice
   and four reading speeds. Useful for the listening side of the language, and for terms whose
   pronunciation is not obvious from spelling.
@@ -122,7 +127,7 @@ no bundler: `git push` is the deploy.
 | `app.js` | The whole app, an ES module, ~800 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
-| `data/hooks.json` | One memory hook per question, for Hooks mode — derived, fetched only when that mode is opened |
+| `data/hooks.json` | One memory hook per question — derived, fetched after the page loads and never waited for |
 | `organigramm.html` `.css` `.js` | *Wer wählt wen?* — the chart page, its own route; reads the same two data files |
 | `img/` | The 38 question images, fetched only when a question needs one |
 | `font/` | Archivo variable, latin subset, self-hosted |

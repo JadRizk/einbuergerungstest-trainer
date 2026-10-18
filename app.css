@@ -484,7 +484,7 @@ body.exam .nav{transform:translateX(-101%)}
 
 @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important} }
 
-/* ------------------------------------------------ hooks mode
+/* ------------------------------------------------ hooks
    The recognition aid: a trigger word in the stem, a token in the right
    option. Two highlight colours carry the whole idea, so they are the only
    new hues here -- the trigger borrows the glossary's gold, the token the
@@ -525,19 +525,10 @@ body.exam .nav{transform:translateX(-101%)}
 .q mark.trig, .opt mark.tok{background:transparent; color:inherit}
 .q mark.trig{border-bottom:2px solid var(--gold); font-weight:700}
 .opt mark.tok{background:#C9E4D6; border-radius:4px; padding:.02rem .18rem; font-weight:700}
-
-/* min-width:0 lets it shrink below its intrinsic width instead of pushing the
-   meta row wider than the screen. */
-.hpick{margin-left:auto; min-width:0; flex:0 1 auto}
-.hpick select{
-  font-size:.82rem; padding:.28rem 1.4rem .28rem .5rem; min-height:2rem;
-  border:1px solid var(--edge); border-radius:8px; background:var(--card); color:var(--muted);
-  appearance:none; cursor:pointer; max-width:100%; text-overflow:ellipsis;
-  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
-  background-position:calc(100% - 13px) 50%, calc(100% - 8px) 50%;
-  background-size:5px 5px, 5px 5px; background-repeat:no-repeat;
-}
-.vh{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+/* Most triggers are glossary terms too, and the gloss nests with the mark. Its
+   dotted line would sit on or under the trigger's solid one, so it gives way;
+   the term still opens on a tap. */
+.q mark.trig .gl, .q .gl:has(> mark.trig){border-bottom-color:transparent}
 
 /* ------------------------------------------------ exam scope */
 .scope{margin:0 0 1rem; max-width:30rem}
