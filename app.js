@@ -10,17 +10,28 @@ import { drawer, fillNav, THEMES } from './nav.js';
 fillNav();
 
 let DATA, GLOS;
+let ready=false;                        /* load() has run: S is yours, not the defaults */
 
 /* ---------------- navigation drawer ----------------------------------------
    One set of controls. Under 62rem nav.js slides it in over a scrim; above
    that the stylesheet parks it as a permanent left rail and the drawer goes
    quiet. It is wired up before the catalogue is awaited too, so the menu
-   button still opens it on the error screen. S is only made once the
-   catalogue is in, so until DATA is there the rail counts as unfolded and
-   its button waits. */
+   button still works on the error screen.
+
+   Whether the rail is folded is the class on body; applyRail() puts it there
+   from S. Until load() has run -- on the error screen, for good -- the
+   button folds the rail without saving, since S still holds the defaults and
+   save() would write them over your progress. */
 const RAIL='(min-width:62rem)';
+const body=document.body, burger=document.getElementById('burger');
+const railed=()=>matchMedia(RAIL).matches;
+const railOff=()=>body.classList.contains('rail-off');
 const {close:closeNav, isOpen:navOpen, sync:syncNav}=
-  drawer({rail:RAIL, folded:()=>!!DATA && !S.railOpen, onRail:()=>{ if(!DATA) return; S.railOpen=!S.railOpen; save(); applyRail(); }});
+  drawer({rail:RAIL, folded:railOff, onRail:()=>{
+    if(!ready) return paintRail(!railOff());
+    S.railOpen=!S.railOpen; save(); applyRail();
+  }});
+paintRail(false);
 
 try {
   [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
@@ -386,20 +397,16 @@ function buildFilter(){
   filterSel.value=S.filter;
 }
 /* ---------------- the rail (the drawer is wired at the top) ---------------- */
-const body=document.body, burger=$('burger');
-const railed=()=>matchMedia(RAIL).matches;
-
 /* Above 62rem the same button collapses the rail instead of sliding a drawer
    over the page -- the question column is the thing worth the pixels, and on
    a laptop 17rem of permanent chrome is a lot to spend on controls you touch
    once a session. */
-function applyRail(){
-  const off=!S.railOpen;
+function applyRail(){ paintRail(!S.railOpen); syncDock(); }
+function paintRail(off){
   body.classList.toggle('rail-off', off);
   burger.title = off ? 'Show the menu' : 'Hide the menu';
   if(railed()) burger.setAttribute('aria-expanded', String(!off));
   syncNav();                            /* a folded rail is out of the Tab order */
-  syncDock();
 }
 
 /* ---------------- routes ----------------------------------------------------
@@ -1312,7 +1319,7 @@ document.addEventListener('keydown',e=>{
 /* ---------------- boot ---------------- */
 /* The hooks are fetched now, not on the first miss, so the card is there when
    that miss comes. render() asks for them too, and re-renders once they land. */
-(async()=>{ await load(); window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
+(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has
