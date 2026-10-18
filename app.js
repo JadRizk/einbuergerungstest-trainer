@@ -49,6 +49,15 @@ const TOPIC={
   'Europa und Welt':'Europe & the world', 'Bildung und Arbeit':'Education & work'
 };
 const topicEn=t=>TOPIC[t]||t;
+/* the glossary's sections, named in English like the topics */
+const GCAT={
+  'Institutionen':'Institutions', 'Wirtschaft & Arbeit':'Economy & work', 'Allgemein':'General',
+  'Recht & Justiz':'Law & justice', 'Geschichte':'History', 'Gesellschaft & Religion':'Society & religion',
+  'Wahlen':'Elections', 'Staat & Verfassung':'State & constitution', 'Verwaltung':'Administration',
+  'Symbole & Länder':'Symbols & states', 'Europa & Welt':'Europe & the world', 'Grundrechte':'Basic rights',
+  'Bildung':'Education', 'Parteien':'Parties'
+};
+const catEn=c=>GCAT[c]||c;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
   idx:0, picked:null, pin:null, again:null, stats:{}, exam:null,
@@ -661,7 +670,7 @@ function paintGlos(term){
   hit.forEach(g=>(byCat[g.cat]=byCat[g.cat]||[]).push(g));
   $('gbody').innerHTML = hit.length
     ? Object.entries(byCat).map(([c,items])=>
-        `<div class="gcat">${esc(c)}</div>`+
+        `<div class="gcat">${esc(catEn(c))}</div>`+
         items.sort((a,b)=>a.de.localeCompare(b.de,'de'))
              .map(g=>`<div class="gitem"><b>${esc(g.de)}</b><span>${esc(g.en)}</span></div>`).join('')
       ).join('')

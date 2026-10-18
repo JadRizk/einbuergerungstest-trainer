@@ -63,10 +63,11 @@ states. The exam you sit draws 33 of them.
   Your best is kept with your progress.
 - **Copy or translate** any question with one click, for looking something up elsewhere or
   pasting it into your own notes.
-- **Wer wählt wen?** A chart of who elects, appoints and scrutinises whom — Bund, Länder,
-  Kommunen and the EU — in German, with the English name on hover. Every box and arrow opens
-  the catalogue questions behind it, and your state's own labels (term, voting age, what the head
-  of government is called) are read from its ten questions.
+- **Who elects whom.** A chart of who elects, appoints and scrutinises whom — Bund, Länder,
+  Kommunen and the EU. Each body keeps the German name the questions use, with its English name
+  beneath. Every box and arrow opens the catalogue questions behind it, and your state's own
+  labels (term, voting age, what the head of government is called) are read from its ten
+  questions.
 - **Pick your state** to get the right 10 regional questions.
 - **Picture questions answer with a pointer.** In 36 of the 39, the options read only "Bild 3"
   or a bare "2" labelling a region on a map — nothing the picture does not already say. They are
@@ -132,7 +133,7 @@ no bundler: `git push` is the deploy.
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
 | `data/hooks.json` | One memory hook per question — derived, fetched after the page loads and never waited for |
-| `organigramm.html` `.css` `.js` | *Wer wählt wen?* — the chart page, its own route; reads the same two data files |
+| `organigramm.html` `.css` `.js` | *Who elects whom* — the chart page, its own route; reads the same two data files |
 | `timeline.html` `.css` `.js` | *How it happened* — the history questions on one timeline, from `data/timeline.json` |
 | `nav.js` `nav.css` | The menu every page shares: Practise, Learn, and Settings folded away |
 | `grade.js` `util.js` | The grading rule and the small helpers the pages share |

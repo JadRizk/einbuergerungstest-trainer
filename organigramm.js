@@ -1,5 +1,10 @@
-/* Wer wählt wen? — an organisational chart of the German state, drawn only
+/* Who elects whom — an organisational chart of the German state, drawn only
    from what the catalogue asks.
+
+   The page is in English, like the rest of the app. German stays only as
+   itself: the names of the bodies and elections the questions ask about, and
+   the questions. The German notes and traps are kept in the data for a second
+   interface language later; nothing reads them now.
 
    Every node and every arrow names the catalogue questions it stands on, and
    the question text, the right answer and the wrong ones are read from
@@ -36,7 +41,7 @@ const $ = id => document.getElementById(id);
    the app's state and remembers its own choice from then on. (The menu's
    theme is the one thing written into it from this page; nav.js says how
    the app takes that up.) */
-const P = Object.assign({ en: false, bg: true, land: null }, read('ebt.org') || {});
+const P = Object.assign({ bg: true, land: null }, read('ebt.org') || {});
 let land = P.land || (read('ebt.v2') || {}).land || 'Berlin';
 if (!DATA.meta.states.includes(land)) land = 'Berlin';
 
@@ -79,9 +84,9 @@ const W = 1120, H = 730;
 const COL_Y = 12, COL_H = 628;
 const COLS = [
   { id: 'c-eu',   de: 'Europa',   en: 'Europe — the EU level',           x: 12,  w: 160, qs: [224, 173] },
-  { id: 'c-bund', de: 'Bund',     en: 'The federation — national level', x: 184, w: 500, qs: [64, 27, 38] },
-  { id: 'c-land', de: 'Länder',   en: 'The 16 federal states',           x: 696, w: 220, qs: [64, 24, 39, 49, 67] },
-  { id: 'c-kom',  de: 'Kommunen', en: 'Municipalities — local level',    x: 928, w: 180, qs: [64, 69, 56] }
+  { id: 'c-bund', de: 'Bund',     en: 'Federation — the national level', x: 184, w: 500, qs: [64, 27, 38] },
+  { id: 'c-land', de: 'Länder',   en: 'States — the 16 federal states',     x: 696, w: 220, qs: [64, 24, 39, 49, 67] },
+  { id: 'c-kom',  de: 'Kommunen', en: 'Municipalities — the local level', x: 928, w: 180, qs: [64, 69, 56] }
 ];
 
 /* Branch is what colours the box. It is also a catalogue topic in its own
@@ -181,20 +186,20 @@ function nodes(S) {
    The `sub` lines under an election name it first, because question 62 asks
    for exactly that word. */
 function edges(S) {
-  const lt = S.term ? `alle ${answer(S.term)} Jahre` : '';
-  const ltAge = S.ageIsLandtag ? `ab ${answer(S.age)}` : '';
+  const lt = S.term ? `every ${answer(S.term)} years` : '';
+  const ltAge = S.ageIsLandtag ? `from ${answer(S.age)}` : '';
   const up = x => `M${x} 662 L${x} 531`;
   return [
     { id: 'e-ep', from: 'volk', to: 'ep', k: 'elect', de: 'wählt', en: 'elects',
-      sub: ['Europawahl', 'alle 5 Jahre'], d: up(92), lx: 92, ly: 584, qs: [232, 230] },
+      sub: ['Europawahl', 'every 5 years'], d: up(92), lx: 92, ly: 584, qs: [232, 230] },
     { id: 'e-bt', from: 'volk', to: 'bt', k: 'elect', de: 'wählt', en: 'elects',
-      sub: ['Bundestagswahl', 'alle 4 Jahre · ab 18 · 5 %-Hürde'], d: up(305), lx: 305, ly: 584,
+      sub: ['Bundestagswahl', 'every 4 years · from 18 · 5% threshold'], d: up(305), lx: 305, ly: 584,
       qs: [28, 129, 107, 109, 110, 94, 108, 93, 117, 121, 123, 127, 122, 112, 119, 5, 115, 116, 120, 133] },
     { id: 'e-lt', from: 'volk', to: 'lt', k: 'elect', de: 'wählt', en: 'elects',
       sub: ['Landtagswahl', [lt, ltAge].filter(Boolean).join(' · ')].filter(Boolean), d: up(806), lx: 806, ly: 584,
       qs: [62, S.term?.id, S.ageIsLandtag && S.age?.id, 133].filter(Boolean) },
     { id: 'e-gr', from: 'volk', to: 'gr', k: 'elect', de: 'wählt', en: 'elects',
-      sub: ['Kommunalwahl', !S.ageIsLandtag && S.age ? 'ab ' + answer(S.age) : ''].filter(Boolean),
+      sub: ['Kommunalwahl', !S.ageIsLandtag && S.age ? 'from ' + answer(S.age) : ''].filter(Boolean),
       d: up(1018), lx: 1018, ly: 584, qs: [!S.ageIsLandtag && S.age?.id].filter(Boolean),
       /* Bremen's age question is about the Bürgerschaft, so nothing backs
          this arrow there: it is drawn as background and says why. */
@@ -204,9 +209,9 @@ function edges(S) {
 
     { id: 'e-bp', from: 'bv', to: 'bp', k: 'elect', de: 'wählt', en: 'elects',
       d: 'M405 244 C437 244 433 104 463 104', lx: 434, ly: 168, qs: [86, 44] },
-    { id: 'e-vor', from: 'bp', to: 'bk', k: 'appt', de: 'schlägt vor', en: 'proposes for election',
+    { id: 'e-vor', from: 'bp', to: 'bk', k: 'appt', de: 'schlägt vor', en: 'proposes — for election by the Bundestag',
       d: 'M590 133 L590 206', lx: 590, ly: 162, qs: [70] },
-    { id: 'e-ern', from: 'bp', to: 'bm', k: 'appt', de: 'ernennt', en: 'appoints (formally)',
+    { id: 'e-ern', from: 'bp', to: 'bm', k: 'appt', de: 'ernennt', en: 'appoints — formally',
       d: 'M665 114 C704 126 702 320 665 320', lx: 690, ly: 156, qs: [58] },
     { id: 'e-lei', from: 'bk', to: 'bm', k: 'lead', de: 'leitet', en: 'leads — chairs the Cabinet',
       d: 'M565 264 L565 296', lx: 610, ly: 280, qs: [82] },
@@ -254,31 +259,31 @@ function nodeSVG(n) {
   const x = n.x - n.w / 2, y = n.y - n.h / 2;
   const ref = `data-ref="${n.id}" tabindex="0" role="button" aria-label="${esc(nameOf(n.id) + ' — ' + n.en)}"`;
   if (n.group) {
-    const sub = P.en ? short(n.en) : n.sub;
+    const sub = short(n.en);
     return `<g class="grp b-${n.b}" ${ref}>
       <rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="14"/>
-      <text class="gname" x="${x + 14}" y="${y + n.h - (sub ? 28 : 14)}">${esc(n.de[0])}</text>
-      ${sub ? `<text class="gsub${P.en ? ' en' : ''}" x="${x + 14}" y="${y + n.h - 12}" data-fit="${n.w - 24}">${esc(sub)}</text>` : ''}
+      <text class="gname" lang="de" x="${x + 14}" y="${y + n.h - (sub ? 28 : 14)}">${esc(n.de[0])}</text>
+      ${sub ? `<text class="gsub" x="${x + 14}" y="${y + n.h - 12}" data-fit="${n.w - 24}">${esc(sub)}</text>` : ''}
     </g>`;
   }
-  const sub = P.en ? short(n.en) : n.sub;
+  const sub = short(n.en);
   const lh = 18, total = n.de.length * lh + (sub ? 16 : 0);
   const ty = n.y - total / 2 + 13;
   const fit = n.w - 16;
-  const t = n.de.map((l, i) => `<text class="name" x="${n.x}" y="${ty + i * lh}" data-fit="${fit}">${esc(l)}</text>`).join('');
-  const s = sub ? `<text class="sub${P.en ? ' en' : ''}" x="${n.x}" y="${ty + n.de.length * lh + 1}" data-fit="${fit}">${esc(sub)}</text>` : '';
+  const t = n.de.map((l, i) => `<text class="name" lang="de" x="${n.x}" y="${ty + i * lh}" data-fit="${fit}">${esc(l)}</text>`).join('');
+  const s = sub ? `<text class="sub" x="${n.x}" y="${ty + n.de.length * lh + 1}" data-fit="${fit}">${esc(sub)}</text>` : '';
   return `<g class="node b-${n.b}" ${ref}>
     <rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="10"/>${t}${s}
   </g>`;
 }
 /* Pills are sized after layout, from the measured text (see fit()). */
 function edgeSVG(e) {
-  const label = P.en ? short(e.en) : e.de;
+  const label = short(e.en);
   const subs = (e.sub || []).map((l, i) => `
     <rect class="pill subpill" data-pill="${i + 1}" x="${e.lx}" y="${e.ly + 13 + i * 17}" width="0" height="17" rx="8.5"/>
     <text class="esub${i === 0 ? ' first' : ''}" data-of="${i + 1}" x="${e.lx}" y="${e.ly + 25.5 + i * 17}">${esc(l)}</text>`).join('');
   return `<g class="edge k-${e.k}${e.bg ? ' bg' : ''}" data-ref="${e.id}" tabindex="0" role="button"
-      aria-label="${esc(nameOf(e.from) + ' ' + e.de + ' ' + nameOf(e.to) + ' — ' + e.en)}">
+      aria-label="${esc(nameOf(e.from) + ' — ' + e.en + ' — ' + nameOf(e.to))}">
     <path class="hit" d="${e.d}"/>
     <path class="line" d="${e.d}" marker-end="url(#ah-${e.k})"/>
     <rect class="pill" data-pill="0" x="${e.lx}" y="${e.ly - 11.5}" width="0" height="23" rx="11.5"/>
@@ -313,17 +318,17 @@ function draw() {
   NI = new Map(NODES.map(n => [n.id, n]));
   const marker = k => `<marker id="ah-${k}" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
     <path d="M0 0 L10 5 L0 10 z" class="ah k-${k}"/></marker>`;
-  const cols = COLS.map(c => `<g class="col" data-ref="${c.id}" tabindex="0" role="button" aria-label="${esc(c.de + ' — ' + c.en)}">
+  const cols = COLS.map(c => `<g class="col" data-ref="${c.id}" tabindex="0" role="button" aria-label="${esc(c.en)}">
       <rect x="${c.x}" y="${COL_Y}" width="${c.w}" height="${COL_H}" rx="16"/>
-      <text x="${c.x + c.w / 2}" y="${COL_Y + 28}">${esc(P.en ? short(c.en) : c.de)}</text></g>`).join('');
+      <text x="${c.x + c.w / 2}" y="${COL_Y + 28}">${esc(short(c.en))}</text></g>`).join('');
   const L = LEGIS;
-  const legis = `<g class="legis" data-ref="legis" tabindex="0" role="button" aria-label="${esc(L.de + ' — ' + L.en)}">
+  const legis = `<g class="legis" data-ref="legis" tabindex="0" role="button" aria-label="${esc(L.en)}">
       <rect x="${L.x}" y="${L.y}" width="${L.w}" height="${L.h}" rx="16"/>
-      <text x="${L.x + L.w - 14}" y="${L.y + L.h - 10}" text-anchor="end">${esc(P.en ? 'Federal legislature — passes federal law' : 'Legislative · beschließt Bundesgesetze')}</text></g>`;
+      <text x="${L.x + L.w - 14}" y="${L.y + L.h - 10}" text-anchor="end">Federal legislature — passes federal law</text></g>`;
   const groups = NODES.filter(n => n.group).map(nodeSVG).join('');
   const boxes = NODES.filter(n => !n.group).map(nodeSVG).join('');
   const lines = EDGES.map(edgeSVG).join('');
-  $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Organigramm: wer wählt wen">
+  $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Chart: who elects whom">
     <defs>${['elect', 'appt', 'ctl', 'lead', 'form', 'bg'].map(marker).join('')}</defs>
     ${cols}${legis}${groups}${lines}${boxes}
   </svg>`;
@@ -347,7 +352,7 @@ function lookup(id) {
 }
 function tipHTML(x) {
   if (x.from) {
-    return `<b>${esc(nameOf(x.from))} → ${esc(x.de)} → ${esc(nameOf(x.to))}</b>
+    return `<b lang="de">${esc(nameOf(x.from))} → ${esc(nameOf(x.to))}</b>
       <span>${esc(short(NI.get(x.from).en))} <i>${esc(x.en)}</i> ${esc(short(NI.get(x.to).en))}</span>
       ${x.bg ? '<em>Not asked in the catalogue — background only</em>' : ''}`;
   }
@@ -395,13 +400,14 @@ function focusOn(id) {
 let sel = null;
 const panel = $('panel'), body = $('panel-body');
 const wide = matchMedia('(min-width: 80rem)');
-function qLabel(q) { return q.state ? `${q.state} · Frage ${q.num}` : `Frage ${q.num}`; }
+function qLabel(q) { return q.state ? `${q.state} · question ${q.num}` : `Question ${q.num}`; }
+const count = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 function qHTML(id) {
   const q = byId.get(id); if (!q) return '';
   const opts = q.options.map((o, i) => i === q.answer
-    ? `<li class="ok"><span aria-hidden="true">✓</span><span class="sr" lang="en">Correct: </span> ${esc(o)}</li>`
-    : `<li class="no"><span aria-hidden="true">✗</span><span class="sr" lang="en">Wrong: </span> <s>${esc(o)}</s></li>`).join('');
-  return `<li class="q"><div class="qn">${esc(qLabel(q))}</div><p>${esc(q.q)}</p><ul>${opts}</ul></li>`;
+    ? `<li class="ok"><span aria-hidden="true">✓</span><span class="sr">Correct: </span> <span lang="de">${esc(o)}</span></li>`
+    : `<li class="no"><span aria-hidden="true">✗</span><span class="sr">Wrong: </span> <s lang="de">${esc(o)}</s></li>`).join('');
+  return `<li class="q"><div class="qn">${esc(qLabel(q))}</div><p lang="de">${esc(q.q)}</p><ul>${opts}</ul></li>`;
 }
 function select(id, quiet) {
   const x = lookup(id); if (!x) return closePanel();
@@ -416,12 +422,12 @@ function select(id, quiet) {
     <h2 lang="de" tabindex="-1">${esc(title)}</h2>
     <p class="en">${esc(en)}</p>
     ${g && g !== x.en ? `<p class="gloss">${esc(g)}</p>` : ''}
-    ${isEdge ? `<p class="verbline k-${x.k}"><b lang="de">${esc(x.de)}</b> · ${esc(x.en)}${x.sub ? `<br><span lang="de">${esc(x.sub.join(' · '))}</span>` : ''}</p>` : ''}
+    ${isEdge ? `<p class="verbline k-${x.k}"><b lang="de">${esc(x.de)}</b> · ${esc(x.en)}${x.sub ? `<br><span>${esc(x.sub.join(' · '))}</span>` : ''}</p>` : ''}
     ${br && x.b !== 'volk' ? `<p class="branch b-${x.b}"><b lang="de">${esc(br.de)}</b> · ${esc(br.en)}</p>` : ''}
-    ${x.note ? `<div class="bgnote"><b>${x.bg ? 'Nicht im Fragenkatalog' : 'Zum Verständnis'}</b> · ${x.bg ? 'not asked in the catalogue' : 'for context, not asked'}
-      <p lang="de">${esc(x.note)}</p><p>${esc(x.noteEn)}</p></div>` : ''}
-    ${qs.length ? `<h3>Im Katalog · ${qs.length} ${qs.length === 1 ? 'Frage' : 'Fragen'}</h3><ol class="qs" lang="de">${qs.map(qHTML).join('')}</ol>`
-      : x.bg ? '' : '<p class="none">Keine Frage für dieses Bundesland.</p>'}`;
+    ${x.note ? `<div class="bgnote"><b>${x.bg ? 'Not asked in the catalogue' : 'For context, not asked'}</b>
+      <p>${esc(x.noteEn)}</p></div>` : ''}
+    ${qs.length ? `<h3>In the catalogue · ${count(qs.length, 'question')}</h3><ol class="qs">${qs.map(qHTML).join('')}</ol>`
+      : x.bg ? '' : '<p class="none">No question for this state.</p>'}`;
   openPanel(quiet);
   focusOn(id);
   $('chart').querySelectorAll('[data-ref]').forEach(g => {
@@ -434,16 +440,15 @@ function select(id, quiet) {
 function showGuide() {
   sel = null;
   body.innerHTML = `
-    <h2>So liest du das Organigramm</h2>
-    <p class="en">How to read the chart</p>
+    <h2>How to read the chart</h2>
     <ol class="guide">
       <li><b>Read it bottom up.</b> Every election starts with the people at the bottom; follow the arrows upward.</li>
-      <li><b>Point</b> at a box or arrow for its English name. <b>Click or tap</b> it for the catalogue questions behind it.</li>
+      <li><b>Point</b> at a box or arrow for its full English name. <b>Click or tap</b> it for the catalogue questions behind it.</li>
       <li><b>Colour is the branch.</b> Green boxes make laws (<span lang="de">Legislative</span>), gold ones carry them out (<span lang="de">Exekutive</span>), purple is the court (<span lang="de">Judikative</span>).</li>
     </ol>
-    <h3>Typische Fallen · common traps</h3>
+    <h3>Common traps</h3>
     <ul class="traps">${TRAPS.map(t => `<li><button type="button" data-go="${t.ref}">
-      <span lang="de">${esc(t.de)}</span><em>${esc(t.en)} · Frage ${t.qs.join(', ')}</em></button></li>`).join('')}</ul>`;
+      <span>${esc(t.en)}</span><em>${t.qs.length === 1 ? 'Question' : 'Questions'} ${t.qs.join(', ')}</em></button></li>`).join('')}</ul>`;
   $('chart').querySelectorAll('.sel').forEach(g => g.classList.remove('sel'));
   $('chart').querySelectorAll('[aria-expanded]').forEach(g => g.setAttribute('aria-expanded', 'false'));
   focusOn(null);
@@ -534,7 +539,6 @@ function sw(id, key) {
   el.onclick = flip;
   el.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
 }
-sw('t-en', 'en');
 sw('t-bg', 'bg');
 
 draw();
