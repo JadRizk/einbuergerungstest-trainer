@@ -755,7 +755,7 @@ function render(){
   if(!list.length){
     viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="empty">
       <b>Nothing left</b>This selection is empty — pick another one from the menu.</div></div></div>`;
-    $('barnow').textContent=''; paintDock(); return;
+    paintStreak(); paintDock(); return;
   }
   if(S.idx>=list.length) S.idx=0;
   const q=list[S.idx], ord=optOrder(q);
@@ -764,7 +764,6 @@ function render(){
   const atPos=ord.indexOf(q.answer)+1;
   const h=hookFor(q);
   if(hookWanted(q) && !HOOKS) loadHooks().then(()=>{ if(HOOKS && S.mode!=='exam' && !autoTimer) render(); });
-  $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
   paintStreak();
 
   viewEl.innerHTML=`<div class="stage">
@@ -851,13 +850,12 @@ function countStreak(ok){
   S.streak=ok?S.streak+1:0;
   if(S.streak>S.bestStreak) S.bestStreak=S.streak;
 }
-/* Below two in a row there is nothing to say, so the bar stays as it was. */
+/* Both numbers stay on screen in Practice, 0 included, so a miss reads as the
+   count going back to 0 rather than as something disappearing. */
 function paintStreak(){
-  const el=$('streak'), on=S.mode==='drill' && S.streak>=2;
-  el.hidden=!on;
-  if(!on) return;
-  el.innerHTML=`<b>${S.streak}</b> in a row`;
-  el.title=`${S.streak} correct in a row · best ${S.bestStreak}`;
+  $('streak').hidden=(S.mode!=='drill');
+  $('s-now').textContent=S.streak;
+  $('s-best').textContent=S.bestStreak;
 }
 
 /* ---------------- the numbers -----------------------------------------------
@@ -923,9 +921,6 @@ function paintStats(){
       <button class="chip${S.filter==='all'?' on':''}" data-f="all"><b>${done}</b>attempted</button>
     </div>
 
-    ${S.bestStreak?`<div class="brk"><h4>Best streak</h4>
-      <p class="streakbest"><b>${S.bestStreak}</b> correct in a row</p></div>`:''}
-
     ${past.length?`<div class="brk"><h4>Past mock exams</h4><div class="exams">
       ${past.map(e=>`<span class="ex ${e.s>=(e.p||17)?'pass':'fail'}">${e.s}/${e.n||33}</span>`).join('')}
     </div></div>`:''}
@@ -952,7 +947,6 @@ function paintDock(){
   const weak=p.filter(shaky).length;
   $('dock-stat').innerHTML= (railed() || !canProject())
     ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${nSolid}</b> solid · <b>${weak}</b> shaky`
-      + (railed()&&S.bestStreak?` · best <b>${S.bestStreak}</b> in a row`:'')
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
   /* The grid is not optional on a wide screen. It costs 46px and hiding it
@@ -1069,7 +1063,6 @@ function examOptionsHtml(q, ord, chosen){
 
 function renderExam(){
   stopTick();
-  $('barnow').textContent='';
   if(!S.exam){
     viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="panel">
       <h2>Mock exam</h2>

@@ -61,14 +61,11 @@ button,select,input{font:inherit;color:inherit}
 .brand{font-weight:700; letter-spacing:-.022em; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .wide{display:none}                    /* long labels are a wide-screen luxury */
 .brand span{color:var(--muted); font-weight:500; display:none}
-.barnow{margin-left:auto; font-size:.86rem; color:var(--muted); white-space:nowrap}
-.barnow b{color:var(--ink); font-weight:600}
-/* sits left of the position; the position keeps its place when this is hidden */
-.streak{margin-left:auto; font-size:.86rem; color:var(--muted); white-space:nowrap}
-.streak b{color:var(--accent); font-weight:700}
-.streak:not([hidden]) + .barnow{margin-left:.4rem; padding-left:.7rem; border-left:1px solid var(--rule)}
-.streakbest{margin:0; font-size:.88rem; color:var(--muted)}
-.streakbest b{color:var(--ink); font-weight:700}
+.streak{margin-left:auto; display:flex; align-items:baseline; font-size:.86rem; color:var(--muted); white-space:nowrap; cursor:default}
+.streak b{display:inline-block; min-width:1.4ch; margin-left:.3rem; color:var(--ink); font-weight:600; font-variant-numeric:tabular-nums}
+.streak span + span{margin-left:.7rem; padding-left:.7rem; border-left:1px solid var(--rule)}
+#s-now{color:var(--accent); font-weight:700}
+.streak[hidden]{display:none}
 
 .burger{
   flex:0 0 auto; width:2.75rem; height:2.75rem; margin:-.35rem 0 -.35rem -.5rem;
@@ -435,7 +432,7 @@ body.exam .nav{transform:translateX(-101%)}
   body:not(.rail-off) .brand{display:none}
 
   .bar{grid-column:2; grid-row:1; padding-left:1.5rem; padding-right:calc(1.5rem + var(--sar))}
-  .barnow{font-size:.88rem}
+  .streak{font-size:.88rem}
 
   /* a wide screen reads as a document: nothing is pinned to the bottom,
      because there is no thumb reaching for it */
