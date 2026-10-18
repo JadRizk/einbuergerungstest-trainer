@@ -16,7 +16,7 @@ then added the position, the mark and the kit.
 | [`assets/social/github-card.svg`](assets/social/github-card.svg) | 1280×640, GitHub's repository social preview. Its own composition, not a crop. |
 | [`assets/readme-header.svg`](assets/readme-header.svg) | The README banner. The `.png` is what GitHub serves — it cannot render an SVG with web fonts. |
 | [`build.py`](build.py) | Regenerates all of the above and copies the kit into `icon/`. |
-| [`check-colours.mjs`](check-colours.mjs) | Pins every hex the metadata duplicates to its token in `app.css`. |
+| [`check-colours.mjs`](check-colours.mjs) | Pins every hex the metadata duplicates to its token in `tokens.css`, and every token to `PALETTE.md`. |
 | `../icon/` | Where the kit is installed for the app. **Built, not hand-placed.** |
 
 There is no `references/naming.md`: the name was settled before this pass and

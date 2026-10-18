@@ -126,7 +126,8 @@ no bundler: `git push` is the deploy.
 | | |
 | --- | --- |
 | `index.html` | The shell — markup only |
-| `app.css` | All styling, and the self-hosted `@font-face` |
+| `tokens.css` | The colours both pages share, light and dark |
+| `app.css` | All the app's styling, and the self-hosted `@font-face` |
 | `app.js` | The whole app, an ES module, ~800 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |

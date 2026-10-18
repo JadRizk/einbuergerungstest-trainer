@@ -1,0 +1,33 @@
+/* The colours both pages share, once. app.css and organigramm.css each load
+   after this and add only their own: the map and picked tokens, the arrows and
+   branches. Every value is measured in brand/PALETTE.md, and
+   brand/check-colours.mjs pins them to it. */
+:root{
+  --paper:#EDF0EF; --card:#FFFFFF; --ink:#152227; --muted:#4F6167;
+  --dim:#5C6E74;                       /* rejected answers: readable, not shouty */
+  --edge:#788584;                      /* borders of real controls, >=3:1        */
+  --rule:#DBE2E1; --soft:#E7EBEA;      /* decorative dividers only               */
+  --sunk:#F1F4F4;
+  --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
+  --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B;
+  --tipbg:#152227; --tipink:#F2F5F4;   /* tooltip, and the exam bar's strip  */
+  --tipline:#152227;                   /* the tooltip's edge: its own ground  */
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme:light;
+}
+/* Dark: the same paper with the light off. Same hues at the same low chroma,
+   only lightness moves. theme.js sets data-theme, resolving System from the
+   device. */
+:root[data-theme="dark"]{
+  --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE;
+  --dim:#98A8AB;
+  --edge:#717D7E;
+  --rule:#313A3B; --soft:#273031;
+  --sunk:#151E21;
+  --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
+  --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B;
+  --tipbg:#2F3A3D; --tipink:#E4EBEB;
+  --tipline:#717D7E;
+  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color-scheme:dark;
+}

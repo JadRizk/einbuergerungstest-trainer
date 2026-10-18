@@ -101,11 +101,11 @@ kept for the same reason.
 
 ## Primitives
 
-Named by appearance. These are the names that actually exist in `app.css`.
-**One token per row** — `brand/check-colours.mjs` pairs each name with the hex
-**immediately** beside it and asserts it still matches `app.css`, so a combined
-row silently breaks the pin. That is why *Light* is the first column: it is the
-value the check pins. The *Dark* column is not pinned yet — see *Unverified*.
+Named by appearance. These are the names that actually exist in `tokens.css`
+and `app.css`. **One token per row** — `brand/check-colours.mjs` pairs each
+name with the hex **immediately** beside it and asserts it still matches the
+stylesheet, so a combined row silently breaks the pin. That is why *Light* is
+the first column: it is the value the check pins. The *Dark* column is not pinned yet — see *Unverified*.
 
 `--picked` and `--gloss` do not exist yet; they name two colours `app.css`
 hard-codes today (`#E3EEEB` three times, `#C9E4D6` once), which dark mode has
@@ -373,9 +373,10 @@ slash and by being the only red, not by contrast with the page.
 
 ## Organigramm
 
-`organigramm.css` repeats the shared tokens (the check asserts each matches
-`app.css`, in both themes) and adds its own: four arrow kinds and four branch
-tints. Dark values follow the same rule — same hue, lightness lifted.
+`organigramm.css` loads the shared tokens from `tokens.css`, as `app.css` does
+(the check asserts neither page sets one again), and adds its own: four arrow
+kinds and four branch tints. Dark values follow the same rule — same hue,
+lightness lifted.
 
 ```bash
 VP=~/.claude/skills/design-direction/scripts/validate-palette.mjs

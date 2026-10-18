@@ -11,24 +11,16 @@
 
 :root{
   --railpad:1rem;        /* where control boxes start */
-  --paper:#EDF0EF; --card:#FFFFFF; --ink:#152227; --muted:#4F6167;
-  --dim:#5C6E74;                       /* rejected answers: readable, not shouty */
-  --edge:#788584;                      /* borders of real controls, >=3:1        */
-  --rule:#DBE2E1; --soft:#E7EBEA;      /* decorative dividers only               */
-  --sunk:#F1F4F4;
-  --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
-  --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B; --nobg:#FAE4E2;
+  /* the shared colours are in tokens.css; these are the app's own */
+  --nobg:#FAE4E2;
   /* map only. Four shades of right, the darkest being --ok, and one red. No
      red clears all four greens under dichromacy, so a wrong cell is slashed */
   --cellbad:#D9534F;
   --cellok1:#ABE0C0; --cellok2:#72B68F; --cellok3:#3E815D;
-  --tipbg:#152227; --tipink:#F2F5F4;   /* tooltip, and the exam bar's strip  */
-  --tipline:#152227;                   /* the tooltip's edge: its own ground  */
   --picked:#E3EEEB;                    /* a chosen answer, chip, copy button  */
   --gloss:#C9E4D6;                     /* a glossed word in an answer         */
   --imgdim:none;                       /* catalogue scans keep a white plate  */
-  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  --shell:62rem; --rail:17rem; color-scheme:light;
+  --shell:62rem; --rail:17rem;
   --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 
   /* safe areas, named once so every fixed edge can use them */
@@ -38,27 +30,16 @@
   --sar:env(safe-area-inset-right,0px);
   --peek:calc(3.7rem + var(--sab));    /* the progress sheet at rest */
 }
-/* Dark: the same paper with the light off. Same hues at the same low chroma,
-   only lightness moves; every value is measured in brand/PALETTE.md. theme.js
-   sets data-theme, resolving System from the device. */
+/* Dark: the app's own colours, lifted the way tokens.css lifts the shared
+   ones and measured in brand/PALETTE.md. */
 :root[data-theme="dark"]{
-  --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE;
-  --dim:#98A8AB;
-  --edge:#717D7E;
-  --rule:#313A3B; --soft:#273031;
-  --sunk:#151E21;
-  --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
-  --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B; --nobg:#3F2220;
+  --nobg:#3F2220;
   /* the ramp runs the other way: more right is brighter on a dark page */
   --cellbad:#972622;
   --cellok1:#214D34; --cellok2:#367854; --cellok3:#56A276;
-  --tipbg:#2F3A3D; --tipink:#E4EBEB;
-  --tipline:#717D7E;
   --picked:#1F3531;
   --gloss:#284B3B;
   --imgdim:brightness(.9);
-  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  color-scheme:dark;
 }
 /* theme.js sets this for the instant a theme changes, so every surface
    switches at once instead of each running its own colour transition */

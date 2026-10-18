@@ -3,9 +3,13 @@
  *
  * The manifest and <meta name="theme-color"> are read by the OS and the
  * browser chrome, not by the page, so neither can resolve var(--paper). Each
- * therefore carries a copy of a value that really lives in app.css.
- * organigramm.css repeats app.css's tokens, and PALETTE.md states all of them.
- * A copy is a fact to pin, not a habit to remember -- this asserts they agree.
+ * therefore carries a copy of a value that really lives in tokens.css.
+ * PALETTE.md states every token. A copy is a fact to pin, not a habit to
+ * remember -- this asserts they agree.
+ *
+ * tokens.css holds the colours both pages share; app.css and organigramm.css
+ * add only their own. A page sheet that set a shared token again would quietly
+ * win over tokens.css on that page, so that is checked too.
  *
  *   node brand/check-colours.mjs
  *
@@ -39,25 +43,25 @@ const block = (css, file, sel) => {
 const hexes = text => Object.fromEntries(
   [...text.matchAll(/--([\w-]+)\s*:\s*(#[0-9A-Fa-f]{6})\b/g)].map(([, n, h]) => [n, h.toUpperCase()]));
 
-const sheets = Object.fromEntries(['app.css', 'organigramm.css'].map(file => {
+const sheets = Object.fromEntries(['tokens.css', 'app.css', 'organigramm.css'].map(file => {
   const css = read(file);
   return [file, { light: hexes(block(css, file, LIGHT)), dark: hexes(block(css, file, DARK)) }];
 }));
-const app = sheets['app.css'];
+const shared = sheets['tokens.css'];
 
 const checks = [];
 const pin = (label, got, want) => checks.push([label, got, want]);
 
 for (const page of ['index.html', 'organigramm.html']) {
   const html = read(page);
-  for (const [scheme, want] of [['light', app.light.paper], ['dark', app.dark.paper]]) {
+  for (const [scheme, want] of [['light', shared.light.paper], ['dark', shared.dark.paper]]) {
     const m = html.match(new RegExp(
       `<meta name="theme-color" content="(#[0-9A-Fa-f]{6})" media="\\(prefers-color-scheme: ${scheme}\\)">`));
     pin(`${page} theme-color ${scheme} ↔ --paper`, m ? m[1].toUpperCase() : 'missing', want);
   }
 }
-pin('manifest theme_color ↔ --paper',       manifest.theme_color.toUpperCase(),      app.light.paper);
-pin('manifest background_color ↔ --paper',  manifest.background_color.toUpperCase(), app.light.paper);
+pin('manifest theme_color ↔ --paper',       manifest.theme_color.toUpperCase(),      shared.light.paper);
+pin('manifest background_color ↔ --paper',  manifest.background_color.toUpperCase(), shared.light.paper);
 
 // no colour exists in one theme and not the other
 for (const [file, s] of Object.entries(sheets)) {
@@ -67,15 +71,15 @@ for (const [file, s] of Object.entries(sheets)) {
     pin(`${file} --${name} has a dark value`, name in s.dark ? 'yes' : 'no', 'yes');
 }
 
-// organigramm.css repeats app.css's tokens; the repeat must not drift
-const org = sheets['organigramm.css'];
-for (const theme of ['light', 'dark'])
-  for (const [name, hex] of Object.entries(org[theme]))
-    if (name in app[theme]) pin(`organigramm --${name} ${theme} ↔ app.css`, hex, app[theme][name]);
+// a shared token lives in tokens.css alone; a page sheet must not set it again
+for (const file of ['app.css', 'organigramm.css'])
+  for (const theme of ['light', 'dark'])
+    for (const name of Object.keys(sheets[file][theme]))
+      pin(`${file} --${name} ${theme} not in tokens.css`, name in shared[theme] ? 'repeated' : 'own', 'own');
 
 // every hex PALETTE.md states for a token must still be that token's value:
 // the first hex after the name is light, a second one directly after it dark
-const value = (theme, name) => app[theme][name] ?? org[theme][name];
+const value = (theme, name) => Object.values(sheets).map(s => s[theme][name]).find(Boolean);
 for (const [, name, light, dark] of palette.matchAll(
     /`--([\w-]+)`\s*\|\s*`(#[0-9A-Fa-f]{6})`(?:\s*\|\s*`(#[0-9A-Fa-f]{6})`)?/g)) {
   if (!value('light', name)) continue;                 // documented, not in :root

@@ -1,19 +1,14 @@
 /* Wer wählt wen? — the organisational chart page.
-   Same tokens and typeface as app.css, so it reads as part of the app, but a
-   page of its own: it scrolls like a document instead of being a fixed shell. */
+   Same colours (tokens.css) and typeface as the app, so it reads as part of
+   it, but a page of its own: it scrolls like a document instead of being a
+   fixed shell. */
 @font-face{
   font-family:'Archivo'; font-style:normal; font-weight:400 700; font-display:swap;
   src:url('font/archivo-latin-var.woff2') format('woff2-variations');
 }
 :root{
-  --paper:#EDF0EF; --card:#FFFFFF; --ink:#152227; --muted:#4F6167; --dim:#5C6E74;
-  --edge:#788584; --rule:#DBE2E1; --soft:#E7EBEA; --sunk:#F1F4F4;
-  --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
-  --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B;
-  --tipbg:#152227; --tipink:#F2F5F4; --tipline:#152227;
-  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-
-  /* arrow kinds */
+  /* the shared colours are in tokens.css; these are the chart's own.
+     arrow kinds */
   --k-elect:#0B6357; --k-appt:#8A5A12; --k-ctl:#2F5DA8; --k-form:#33465E; --k-bg:#6E7B79;   /* >=3:1 on white, as a line must be */
   /* branches: tint + stroke */
   --leg:#E2F0EB;  --leg-s:#0B6357;
@@ -26,18 +21,10 @@
   --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --panel:21rem;
   --page:100rem;
-  color-scheme:light;
 }
-/* Dark: the same values as app.css, plus the chart's own, lifted the same way
-   (same hue, lightness only) and measured in brand/PALETTE.md; theme.js sets
-   data-theme. brand/check-colours.mjs asserts the shared values match app.css. */
+/* Dark: the chart's own colours, lifted the way tokens.css lifts the shared
+   ones (same hue, lightness only) and measured in brand/PALETTE.md. */
 :root[data-theme="dark"]{
-  --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE; --dim:#98A8AB;
-  --edge:#717D7E; --rule:#313A3B; --soft:#273031; --sunk:#151E21;
-  --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
-  --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B;
-  --tipbg:#2F3A3D; --tipink:#E4EBEB; --tipline:#717D7E;
-  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --k-elect:#6AB5A6; --k-appt:#D6A866; --k-ctl:#7CA5E9; --k-form:#92A6C1; --k-bg:#768381;
   --leg:#21322D;  --leg-s:#6AB5A6;
   --exe:#352917;  --exe-s:#D6A866;
@@ -45,7 +32,6 @@
   --head:#272E38; --head-s:#92A6C1;
   --colhov:#1B2525;
   --exe-grp:#2B261B;
-  color-scheme:dark;
 }
 /* theme.js sets this for the instant a theme changes, so every surface
    switches at once instead of each running its own colour transition */
