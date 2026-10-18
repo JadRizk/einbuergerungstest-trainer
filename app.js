@@ -4,17 +4,44 @@
 
 import { level as levelOf, solid as solidOf, run } from './grade.js';
 import { json, esc } from './util.js';
-import { drawer, fillNav, THEMES } from './nav.js';
+import { drawer, fillNav, standalone, THEMES } from './nav.js';
 
 /* the menu's shared sections go in before the catalogue is awaited */
 fillNav();
 
 let DATA, GLOS;
+let ready=false;                        /* load() has run: S is yours, not the defaults */
+
+/* ---------------- navigation drawer ----------------------------------------
+   One set of controls. Under 62rem nav.js slides it in over a scrim; above
+   that the stylesheet parks it as a permanent left rail and the drawer goes
+   quiet. It is wired up before the catalogue is awaited too, so the menu
+   button still works on the error screen.
+
+   Whether the rail is folded is the class on body; applyRail() puts it there
+   from S. Until load() has run -- on the error screen, for good -- the
+   button folds the rail without saving, since S still holds the defaults and
+   save() would write them over your progress. */
+const RAIL='(min-width:62rem)';
+const body=document.body, burger=document.getElementById('burger');
+const railed=()=>matchMedia(RAIL).matches;
+const railOff=()=>body.classList.contains('rail-off');
+const {close:closeNav, isOpen:navOpen, sync:syncNav}=
+  drawer({rail:RAIL, folded:railOff, onRail:()=>{
+    if(!ready) return paintRail(!railOff());
+    S.railOpen=!S.railOpen; save(); applyRail();
+  }});
+paintRail(false);
+
 try {
   [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 } catch (err) {
   document.getElementById('view').innerHTML = `<div class="empty"><b>The catalogue could not be loaded</b>${
     navigator.onLine ? '' : 'You are offline, and the app has not been saved for offline use yet. '}Reload to try again.</div>`;
+  /* The menu keeps what works without the catalogue -- the chart, the
+     timeline, Appearance, About -- and runs as it does on those pages. */
+  document.querySelectorAll('#practise, #glosBtn, #settings .nav-sec:not(#appearance)').forEach(el=>el.remove());
+  standalone({close:closeNav, isOpen:navOpen});
   throw err;
 }
 
@@ -285,6 +312,10 @@ function view(){
   const r=rank();
   return r? l.slice().sort((a,b)=>r.get(a.id)-r.get(b.id)) : l;
 }
+/* Let go of both: the answer on screen and a question held for another tab.
+   Anything that moves off the question calls this; the answer-shuffle switch
+   stays on it, answer and all, so it calls nothing. */
+function letGo(){ S.picked=S.keep=null; }
 
 /* ---------------- hooks: the recognition aid --------------------------------
    data/hooks.json is derived from the catalogue, not part of it: per question
@@ -369,27 +400,17 @@ function buildFilter(){
     +topics.map(t=>`<option value="t:${esc(t)}">${esc(topicEn(t))}</option>`).join('');
   filterSel.value=S.filter;
 }
-/* ---------------- navigation drawer ----------------------------------------
-   One set of controls. Under 62rem nav.js slides it in over a scrim; above
-   that the stylesheet parks it as a permanent left rail and the drawer goes
-   quiet. */
-const body=document.body, burger=$('burger');
-const RAIL='(min-width:62rem)';
-const railed=()=>matchMedia(RAIL).matches;
-const {close:closeNav, isOpen:navOpen, sync:syncNav}=
-  drawer({rail:RAIL, folded:()=>!S.railOpen, onRail:()=>{ S.railOpen=!S.railOpen; save(); applyRail(); }});
-
+/* ---------------- the rail (the drawer is wired at the top) ---------------- */
 /* Above 62rem the same button collapses the rail instead of sliding a drawer
    over the page -- the question column is the thing worth the pixels, and on
    a laptop 17rem of permanent chrome is a lot to spend on controls you touch
    once a session. */
-function applyRail(){
-  const off=!S.railOpen;
+function applyRail(){ paintRail(!S.railOpen); syncDock(); }
+function paintRail(off){
   body.classList.toggle('rail-off', off);
   burger.title = off ? 'Show the menu' : 'Hide the menu';
   if(railed()) burger.setAttribute('aria-expanded', String(!off));
   syncNav();                            /* a folded rail is out of the Tab order */
-  syncDock();
 }
 
 /* ---------------- routes ----------------------------------------------------
@@ -413,7 +434,7 @@ function applyRoute(){
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
-  if(changed){ S.picked=S.keep=null; S.idx=0; stopSpeech(); }
+  if(changed){ letGo(); S.idx=0; stopSpeech(); }
   if(m!=='exam') S.exam=null;
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
@@ -428,8 +449,8 @@ $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
 $('m-exam').onclick =()=>go('exam');
 
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=S.keep=null;S.exam=null;stopSpeech();save();closeNav();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=S.keep=null;stopSpeech();closeNav();render();};
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;letGo();S.exam=null;stopSpeech();save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;letGo();stopSpeech();closeNav();render();};
 
 function toggle(id,key,after){
   const el=$(id);
@@ -440,8 +461,8 @@ function toggle(id,key,after){
 toggle('t-gloss','gloss',()=>{hideTip(); render();});
 toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
-toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=S.keep=null; render();});
-toggle('t-shufa','shufA',()=>{S.picked=S.keep=null; render();});
+toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; letGo(); render();});
+toggle('t-shufa','shufA',render);     /* an answer on screen stays: its marks go with the options */
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
 /* a is the fuller record of one question: more answers, then more right,
@@ -496,7 +517,7 @@ addEventListener('storage',e=>{
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.wiped=Date.now(); S.idx=0; S.picked=S.keep=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.wiped=Date.now(); S.idx=0; letGo(); S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
@@ -875,7 +896,7 @@ function step(d){
      it can drop it from the list and shift every index after it */
   const to=list[(S.idx+d+list.length)%list.length];
   if(S.again!==null){ requeue(list,S.again,to); S.again=null; }
-  S.picked=S.keep=null;
+  letGo();
   list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
@@ -970,7 +991,7 @@ function paintStats(){
 
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
     S.filter=b.dataset.f; filterSel.value=S.filter;
-    S.idx=0; S.picked=S.keep=null; stopSpeech(); setSheet(false); render();
+    S.idx=0; letGo(); stopSpeech(); setSheet(false); render();
   });
 }
 
@@ -1005,7 +1026,7 @@ function paintDock(){
     b.onclick=()=>{
       /* Not in the current selection: widen it to everything, since the
          question you tapped is the one you asked for. */
-      S.picked=S.keep=null;              /* releases the held question first */
+      letGo();                           /* releases the held question first */
       let at=view().findIndex(x=>x.id===q.id);
       if(at<0){
         S.filter='all'; filterSel.value='all';
@@ -1302,7 +1323,7 @@ document.addEventListener('keydown',e=>{
 /* ---------------- boot ---------------- */
 /* The hooks are fetched now, not on the first miss, so the card is there when
    that miss comes. render() asks for them too, and re-renders once they land. */
-(async()=>{ await load(); window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
+(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has

@@ -22,7 +22,7 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18r';
+const VERSION = 'ebt-2026-10-18s';
 const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js', 'theme.js', 'manifest.json',
                  'nav.css', 'nav.js',
                  'organigramm.html', 'organigramm.css', 'organigramm.js',
