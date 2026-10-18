@@ -22,8 +22,9 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18c';
-const SHELL   = ['./', 'app.css', 'app.js', 'manifest.json'];
+const VERSION = 'ebt-2026-10-18d';
+const SHELL   = ['./', 'app.css', 'app.js', 'manifest.json',
+                 'organigramm.html', 'organigramm.css', 'organigramm.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -71,7 +72,9 @@ async function networkFirst(req) {
     if (res.ok) c.put(req, res.clone());
     return res;
   } catch (err) {
-    const hit = await c.match(req) || await c.match('./');
+    /* Only a page navigation may fall back to the app shell: answering a
+       missing script or stylesheet with index.html is a MIME error at best. */
+    const hit = await c.match(req) || (req.mode === 'navigate' && await c.match('./'));
     if (hit) return hit;
     throw err;
   }

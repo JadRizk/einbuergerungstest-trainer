@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="organigramm.css">
+<link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
+<link rel="preload" as="fetch" type="application/json" href="data/glossary.json" crossorigin>
+<title>Wer wählt wen? — Einbürgerungstest</title>
+<meta name="description" content="Who elects whom in Germany: an organisational chart of the federal, state, local and EU bodies, built from the questions of the official citizenship test.">
+<meta name="theme-color" content="#EDF0EF">
+<link rel="icon" href="icon/favicon.ico" sizes="32x32">
+<link rel="icon" href="icon/favicon.svg" type="image/svg+xml">
+<script type="module" src="organigramm.js"></script>
+</head>
+<body>
+
+<header class="bar">
+  <a class="back" href="./" aria-label="Back to the question catalogue">←</a>
+  <div class="title">
+    <h1><span lang="de">Wer wählt wen?</span> <small>Who elects whom</small></h1>
+    <p>Built from <span id="qcount">…</span> catalogue questions. Solid arrows are what the questions ask; dotted ones are background.</p>
+  </div>
+  <div class="controls">
+    <label class="field"><span>Bundesland</span>
+      <select class="pick" id="land"></select></label>
+    <div class="opt-row" id="t-en" role="checkbox" tabindex="0" aria-checked="false">
+      <span class="lb">English labels</span><span class="sw"></span>
+    </div>
+    <div class="opt-row" id="t-bg" role="checkbox" tabindex="0" aria-checked="true">
+      <span class="lb">Background arrows</span><span class="sw"></span>
+    </div>
+  </div>
+</header>
+
+<ul class="legend" aria-label="Legend">
+  <li><i class="ln k-elect"></i><span lang="de">wählt</span> <em>elects</em></li>
+  <li><i class="ln k-appt"></i><span lang="de">ernennt · schlägt vor</span> <em>appoints · proposes</em></li>
+  <li><i class="ln k-ctl"></i><span lang="de">kontrolliert</span> <em>scrutinises</em></li>
+  <li><i class="ln k-form"></i><span lang="de">bilden · leitet</span> <em>make up · leads</em></li>
+  <li><i class="ln k-bg"></i><span lang="de">Hintergrund</span> <em>not asked</em></li>
+  <li class="gap" aria-hidden="true"></li>
+  <li><i class="bx b-leg"></i><span lang="de">Legislative</span></li>
+  <li><i class="bx b-exe"></i><span lang="de">Exekutive</span></li>
+  <li><i class="bx b-jud"></i><span lang="de">Judikative</span></li>
+  <li><i class="bx b-head"></i><span lang="de">Staatsoberhaupt</span></li>
+  <li><button id="sep" type="button"><span lang="de">Gewaltenteilung</span> — questions</button></li>
+</ul>
+
+<main class="wrap">
+  <div class="chart" id="chart" lang="de"></div>
+  <aside class="panel" id="panel" hidden aria-label="Questions behind the selection">
+    <button class="close" id="panel-close" aria-label="Close">✕</button>
+    <div id="panel-body"></div>
+  </aside>
+</main>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+</body>
+</html>
