@@ -36,11 +36,12 @@ const GL = new Map(GLOS.map(g => [g.de, g.en]));
 const $ = id => document.getElementById(id);
 
 /* ---------------- preferences: the app's state, our own toggles ---------------- */
-/* The app's own blob is only read here: the app keeps `land` in memory and
-   would overwrite any change made here on its next save. The chart starts on
-   the app's state and remembers its own choice from then on. (The menu's
-   theme is the one thing written into it from this page; nav.js says how
-   the app takes that up.) */
+/* The app's own blob is only read here. Practice would take up a `land`
+   written here, since its storage listener takes up every saved field, but
+   the state on the chart is this page's own choice: it starts on the app's
+   state and remembers its own from then on, so looking up another state here
+   does not change the one you practise. (The menu's theme is the one thing
+   written into it from this page; nav.js says how the app takes that up.) */
 const P = Object.assign({ bg: true, land: null }, read('ebt.org') || {});
 let land = P.land || (read('ebt.v2') || {}).land || 'Berlin';
 if (!DATA.meta.states.includes(land)) land = 'Berlin';
