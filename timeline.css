@@ -48,8 +48,6 @@ button{font:inherit; color:inherit}
      border-bottom:1px solid transparent; transition:border-color .2s ease}
 .bar.stuck{border-bottom-color:var(--rule)}
 .bar-row{display:flex; gap:.8rem; align-items:center; padding:.8rem 1rem .35rem; max-width:var(--page); margin:0 auto}
-.back{flex:0 0 auto; width:2.6rem; height:2.6rem; display:grid; place-items:center; border-radius:9px;
-      color:var(--ink); text-decoration:none; font-size:1.25rem; border:1px solid var(--edge); background:var(--card)}
 .title{flex:1 1 auto; min-width:0}
 .title h1{margin:0; font-size:1.35rem; letter-spacing:-.02em; line-height:1.2}
 .title p{margin:.1rem 0 0; color:var(--muted); font-size:.84rem}
@@ -72,8 +70,7 @@ button{font:inherit; color:inherit}
 .chips.lit button{background:var(--accent); border-color:var(--accent); color:var(--card)}
 .chips.lit button small{color:color-mix(in srgb, var(--card) 80%, transparent)}
 @media (hover:hover) and (pointer:fine){
-  .back:hover{border-color:var(--muted)}
-  .chips:not(.lit) button:hover{border-color:var(--edge)}
+    .chips:not(.lit) button:hover{border-color:var(--edge)}
 }
 
 /* ---------------- the timeline grid ---------------- */

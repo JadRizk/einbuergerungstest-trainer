@@ -12,8 +12,10 @@
 
 import { json, esc, read } from './util.js';
 import { level, solid } from './grade.js';
+import { mountNav } from './nav.js';
 
 document.documentElement.classList.add('js');
+mountNav('timeline');
 
 const $ = id => document.getElementById(id);
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
@@ -295,7 +297,10 @@ let laying = false;
 const relayout = () => { if (!laying) { laying = true; requestAnimationFrame(() => {
   laying = false; layout(); measure(); pinned?.scrollIntoView({ block: 'start' }); tick();
 }); } };
-const ro = new ResizeObserver(relayout);
+/* A resize is measured again at once, before that frame is painted, so the
+   spine never draws against the old positions; the interleaving follows on
+   the next frame and measures once more. */
+const ro = new ResizeObserver(() => { measure(); frame(); relayout(); });
 tl.querySelectorAll('.row').forEach(r => ro.observe(r));
 // whatever sits above the timeline moves every row with it when it rewraps
 ro.observe(document.body);
@@ -318,7 +323,8 @@ let nowRow = null, ticking = false, barH = 0;
 /* Where the spine sits is measured once per layout, not on every scroll
    frame: each piece's top on the page and its height. Nothing on the spine
    moves by transform, so this holds until a row or the page above it
-   changes size, and both of those relayout. */
+   changes size, which the observer above catches. A window that only
+   changes height moves nothing: the reading line is computed per frame. */
 const at = el => { const r = el.getBoundingClientRect(); return [r.top + scrollY, r.height]; };
 function measure() {
   for (const x of fills) [x.top, x.h] = at(x.box);
@@ -349,12 +355,9 @@ function frame() {
 }
 const tick = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
 addEventListener('scroll', tick, { passive: true });
-addEventListener('resize', relayout);
+addEventListener('resize', tick);
 // anchors land below the bar, whatever height it wraps to
-new ResizeObserver(([e]) => {
-  barH = e.target.offsetHeight;
-  document.documentElement.style.setProperty('--barh', barH + 'px');
-}).observe(bar);
+new ResizeObserver(([e]) => document.documentElement.style.setProperty('--barh', e.target.offsetHeight + 'px')).observe(bar);
 measure();
 frame();
 

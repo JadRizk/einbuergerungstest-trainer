@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="timeline.css">
 <link rel="preload" as="fetch" type="application/json" href="data/timeline.json" crossorigin>
 <link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
@@ -22,7 +23,9 @@
 
 <header class="bar" id="bar">
   <div class="bar-row">
-    <a class="back" href="./" aria-label="Back to the question catalogue">←</a>
+    <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
     <div class="title">
       <h1>How it happened</h1>
       <p><span id="count">…</span></p>

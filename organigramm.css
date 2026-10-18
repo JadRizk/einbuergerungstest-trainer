@@ -45,9 +45,7 @@ button,select{font:inherit; color:inherit}
 
 /* ---------------- header: title left, controls right ---------------- */
 .bar{display:flex; flex-wrap:wrap; gap:.6rem 1rem; align-items:center; padding:.9rem 1rem .3rem; max-width:var(--page); margin:0 auto}
-.back{flex:0 0 auto; width:2.6rem; height:2.6rem; display:grid; place-items:center; border-radius:9px;
-      color:var(--ink); text-decoration:none; font-size:1.25rem; border:1px solid var(--edge); background:var(--card)}
-.back:hover{border-color:var(--muted)}
+.bar > .burger{align-self:flex-start}      /* level with the title's first line */
 .title{flex:1 1 12rem; min-width:0}
 .title h1{margin:0; font-size:1.4rem; letter-spacing:-.02em; line-height:1.2}
 .title h1 small{font-size:.95rem; font-weight:500; color:var(--muted); letter-spacing:0; margin-left:.2rem}

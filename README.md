@@ -133,6 +133,9 @@ no bundler: `git push` is the deploy.
 | `data/glossary.json` | 361 German→English terms, a study aid |
 | `data/hooks.json` | One memory hook per question — derived, fetched after the page loads and never waited for |
 | `organigramm.html` `.css` `.js` | *Wer wählt wen?* — the chart page, its own route; reads the same two data files |
+| `timeline.html` `.css` `.js` | *How it happened* — the history questions on one timeline, from `data/timeline.json` |
+| `nav.js` `nav.css` | The menu every page shares: Practise, Learn, and Settings folded away |
+| `grade.js` `util.js` | The grading rule and the small helpers the pages share |
 | `img/` | The 38 question images, fetched only when a question needs one |
 | `font/` | Archivo variable, latin subset, self-hosted |
 | `sw.js` | Service worker — offline support and caching |
@@ -145,6 +148,7 @@ returning visitors re-download the catalogue. First load is **95 KB** over the w
 
 There is a single set of controls in the markup; CSS decides where it lives. Below `62rem` it is
 a drawer behind the menu button, above it a permanent left rail that the same button collapses.
+The chart and the timeline carry the same menu, always as a drawer, so they keep their full width.
 The answers use `position: sticky` rather than being pinned: a short question has no gap above
 them, and a tall picture question still keeps them on screen. Progress is a bottom sheet on a
 phone — shut or open, no half-way — and the bar across the bottom on a wide screen. The 310-cell
