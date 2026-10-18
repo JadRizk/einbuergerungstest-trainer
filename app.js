@@ -441,7 +441,7 @@ toggle('t-gloss','gloss',()=>{hideTip(); render();});
 toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=S.keep=null; render();});
-toggle('t-shufa','shufA',()=>{S.picked=S.keep=null; render();});
+toggle('t-shufa','shufA',()=>{S.picked=null; render();});   /* lets go of the answer, not a question held for another tab */
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
 /* a is the fuller record of one question: more answers, then more right,
