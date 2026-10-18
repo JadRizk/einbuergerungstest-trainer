@@ -50,7 +50,9 @@ states. The exam you sit draws 33 of them.
   pronunciation is not obvious from spelling.
 - **Shuffle questions, shuffle answers.** Shuffling answers is the one that matters — it stops
   you memorising *"the third option"* instead of the actual answer, which is the classic way to
-  pass a practice app and fail the exam.
+  pass a practice app and fail the exam. The question shuffle leans toward what you get wrong:
+  questions you currently have wrong come up early in the order, and a question you miss
+  comes back after four other questions, again and again until you answer it right.
 - **Copy or translate** any question with one click, for looking something up elsewhere or
   pasting it into your own notes.
 - **Wer wählt wen?** A chart of who elects, appoints and scrutinises whom — Bund, Länder,

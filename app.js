@@ -47,7 +47,7 @@ const TOPIC={
 const topicEn=t=>TOPIC[t]||t;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
-  idx:0, picked:null, pin:null, stats:{}, exam:null,
+  idx:0, picked:null, pin:null, again:null, stats:{}, exam:null,
   gloss:true, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   hgrade:'all',                         /* hooks mode: which grades to show */
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
@@ -162,13 +162,40 @@ function permute(n,seed){
   for(let i=n-1;i>0;i--){ s=(s*1664525+1013904223)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
+/* The question shuffle leans toward your mistakes. Each question draws a
+   seeded key log(u)/weight -- weighted sampling without replacement -- so a
+   question you have wrong right now tends to come up early, while everything
+   still turns up once per pass. With 30 mistakes in 310 at weight 20, half of
+   them land in the first 25 questions and nearly all in the first 70.
+   Weights are read once per shuffle and the order then stays put: re-weighing
+   after every answer would reorder the list under you. */
+const W_SHAKY=20, W_MISSED_BEFORE=4;
+function weight(q){
+  const s=S.stats[q.id];
+  if(!s) return 1;
+  return shaky(q) ? W_SHAKY : s.w ? W_MISSED_BEFORE : 1;
+}
 let rankCache=null, rankSeed=null;
 function rank(){
   if(!S.shufQ) return null;
   if(rankCache && rankSeed===S.seed) return rankCache;
-  const p=permute(Q.length,S.seed), m=new Map();
-  p.forEach((idx,i)=>m.set(Q[idx].id,i));
+  let s=(S.seed*2654435761)>>>0;
+  const keyed=Q.map(q=>{ s=(s*1664525+1013904223)>>>0;
+    return {id:q.id, k:Math.log((s+1)/4294967297)/weight(q)}; });
+  keyed.sort((a,b)=>b.k-a.k);
+  const m=new Map(); keyed.forEach((x,i)=>m.set(x.id,i));
   rankCache=m; rankSeed=S.seed; return m;
+}
+/* A miss while shuffling comes back after AGAIN other questions -- and again
+   after that, until you get it right -- instead of waiting for the next pass. It
+   moves only when you step away from it, so the list never shifts while the
+   answer is on screen; `to` is where that step is going. */
+const AGAIN=4;
+function requeue(list,id,to){
+  const r=rank(); if(!r) return;
+  const rest=list.filter(x=>x.id!==id), at=rest.findIndex(x=>x.id===to.id);
+  const anchor=rest[at+AGAIN-1];
+  r.set(id, anchor ? r.get(anchor.id)+0.5 : Math.max(...r.values())+1);
 }
 function optOrder(q){ return (S.shufA && !q.img) ? permute(4,q.id+S.seed*97) : [0,1,2,3]; }
 
@@ -875,6 +902,7 @@ function answer(orig){
     record(q,right);
     save();
   }
+  S.again=(!right && S.mode==='drill' && S.shufQ) ? q.id : null;
   render();
   /* right answers move on by themselves; wrong ones wait, because the pause
      after a wrong answer is the part that actually teaches you something */
@@ -887,6 +915,7 @@ function step(d){
   /* pick the target by id before letting go of the held question: releasing
      it can drop it from the list and shift every index after it */
   const to=list[(S.idx+d+list.length)%list.length];
+  if(S.again!==null){ requeue(list,S.again,to); S.again=null; }
   S.picked=null;
   list=curList();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
