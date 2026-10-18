@@ -29,27 +29,8 @@
   color-scheme:light;
 }
 /* Dark: the same values as app.css, plus the chart's own, lifted the same way
-   (same hue, lightness only) and measured in brand/PALETTE.md. Written twice,
-   for the system setting and for an explicit choice; brand/check-colours.mjs
-   asserts both copies agree with each other and with app.css. */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE; --dim:#98A8AB;
-    --edge:#717D7E; --rule:#313A3B; --soft:#273031; --sunk:#151E21;
-    --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
-    --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B;
-    --tipbg:#2F3A3D; --tipink:#E4EBEB; --tipline:#717D7E;
-    --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --k-elect:#6AB5A6; --k-appt:#D6A866; --k-ctl:#7CA5E9; --k-form:#92A6C1; --k-bg:#768381;
-    --leg:#21322D;  --leg-s:#6AB5A6;
-    --exe:#352917;  --exe-s:#D6A866;
-    --jud:#302A3B;  --jud-s:#A79AD8;
-    --head:#272E38; --head-s:#92A6C1;
-    --colhov:#1B2525;
-    --exe-grp:#2B261B;
-    color-scheme:dark;
-  }
-}
+   (same hue, lightness only) and measured in brand/PALETTE.md; theme.js sets
+   data-theme. brand/check-colours.mjs asserts the shared values match app.css. */
 :root[data-theme="dark"]{
   --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE; --dim:#98A8AB;
   --edge:#717D7E; --rule:#313A3B; --soft:#273031; --sunk:#151E21;

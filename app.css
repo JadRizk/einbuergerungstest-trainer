@@ -39,30 +39,8 @@
   --peek:calc(3.7rem + var(--sab));    /* the progress sheet at rest */
 }
 /* Dark: the same paper with the light off. Same hues at the same low chroma,
-   only lightness moves; every value is measured in brand/PALETTE.md. Written
-   twice, once for the system setting and once for an explicit choice, and
-   brand/check-colours.mjs asserts the two copies agree. */
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE;
-    --dim:#98A8AB;
-    --edge:#717D7E;
-    --rule:#313A3B; --soft:#273031;
-    --sunk:#151E21;
-    --accent:#6AB5A6; --gold:#D6A866; --goldbg:#352917;
-    --ok:#7FCB9E; --okbg:#1B3125; --no:#EB827B; --nobg:#3F2220;
-    /* the ramp runs the other way: more right is brighter on a dark page */
-    --cellbad:#972622;
-    --cellok1:#214D34; --cellok2:#367854; --cellok3:#56A276;
-    --tipbg:#2F3A3D; --tipink:#E4EBEB;
-    --tipline:#717D7E;
-    --picked:#1F3531;
-    --gloss:#284B3B;
-    --imgdim:brightness(.9);
-    --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%23ABBBBE' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    color-scheme:dark;
-  }
-}
+   only lightness moves; every value is measured in brand/PALETTE.md. theme.js
+   sets data-theme, resolving System from the device. */
 :root[data-theme="dark"]{
   --paper:#10191B; --card:#192426; --ink:#E4EBEB; --muted:#ABBBBE;
   --dim:#98A8AB;
