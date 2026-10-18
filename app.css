@@ -63,6 +63,12 @@ button,select,input{font:inherit;color:inherit}
 .brand span{color:var(--muted); font-weight:500; display:none}
 .barnow{margin-left:auto; font-size:.86rem; color:var(--muted); white-space:nowrap}
 .barnow b{color:var(--ink); font-weight:600}
+/* sits left of the position; the position keeps its place when this is hidden */
+.streak{margin-left:auto; font-size:.86rem; color:var(--muted); white-space:nowrap}
+.streak b{color:var(--accent); font-weight:700}
+.streak:not([hidden]) + .barnow{margin-left:.4rem; padding-left:.7rem; border-left:1px solid var(--rule)}
+.streakbest{margin:0; font-size:.88rem; color:var(--muted)}
+.streakbest b{color:var(--ink); font-weight:700}
 
 .burger{
   flex:0 0 auto; width:2.75rem; height:2.75rem; margin:-.35rem 0 -.35rem -.5rem;

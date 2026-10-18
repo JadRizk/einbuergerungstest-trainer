@@ -69,8 +69,12 @@ Stated as prohibitions. Stage 03 applies these to the mark verbatim.
 - **Light only.** `color-scheme:light` is declared and no dark variant exists.
   The kit therefore ships a light-ground mark; a dark-ground variant exists only
   as the inverted asset, not as a theme.
-- **No celebration.** No confetti, no streaks, no badges, no mascot. A right
-  answer advances. The mark is therefore not a character and not a smiley.
+- **No celebration.** No confetti, no badges, no mascot. A right answer
+  advances. The one concession is the streak in Practice: a plain-text count
+  ("12 in a row") in the top bar, muted, with the number in the accent. No
+  icon, no animation, no message when it breaks, and it hides below two. The
+  best is a fact in the progress sheet, not an achievement. The mark is
+  therefore not a character and not a smiley.
 - **State is never carried by colour alone.** Every answer carries ✓ or ✗;
   every map legend entry carries its word. Measured justification in
   `PALETTE.md` — the status hues *do* collapse toward the accent under

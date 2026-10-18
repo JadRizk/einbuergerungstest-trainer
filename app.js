@@ -51,11 +51,12 @@ const S={
   gloss:true, hooks:false, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
+  streak:0, bestStreak:0,               /* right answers in a row in Practice */
   voice:'', rate:0.85
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
   shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
+  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
@@ -454,7 +455,7 @@ toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0;
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
@@ -764,6 +765,7 @@ function render(){
   const h=hookFor(q);
   if(hookWanted(q) && !HOOKS) loadHooks().then(()=>{ if(HOOKS && S.mode!=='exam' && !autoTimer) render(); });
   $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
+  paintStreak();
 
   viewEl.innerHTML=`<div class="stage">
     <div class="meta">
@@ -816,6 +818,7 @@ function answer(orig){
   S.picked=orig; S.pin=q.id;
   const right=(orig===q.answer);
   record(q,right);
+  countStreak(right);
   save();
   S.again=(!right && S.mode==='drill' && S.shufQ) ? q.id : null;
   render();
@@ -836,6 +839,25 @@ function step(d){
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
+}
+
+/* ---------------- streak ----------------------------------------------------
+   Right answers in a row, across questions. Only Practice can get here: Browse
+   never takes an answer and the exam has its own handler, where a running
+   count would give away which answers were right. Each visit starts at 0, so
+   only the best is saved. A question that comes back after a miss counts like
+   any other. */
+function countStreak(ok){
+  S.streak=ok?S.streak+1:0;
+  if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+}
+/* Below two in a row there is nothing to say, so the bar stays as it was. */
+function paintStreak(){
+  const el=$('streak'), on=S.mode==='drill' && S.streak>=2;
+  el.hidden=!on;
+  if(!on) return;
+  el.innerHTML=`<b>${S.streak}</b> in a row`;
+  el.title=`${S.streak} correct in a row · best ${S.bestStreak}`;
 }
 
 /* ---------------- the numbers -----------------------------------------------
@@ -901,6 +923,9 @@ function paintStats(){
       <button class="chip${S.filter==='all'?' on':''}" data-f="all"><b>${done}</b>attempted</button>
     </div>
 
+    ${S.bestStreak?`<div class="brk"><h4>Best streak</h4>
+      <p class="streakbest"><b>${S.bestStreak}</b> correct in a row</p></div>`:''}
+
     ${past.length?`<div class="brk"><h4>Past mock exams</h4><div class="exams">
       ${past.map(e=>`<span class="ex ${e.s>=(e.p||17)?'pass':'fail'}">${e.s}/${e.n||33}</span>`).join('')}
     </div></div>`:''}
@@ -927,6 +952,7 @@ function paintDock(){
   const weak=p.filter(shaky).length;
   $('dock-stat').innerHTML= (railed() || !canProject())
     ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${nSolid}</b> solid · <b>${weak}</b> shaky`
+      + (railed()&&S.bestStreak?` · best <b>${S.bestStreak}</b> in a row`:'')
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
   /* The grid is not optional on a wide screen. It costs 46px and hiding it
