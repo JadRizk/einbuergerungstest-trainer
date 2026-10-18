@@ -10,6 +10,18 @@ import { drawer, fillNav, THEMES } from './nav.js';
 fillNav();
 
 let DATA, GLOS;
+
+/* ---------------- navigation drawer ----------------------------------------
+   One set of controls. Under 62rem nav.js slides it in over a scrim; above
+   that the stylesheet parks it as a permanent left rail and the drawer goes
+   quiet. It is wired up before the catalogue is awaited too, so the menu
+   button still opens it on the error screen. S is only made once the
+   catalogue is in, so until DATA is there the rail counts as unfolded and
+   its button waits. */
+const RAIL='(min-width:62rem)';
+const {close:closeNav, isOpen:navOpen, sync:syncNav}=
+  drawer({rail:RAIL, folded:()=>!!DATA && !S.railOpen, onRail:()=>{ if(!DATA) return; S.railOpen=!S.railOpen; save(); applyRail(); }});
+
 try {
   [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 } catch (err) {
@@ -373,15 +385,9 @@ function buildFilter(){
     +topics.map(t=>`<option value="t:${esc(t)}">${esc(topicEn(t))}</option>`).join('');
   filterSel.value=S.filter;
 }
-/* ---------------- navigation drawer ----------------------------------------
-   One set of controls. Under 62rem nav.js slides it in over a scrim; above
-   that the stylesheet parks it as a permanent left rail and the drawer goes
-   quiet. */
+/* ---------------- the rail (the drawer is wired at the top) ---------------- */
 const body=document.body, burger=$('burger');
-const RAIL='(min-width:62rem)';
 const railed=()=>matchMedia(RAIL).matches;
-const {close:closeNav, isOpen:navOpen, sync:syncNav}=
-  drawer({rail:RAIL, folded:()=>!S.railOpen, onRail:()=>{ S.railOpen=!S.railOpen; save(); applyRail(); }});
 
 /* Above 62rem the same button collapses the rail instead of sliding a drawer
    over the page -- the question column is the thing worth the pixels, and on
