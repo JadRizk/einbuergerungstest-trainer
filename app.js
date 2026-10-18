@@ -47,7 +47,7 @@ const TOPIC={
 const topicEn=t=>TOPIC[t]||t;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
-  idx:0, picked:null, stats:{}, exam:null,
+  idx:0, picked:null, pin:null, stats:{}, exam:null,
   gloss:true, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   hgrade:'all',                         /* hooks mode: which grades to show */
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
@@ -178,10 +178,15 @@ const landQs=()=>Q.filter(q=>q.state===S.land);
 const pool=()=>general.concat(landQs());
 function view(){
   const p=pool();
+  /* While an answer is on screen its question stays in the list, even when
+     that answer just moved it out of the selection (a first answer under "Not
+     seen yet", a recovery under "My mistakes"). Otherwise the list shifts under
+     S.idx and the next question is drawn as already answered. */
+  const held=q=>S.picked!==null && q.id===S.pin;
   let l;
   switch(true){
-    case S.filter==='unseen': l=p.filter(q=>!S.stats[q.id]); break;
-    case S.filter==='wrong':  l=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>0&&S.stats[q.id].w>=S.stats[q.id].r); break;
+    case S.filter==='unseen': l=p.filter(q=>!S.stats[q.id]||held(q)); break;
+    case S.filter==='wrong':  l=p.filter(q=>shaky(q)||held(q)); break;
     case S.filter==='images': l=p.filter(q=>q.img); break;
     case S.filter==='land':   l=landQs(); break;
     case S.filter.startsWith('t:'): l=p.filter(q=>q.topic===S.filter.slice(2)); break;
@@ -862,13 +867,12 @@ function answer(orig){
   if(S.mode==='flash'||S.picked!==null) return;
   const q=curList()[S.idx];
   if(!q) return;
-  S.picked=orig;
+  S.picked=orig; S.pin=q.id;
   const right=(orig===q.answer);
   /* Hooks mode is a rehearsal of what you already learnt, not an attempt at
      the question, so it stays out of the statistics and out of the map. */
   if(S.mode!=='hooks'){
-    const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
-    right? st.r++ : st.w++;
+    record(q,right);
     save();
   }
   render();
@@ -878,15 +882,37 @@ function answer(orig){
 }
 function step(d){
   clearAuto();
-  const list=curList();
+  let list=curList();
   if(!list.length) return;
-  S.idx=(S.idx+d+list.length)%list.length;
-  S.picked=null; hideTip(); stopSpeech(); render();
+  /* pick the target by id before letting go of the held question: releasing
+     it can drop it from the list and shift every index after it */
+  const to=list[(S.idx+d+list.length)%list.length];
+  S.picked=null;
+  list=curList();
+  S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
+  hideTip(); stopSpeech(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
 }
 
 /* ---------------- the numbers -----------------------------------------------
-   Laplace-smoothed per question, so one lucky guess is not "mastered" and an
+   Each question keeps a lifetime tally (r, w) and its current run of correct
+   answers (c). The tally feeds the projection; the run decides solid or shaky.
+   A miss makes a question shaky at once, however often you got it right
+   before -- judged on the tally alone, it stayed green until the misses
+   outnumbered the hits. Once missed, it takes two right in a row to be solid
+   again, so a single lucky guess does not clear it; a question never missed
+   is solid after one. Records saved before `c` existed fall back to the
+   tally, and a tie there counts as shaky because the order is unknown. */
+function record(q,ok){
+  const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
+  if(ok){ st.r++; st.c=(st.c||0)+1; } else { st.w++; st.c=0; }
+}
+const solid=q=>{ const s=S.stats[q.id];
+  if(!s) return false;
+  return 'c' in s ? s.c>=(s.w?2:1) : s.r>s.w; };
+const shaky=q=>!!S.stats[q.id] && !solid(q);
+
+/* Laplace-smoothed per question, so one lucky guess is not "mastered" and an
    unseen question sits at exactly 0.5 instead of needing a special case. */
 const pOf=q=>{ const s=S.stats[q.id], r=s?s.r:0, w=s?s.w:0; return (r+1)/(r+w+2); };
 const mean=a=>a.length? a.reduce((x,y)=>x+y,0)/a.length : 0.5;
@@ -904,13 +930,13 @@ function paintStats(){
   const el=$('stats');
   const p=pool();
   const done=p.filter(q=>S.stats[q.id]).length;
-  const weak=p.filter(q=>{const s=S.stats[q.id]; return s&&s.w>s.r;}).length;
+  const weak=p.filter(shaky).length;
   const unseen=p.length-done;
   const proj=projected(), passed=proj>=17, known=canProject();
 
   const topics=[...new Set(general.map(q=>q.topic))]
     .map(t=>{ const qs=general.filter(q=>q.topic===t);
-      return {t, n:qs.length, solid:qs.filter(q=>{const s=S.stats[q.id];return s&&s.r>=s.w;}).length}; })
+      return {t, n:qs.length, solid:qs.filter(solid).length}; })
     .sort((a,b)=>b.n-a.n);
 
   const past=S.exams.slice(-6).reverse();
@@ -954,10 +980,10 @@ function paintDock(){
      reading or writing it against view() lands on an unrelated question. */
   const p=pool(), list=curList(), map=$('map');
   const done=p.filter(q=>S.stats[q.id]).length;
-  const solid=p.filter(q=>S.stats[q.id]&&S.stats[q.id].r>=S.stats[q.id].w).length;
-  const weak=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>S.stats[q.id].r).length;
+  const nSolid=p.filter(solid).length;
+  const weak=p.filter(shaky).length;
   $('dock-stat').innerHTML= (railed() || !canProject())
-    ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${solid}</b> solid · <b>${weak}</b> shaky`
+    ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${nSolid}</b> solid · <b>${weak}</b> shaky`
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
   /* The grid is not optional on a wide screen. It costs 46px and hiding it
@@ -971,7 +997,7 @@ function paintDock(){
   p.forEach(q=>{
     const b=document.createElement('button'), st=S.stats[q.id];
     let cls='cell';
-    if(st) cls+=(st.r>=st.w)?' ok':' bad';
+    if(st) cls+=solid(q)?' ok':' bad';
     if(q.state) cls+=' land';
     if(cur&&q.id===cur.id) cls+=' now';
     b.className=cls;
@@ -980,6 +1006,7 @@ function paintDock(){
       /* Not in the current selection: drop the narrower filter first and only
          widen the catalogue selection if that was not what was hiding it, so a
          selection the user still needs is not discarded. */
+      S.picked=null;                     /* releases the held question first */
       let at=curList().findIndex(x=>x.id===q.id);
       if(at<0 && S.mode==='hooks' && S.hgrade!=='all'){
         S.hgrade='all'; at=curList().findIndex(x=>x.id===q.id);
@@ -989,7 +1016,7 @@ function paintDock(){
         at=Math.max(0, curList().findIndex(x=>x.id===q.id));
       }
       S.idx=at;
-      S.picked=null; stopSpeech(); setSheet(false); render();
+      stopSpeech(); setSheet(false); render();
     };
     map.appendChild(b);
   });
@@ -1203,7 +1230,9 @@ function renderResult(){
   const rows=S.exam.ids.map((id,n)=>{
     const q=Q.find(x=>x.id===id), a=S.exam.answers[id], ok=(a===q.answer);
     if(ok) score++;
-    if(fresh){ const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0}); ok?st.r++:st.w++; }
+    /* a question the clock took from you was never attempted, so it says
+       nothing about whether you know it -- it still scores as a miss above */
+    if(fresh && a!=null) record(q,ok);
     return `<div class="row"><span class="n">${n+1}</span><span class="s ${ok?'ok':'bad'}">${ok?'✓':'✗'}</span>
       <span class="b" lang="de">${deco(q.q)}<em>Correct: ${deco(q.options[q.answer])}${ok?'':' · You chose: '+(a==null?'—':deco(q.options[a]))}</em></span></div>`;
   }).join('');
