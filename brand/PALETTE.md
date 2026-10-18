@@ -129,7 +129,10 @@ to be able to change. The check skips a name `:root` does not have.
 | `--okbg` | `#DEEDE4` | `#1B3125` | correct, as a ground |
 | `--no` | `#B3332B` | `#EB827B` | wrong |
 | `--nobg` | `#FAE4E2` | `#3F2220` | wrong, as a ground |
-| `--cellbad` | `#D9534F` | `#972622` | map-only red |
+| `--cellno1` | `#F4B4AE` | `#D0524C` | map-only wrong once: the lightest red, next to even |
+| `--cellno2` | `#D9534F` | `#972622` | map-only wrong twice |
+| `--cellno3` | `#9E2B26` | `#5A2522` | map-only wrong three or more: the darkest red |
+| `--celleven` | `#828D9F` | `#5F6A7B` | map-only even: right since a miss, or level |
 | `--cellok1` | `#ABE0C0` | `#214D34` | map-only right, faintest |
 | `--cellok2` | `#72B68F` | `#367854` | map-only right, faint |
 | `--cellok3` | `#3E815D` | `#56A276` | map-only right, strong |
@@ -265,10 +268,10 @@ accent leaves no open hue that also *means* correct or wrong, so the colours
 stay and the information is carried elsewhere:
 
 - Every answer row renders `✓` or `✗` as a glyph — `app.js:546-547`, `app.js:855`.
-- Every progress-map legend entry carries its word: *Less … More* around the
-  shades of right, *wrong last time*, *state question*.
-- A wrong map cell carries a light diagonal slash, the ✗ a bare square has no
-  room for. See *The four greens* below.
+- Every progress-map legend entry carries its word: *Wrong … Right* around the
+  scale, *not seen*, *state question*.
+- A red map cell carries a diagonal slash and the even cell a short dash, the
+  ✗ and = a bare square has no room for. See *The map scale* below.
 - The state marker on a map cell is an inset **ring**, not a fill.
 
 **The one place colour stands alone is the progress map**, where a cell is a
@@ -289,11 +292,14 @@ survives dichromacy, so the grid reads light-vs-dark rather than green-vs-red.
 The CSS comment claiming this is now **verified rather than asserted**.
 `#D9534F` is a fill and never text, so its 3.45:1 is not a floor breach.
 
-### The four greens
+### The map scale
 
-The map shades a right cell by right answers minus wrong ones, 1 to 4+, using
-`--cellok1` `--cellok2` `--cellok3` and `--ok`. The ramp sits on hue 158° at
-OKLCH lightness .86 / .72 / .55 / .40 (the last is `--ok` itself).
+Each answered cell sits on one scale: three reds (`--cellno1`–`3`), an even
+grey (`--celleven`), and four greens (`--cellok1`–`3`, then `--ok`). Right
+answers minus wrong ones set the step. A first answer goes straight to its
+colour; after that a miss forces red and the next right answer forces even,
+whatever the tally. The greens sit on hue 158° at OKLCH lightness
+.86 / .72 / .55 / .40 (the last is `--ok` itself).
 
 ```bash
 node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
@@ -311,8 +317,25 @@ node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
 .35–.85 and chroma .08–.24 found nothing better than ΔE 10.6 against the
 nearest green. Any red sits somewhere inside a light-to-dark ramp, and protan
 simulation puts it on one of the steps. So the map stops relying on colour
-there: a wrong cell is slashed in `--card`. Not-seen cells keep their `--edge`
+there: a red cell is slashed in `--cellmark` (`--card`), or, on the palest
+red, where a light slash vanishes, in `--cellmark1` (`--cellno3`). Not-seen cells keep their `--edge`
 ring, which is what separates them from the lightest green (ΔE 9.3).
+
+The even grey has the same problem. A sweep of greys and cool tints found
+nothing better than ΔE 11.1 against the nearest green in light and 9.8 in dark;
+a neutral grey sits on the ramp's lightness and protan simulation strips what
+little hue the greens keep. So the even cell carries a short horizontal dash
+in `--card`, and its fill is free to be a quiet slate.
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  status "r1:#F4B4AE,r2:#D9534F,r3:#9E2B26,even:#828D9F" --accent "#0B6357" --ground "#EDF0EF"
+```
+
+| Pair | ΔE | Condition | Verdict |
+|---|---|---|---|
+| adjacent reds, worst (r2 ↔ r3) | 14.6 | protan | PASS |
+| r2 ↔ even | 11.5 | deutan | WARN — the slash and dash separate them |
 
 **Severity ordering is inverted and stays that way.** Success is 1.58× louder
 than warning. In a study tool the reader is scanning for what they got *right*
@@ -359,10 +382,26 @@ node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
 | g4 ↔ wrong | **32.1** | deutan | **PASS** |
 | not seen `#151E21` ↔ g1 | 15.8 | deutan | PASS |
 
+The reds do **not** flip. In both themes the lightest red sits next to even
+and the darkest is three or more misses, so one slip reads as the mild end
+on either page. Dark slashes every red in `--ink` (`--cellmark` and
+`--cellmark1`), since a `--card` line is lost on a dark red.
+
+```bash
+node ~/.claude/skills/design-direction/scripts/validate-palette.mjs \
+  status "r1:#D0524C,r2:#972622,r3:#5A2522,even:#5F6A7B" --accent "#6AB5A6" --ground "#10191B"
+```
+
+| Pair | ΔE | Condition | Verdict |
+|---|---|---|---|
+| r1 ↔ even | 7.6 | protan | WARN — slash against dash |
+| r1 ↔ r2 | 15.2 | tritan | PASS |
+| r2 ↔ r3 | 7.5 | protan | WARN — both slashed; only the depth blurs |
+
 The pair the light map rests on — mastered against wrong — is far stronger
 here, 32.1 against 12.8. The collapse moves from the third green to the first,
-and the slash covers it the same way; in dark the slash is drawn in the dark
-`--card`. Not-seen cells now separate from the faintest green by colour alone,
+and the slash covers it the same way; in dark the slash is drawn in
+`--ink`. Not-seen cells now separate from the faintest green by colour alone,
 which light could not do.
 
 **The cost:** the dark red is a quieter fill. `#972622` is 2.22:1 against the
