@@ -78,10 +78,17 @@ const S={
 /* what outlives the tab; the rest of S is where you are right now */
 const SAVED=['land','stats','gloss','hooks','shufQ','shufA','auto','seed','railOpen','exams',
   'bestStreak','voice','rate','escope','efrom','eto','theme'];
-function save(){ store.set(KEY,Object.fromEntries(SAVED.map(k=>[k,S[k]]))); }
+/* Each of them as this tab last knew it in storage, written or taken up. A
+   field that differs from it here is a change not saved yet -- a range being
+   typed, a new shuffle -- and another tab's save does not take it away. */
+const stored={};
+const mark=d=>{ for(const k of SAVED) if(k in d) stored[k]=JSON.stringify(d[k]); };
+const unsaved=k=>JSON.stringify(S[k])!==stored[k];
+function save(){ const d=Object.fromEntries(SAVED.map(k=>[k,S[k]])); mark(d); store.set(KEY,d); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
+  mark(S);
 }
 
 /* ---------------- glossary decoration ---------------- */
@@ -442,15 +449,17 @@ THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(
    answers included. The question on screen stays on screen: the list it
    sits in can shift (an answer elsewhere moves questions out of "Not seen
    yet"), so it is found again by id, and held in the list like an answered
-   one if it has left it. The redraw waits while an answer is on screen or
-   an exam is running; the next step draws the new state. */
+   one if it has left it. The redraw waits while an answer is on screen, an
+   exam is running or a field on the page is being filled in; the next step
+   draws the new state. */
 addEventListener('storage',e=>{
   if(e.key!==KEY) return;
   let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
   if(!d) return;
   const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
   const cur=S.mode==='exam' ? null : view()[S.idx];
-  for(const k of SAVED) if(k in d) S[k]=d[k];
+  for(const k of SAVED) if(k in d && !unsaved(k)) S[k]=d[k];
+  mark(d);
   if(cur){
     if(!view().some(x=>x.id===cur.id)) S.keep=cur.id;
     S.idx=view().findIndex(x=>x.id===cur.id);
@@ -460,7 +469,8 @@ addEventListener('storage',e=>{
   if(S.railOpen!==was.railOpen) applyRail();
   if(S.voice!==was.voice) paintVoices();
   paintThemeBtns();
-  if(S.picked===null && !(S.exam && !S.exam.done)) render();
+  const typing=viewEl.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if(S.picked===null && !(S.exam && !S.exam.done) && !typing) render();
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
