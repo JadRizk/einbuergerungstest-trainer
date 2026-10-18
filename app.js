@@ -67,7 +67,7 @@ const GCAT={
 const catEn=c=>GCAT[c]||c;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
-  idx:0, picked:null, pin:null, again:null, stats:{}, exam:null,
+  idx:0, picked:null, pin:null, keep:null, again:null, stats:{}, exam:null,
   gloss:true, hooks:false, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
@@ -262,8 +262,9 @@ function view(){
   /* While an answer is on screen its question stays in the list, even when
      that answer just moved it out of the selection (a first answer under "Not
      seen yet", a recovery under "My mistakes"). Otherwise the list shifts under
-     S.idx and the next question is drawn as already answered. */
-  const held=q=>S.picked!==null && q.id===S.pin;
+     S.idx and the next question is drawn as already answered. S.keep holds a
+     question another tab's answer moved out while it was on screen here. */
+  const held=q=>(S.picked!==null && q.id===S.pin) || q.id===S.keep;
   let l;
   switch(true){
     case S.filter==='unseen': l=p.filter(q=>!S.stats[q.id]||held(q)); break;
@@ -404,7 +405,7 @@ function applyRoute(){
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
-  if(changed){ S.picked=null; S.idx=0; stopSpeech(); }
+  if(changed){ S.picked=S.keep=null; S.idx=0; stopSpeech(); }
   if(m!=='exam') S.exam=null;
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
@@ -419,8 +420,8 @@ $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
 $('m-exam').onclick =()=>go('exam');
 
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();closeNav();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=null;stopSpeech();closeNav();render();};
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=S.keep=null;S.exam=null;stopSpeech();save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=S.keep=null;stopSpeech();closeNav();render();};
 
 function toggle(id,key,after){
   const el=$(id);
@@ -431,21 +432,29 @@ function toggle(id,key,after){
 toggle('t-gloss','gloss',()=>{hideTip(); render();});
 toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
-toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
-toggle('t-shufa','shufA',()=>{S.picked=null; render();});
+toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=S.keep=null; render();});
+toggle('t-shufa','shufA',()=>{S.picked=S.keep=null; render();});
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
 /* Another tab saved: a second Practice tab, or the chart or the timeline
    with a theme chosen in their menu. Everything it saved is taken up at
    once, or this tab's next save would put its own old copy back over it --
-   answers included. Only the redraw waits while an answer is on screen or
+   answers included. The question on screen stays on screen: the list it
+   sits in can shift (an answer elsewhere moves questions out of "Not seen
+   yet"), so it is found again by id, and held in the list like an answered
+   one if it has left it. The redraw waits while an answer is on screen or
    an exam is running; the next step draws the new state. */
 addEventListener('storage',e=>{
   if(e.key!==KEY) return;
   let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
   if(!d) return;
   const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
+  const cur=S.mode==='exam' ? null : view()[S.idx];
   for(const k of SAVED) if(k in d) S[k]=d[k];
+  if(cur){
+    if(!view().some(x=>x.id===cur.id)) S.keep=cur.id;
+    S.idx=view().findIndex(x=>x.id===cur.id);
+  }
   if(!THEMES.includes(S.theme)) S.theme=was.theme;
   if(S.theme!==was.theme) window.theme?.set(S.theme);
   if(S.railOpen!==was.railOpen) applyRail();
@@ -455,7 +464,7 @@ addEventListener('storage',e=>{
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=S.keep=null; S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
@@ -834,7 +843,7 @@ function step(d){
      it can drop it from the list and shift every index after it */
   const to=list[(S.idx+d+list.length)%list.length];
   if(S.again!==null){ requeue(list,S.again,to); S.again=null; }
-  S.picked=null;
+  S.picked=S.keep=null;
   list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
@@ -929,7 +938,7 @@ function paintStats(){
 
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
     S.filter=b.dataset.f; filterSel.value=S.filter;
-    S.idx=0; S.picked=null; stopSpeech(); setSheet(false); render();
+    S.idx=0; S.picked=S.keep=null; stopSpeech(); setSheet(false); render();
   });
 }
 
@@ -964,7 +973,7 @@ function paintDock(){
     b.onclick=()=>{
       /* Not in the current selection: widen it to everything, since the
          question you tapped is the one you asked for. */
-      S.picked=null;                     /* releases the held question first */
+      S.picked=S.keep=null;              /* releases the held question first */
       let at=view().findIndex(x=>x.id===q.id);
       if(at<0){
         S.filter='all'; filterSel.value='all';
