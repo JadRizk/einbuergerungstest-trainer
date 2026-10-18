@@ -314,7 +314,7 @@ function view(){
 }
 /* Let go of both: the answer on screen and a question held for another tab.
    Anything that moves off the question calls this; the answer-shuffle switch
-   stays on it, so it clears S.picked alone. */
+   stays on it, answer and all, so it calls nothing. */
 function letGo(){ S.picked=S.keep=null; }
 
 /* ---------------- hooks: the recognition aid --------------------------------
@@ -462,7 +462,7 @@ toggle('t-gloss','gloss',()=>{hideTip(); render();});
 toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; letGo(); render();});
-toggle('t-shufa','shufA',()=>{S.picked=null; render();});   /* lets go of the answer, not a question held for another tab */
+toggle('t-shufa','shufA',render);     /* an answer on screen stays: its marks go with the options */
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
 /* a is the fuller record of one question: more answers, then more right,
