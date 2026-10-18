@@ -139,6 +139,7 @@ body.nav-open .nav{transform:translateX(0)}
 }
 .rowbtn em{display:block; font-style:normal; font-size:.76rem; font-weight:400; color:var(--muted); margin-top:.1rem}
 .rowbtn:hover{border-color:var(--muted)}
+a.rowbtn{display:block; margin-top:.45rem; color:inherit; text-decoration:none}
 
 .opt-row{display:flex; align-items:center; gap:.7rem; padding:.55rem 0 .55rem 13px; border-radius:8px; cursor:pointer; user-select:none}
 .opt-row:hover{background:var(--sunk)}
