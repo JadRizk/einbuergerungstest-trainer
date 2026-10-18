@@ -55,15 +55,18 @@ function verdict(q) {
 
 /* ---------------- the rows ---------------- */
 const year = d => String(+d.slice(0, 4));
-const WALL_FROM = TL.events.find(e => e.id === 'mauerbau')?.date;
-const WALL_TO = TL.events.find(e => e.id === 'mauerfall')?.date;
+/* Which era runs as two lanes, and which events bound the Wall, are the
+   data's to say: meta.eras[].split and meta.wall. */
+const SPLIT = new Set(TL.meta.eras.filter(e => e.split).map(e => e.id));
+const dateOf = id => TL.events.find(e => e.id === id)?.date;
+const WALL_FROM = dateOf(TL.meta.wall?.from), WALL_TO = dateOf(TL.meta.wall?.to);
 
 function strands(mode) {
   const st = pos => `<i class="st s-${pos}"><b class="fill"></b></i>`;
   return mode === 2 ? st('w') + st('e') : st('c');
 }
 function wall(e) {
-  if (!WALL_FROM || e.date < WALL_FROM || e.date > WALL_TO) return '';
+  if (!WALL_FROM || !WALL_TO || e.date < WALL_FROM || e.date > WALL_TO) return '';
   const cls = e.date === WALL_FROM ? ' from' : e.date === WALL_TO ? ' to' : '';
   return `<i class="wall${cls}"><b class="fill"></b></i>`;
 }
@@ -152,12 +155,12 @@ function build() {
   let era = null, alt = 0;
   for (const e of TL.events) {
     if (e.era !== era) {
-      if (era === 'teilung') out.push(juncRow('merge', era));
+      if (SPLIT.has(era)) out.push(juncRow('merge', era));
       out.push(eraRow(ERAS.get(e.era), 1));
-      if (e.era === 'teilung') out.push(juncRow('fork', e.era));
+      if (SPLIT.has(e.era)) out.push(juncRow('fork', e.era));
       era = e.era;
     }
-    const mode = era === 'teilung' ? 2 : 1;
+    const mode = SPLIT.has(era) ? 2 : 1;
     const side = mode === 2 ? (e.lane === 'east' ? 'r' : 'l') : (alt++ % 2 ? 'l' : 'r');
     out.push(eventRow(e, mode, side));
   }
@@ -174,15 +177,23 @@ chips.innerHTML = lit.innerHTML = TL.meta.eras.map(e =>
   `<li><button type="button" data-go="${e.id}">${esc(tx(e))} <small>${year(e.from)}</small></button></li>`).join('');
 lit.querySelectorAll('button').forEach(b => { b.tabIndex = -1; });
 let eraNow = null;
+/* The highlight is measured in pixels, so it is measured again whenever the
+   chips change size: when the web font arrives, or the window resizes. */
+function paintEra() {
+  const b = chips.querySelector(`[data-go="${eraNow}"]`); if (!b) return;
+  const W = chips.offsetWidth, l = b.offsetLeft, r = W - (l + b.offsetWidth);
+  lit.style.clipPath = `inset(0 ${r}px 0 ${l}px round 99px)`;
+}
+new ResizeObserver(paintEra).observe(chips);
 function showEra(id) {
   if (id === eraNow) return;
   eraNow = id;
   const b = chips.querySelector(`[data-go="${id}"]`); if (!b) return;
-  const W = chips.offsetWidth, l = b.offsetLeft, r = W - (l + b.offsetWidth);
-  lit.style.clipPath = `inset(0 ${r}px 0 ${l}px round 99px)`;
-  chips.querySelectorAll('button').forEach(x => x.toggleAttribute('aria-current', x === b));
+  paintEra();
+  // aria-current="" would read as false
+  chips.querySelectorAll('button').forEach(x => x === b ? x.setAttribute('aria-current', 'true') : x.removeAttribute('aria-current'));
   // keep the active chip in view where the row scrolls sideways
-  const sc = $('eras-scroll');
+  const sc = $('eras-scroll'), l = b.offsetLeft;
   if (l < sc.scrollLeft || l + b.offsetWidth > sc.scrollLeft + sc.clientWidth)
     sc.scrollTo({ left: l - 16, behavior: reduce.matches ? 'auto' : 'smooth' });
 }
@@ -195,7 +206,8 @@ chips.addEventListener('click', e => {
    Height is the one layout property animated here, because a card's body has
    no transform equivalent; it is measured, kept short, and handed back to
    `auto` the moment it lands so the text can reflow. */
-function setOpen(card, open) {
+const settling = new WeakMap();   // .more → the listener waiting for its transition
+function setOpen(card, open, quiet) {
   const btn = card.querySelector('.toggle'), more = card.querySelector('.more');
   if (card.classList.contains('open') === open) return;
   btn.setAttribute('aria-expanded', String(open));
@@ -213,14 +225,19 @@ function setOpen(card, open) {
   more.style.transition = 'height 240ms var(--ease-out)';
   more.style.height = to + 'px';
   card.classList.toggle('open', open);
-  if (open) reveal(card, to - from);
+  if (open && !quiet) reveal(card, to - from);
+  // a click mid-transition replaces the listener the last one was waiting on
+  more.removeEventListener('transitionend', settling.get(more));
   const done = ev => {
     if (ev && ev.propertyName !== 'height') return;
     more.removeEventListener('transitionend', done);
+    settling.delete(more);
     if (card.classList.contains('open')) more.style.height = 'auto';
     else more.hidden = true;
   };
-  more.addEventListener('transitionend', done);
+  settling.set(more, done);
+  // no change in height means no transition, and no transitionend to wait for
+  if (Math.abs(to - from) < 1) done(); else more.addEventListener('transitionend', done);
 }
 /* An opened card that would run off the bottom of the screen brings itself
    up, never past its own top. */
@@ -281,7 +298,9 @@ function layout() {
   rs.forEach((r, i) => pulls[i] ? r.style.setProperty('--pull', pulls[i] + 'px') : r.style.removeProperty('--pull'));
 }
 let laying = false;
-const relayout = () => { if (!laying) { laying = true; requestAnimationFrame(() => { laying = false; layout(); tick(); }); } };
+const relayout = () => { if (!laying) { laying = true; requestAnimationFrame(() => {
+  laying = false; layout(); pinned?.scrollIntoView({ block: 'start' }); tick();
+}); } };
 const ro = new ResizeObserver(relayout);
 tl.querySelectorAll('.row').forEach(r => ro.observe(r));
 wide.addEventListener('change', relayout);
@@ -322,19 +341,26 @@ function frame() {
 }
 const tick = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
 addEventListener('scroll', tick, { passive: true });
-addEventListener('resize', () => { eraNow = null; tick(); });
+addEventListener('resize', tick);
 // anchors land below the bar, whatever height it wraps to
 new ResizeObserver(([e]) => document.documentElement.style.setProperty('--barh', e.target.offsetHeight + 'px')).observe(bar);
 frame();
 
 /* ---------------- deep links: timeline.html#e-mauerbau ----------------
    Opens that event, so a question elsewhere in the app can point here. */
+let pinned = null;
+const unpin = () => { pinned = null; };
 function follow() {
   const row = location.hash.startsWith('#e-') && document.getElementById(location.hash.slice(1));
   if (!row) return;
   row.classList.add('in');
-  setOpen(row.querySelector('.card'), true);
+  setOpen(row.querySelector('.card'), true, true);
+  pinned = row;
+  for (const t of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(t, unpin, { passive: true, once: true });
   row.scrollIntoView({ block: 'start' });
 }
+/* The first layout is measured in the fallback font; when the web font lands
+   every card reflows and the interleaving moves. Until the reader scrolls
+   themself, the linked card is put back under the bar after each relayout. */
 addEventListener('hashchange', follow);
 follow();

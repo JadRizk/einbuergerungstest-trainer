@@ -2,7 +2,7 @@
  "meta": {
   "source": "written for this app; question numbers refer to data/questions.json",
   "catalog_date": "2025-05-26",
-  "status": "draft",
+  "status": "fact-checked",
   "note": "A study aid, not part of the official catalogue. Each event lists the catalogue questions it answers (qs) and, where useful, questions it is background to (also). Question text is read from data/questions.json at runtime, never copied here. 'trap' names a wrong option the catalogue uses to test this event.",
   "lanes": {
    "de":   {"de": "Deutschland", "en": "Germany"},
@@ -10,10 +10,11 @@
    "east": {"de": "DDR", "en": "East Germany"},
    "welt": {"de": "Europa und Welt", "en": "Europe and the world"}
   },
+  "wall": {"from": "mauerbau", "to": "mauerfall"},
   "eras": [
    {"id": "ns",        "from": "1933", "to": "1945", "de": "Nationalsozialismus", "en": "National Socialism"},
    {"id": "besatzung", "from": "1945", "to": "1949", "de": "Besatzungszeit", "en": "Occupation"},
-   {"id": "teilung",   "from": "1949", "to": "1990", "de": "Zwei deutsche Staaten", "en": "Two German states"},
+   {"id": "teilung",   "from": "1949", "to": "1990", "de": "Zwei deutsche Staaten", "en": "Two German states", "split": true},
    {"id": "einheit",   "from": "1990", "to": null,   "de": "Das vereinte Deutschland", "en": "United Germany"}
   ]
  },
@@ -219,7 +220,7 @@
   },
   {
    "id": "leben-in-der-ddr",
-   "date": "1950",
+   "date": "1949-10-07",
    "end": "1990",
    "when": {"de": "1949 bis 1990", "en": "1949 to 1990"},
    "era": "teilung", "lane": "east",
