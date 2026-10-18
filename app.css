@@ -11,17 +11,16 @@
 
 :root{
   --railpad:1rem;        /* where control boxes start */
-  --paper:#EDF0EF; --card:#FFFFFF; --ink:#152227; --muted:#4F6167;
-  --dim:#5C6E74;                       /* rejected answers: readable, not shouty */
-  --edge:#788584;                      /* borders of real controls, >=3:1        */
-  --rule:#DBE2E1; --soft:#E7EBEA;      /* decorative dividers only               */
-  --sunk:#F1F4F4;
-  --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
-  --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B; --nobg:#FAE4E2;
-  --cellbad:#D9534F;                   /* map only: lighter red so the grid reads
-                                          light-vs-dark, not green-vs-red        */
-  --tipbg:#152227; --tipink:#F2F5F4;
-  --shell:62rem; --rail:17rem; color-scheme:light;
+  /* the shared colours are in tokens.css; these are the app's own */
+  --nobg:#FAE4E2;
+  /* map only. Four shades of right, the darkest being --ok, and one red. No
+     red clears all four greens under dichromacy, so a wrong cell is slashed */
+  --cellbad:#D9534F;
+  --cellok1:#ABE0C0; --cellok2:#72B68F; --cellok3:#3E815D;
+  --picked:#E3EEEB;                    /* a chosen answer, chip, copy button  */
+  --gloss:#C9E4D6;                     /* a glossed word in an answer         */
+  --imgdim:none;                       /* catalogue scans keep a white plate  */
+  --shell:62rem; --rail:17rem;
   --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 
   /* safe areas, named once so every fixed edge can use them */
@@ -31,6 +30,20 @@
   --sar:env(safe-area-inset-right,0px);
   --peek:calc(3.7rem + var(--sab));    /* the progress sheet at rest */
 }
+/* Dark: the app's own colours, lifted the way tokens.css lifts the shared
+   ones and measured in brand/PALETTE.md. */
+:root[data-theme="dark"]{
+  --nobg:#3F2220;
+  /* the ramp runs the other way: more right is brighter on a dark page */
+  --cellbad:#972622;
+  --cellok1:#214D34; --cellok2:#367854; --cellok3:#56A276;
+  --picked:#1F3531;
+  --gloss:#284B3B;
+  --imgdim:brightness(.9);
+}
+/* theme.js sets this for the instant a theme changes, so every surface
+   switches at once instead of each running its own colour transition */
+.theming, .theming *, .theming *::before, .theming *::after{transition:none!important}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 
@@ -128,7 +141,7 @@ body.nav-open .nav{transform:translateX(0)}
   width:100%; background:var(--card); border:1px solid var(--edge); border-radius:8px;
   padding:.55rem 2.3rem .55rem 12px; font-size:.9rem; cursor:pointer;
   line-height:1.45; min-height:2.6rem;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image:var(--chev);
   background-repeat:no-repeat;
   background-position:right 12px center;
 }
@@ -186,7 +199,7 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
   cursor:pointer; white-space:nowrap; text-decoration:none; line-height:1.4; min-height:2rem}
 .copy:hover{color:var(--ink)}
 .copy.done{border-color:var(--ok); color:var(--ok)}
-.copy.live{border-color:var(--accent); color:var(--accent); background:#E3EEEB}
+.copy.live{border-color:var(--accent); color:var(--accent); background:var(--picked)}
 .meta b{color:var(--ink); font-weight:600}
 .tag{display:inline-flex; align-items:center; min-height:2rem; border:1px solid var(--rule);
   border-radius:99px; padding:0 .7rem; font-size:.77rem; font-weight:500; background:var(--card)}
@@ -196,7 +209,7 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
 
 /* picture questions: the image is the question, so let it have the room */
 .shot{background:#fff; border:1px solid var(--rule); border-radius:10px; padding:0; margin:0 0 .8rem; text-align:center; position:relative; overflow:hidden}
-.shot img{max-width:100%; height:auto; display:block; margin:0 auto; cursor:zoom-in}
+.shot img{max-width:100%; height:auto; display:block; margin:0 auto; cursor:zoom-in; filter:var(--imgdim)}
 
 
 .opts{display:flex; flex-direction:column; gap:.45rem; margin:0; padding:0; list-style:none}
@@ -218,7 +231,7 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
 .opt.dim{color:var(--dim); border-color:var(--rule); background:var(--card)}
 .opt.dim .cap{color:var(--dim); border-color:var(--rule)}
 /* mid-exam: "this is the one I picked", NOT "this one is correct" */
-.opt.picked{border-color:var(--accent); background:#E3EEEB; box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.picked{border-color:var(--accent); background:var(--picked); box-shadow:inset 0 0 0 1px var(--accent)}
 .opt.picked .cap{border-color:var(--accent); background:var(--accent); color:var(--card)}
 
 /* 36 of the 39 picture questions answer with "Bild 3" or a bare "2" — the
@@ -253,6 +266,7 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
 .gl{border-bottom:1.5px dotted var(--gold); cursor:help}
 .opt:not(:disabled) .gl{cursor:pointer}
 #tip{position:fixed; z-index:60; max-width:19rem; background:var(--tipbg); color:var(--tipink);
+  border:1px solid var(--tipline);
   border-radius:8px; padding:.5rem .65rem; font-size:.84rem; line-height:1.4;
   box-shadow:0 8px 22px rgba(0,0,0,.24); pointer-events:none}
 #tip[hidden]{display:none}
@@ -328,7 +342,7 @@ body.sheet-drag .dock{transition:none}
 .chip{background:var(--sunk); border:1px solid var(--rule); border-radius:8px; padding:.4rem .65rem; font-size:.8rem; color:var(--muted); cursor:pointer; text-align:left}
 .chip b{display:block; font-size:1.1rem; color:var(--ink); font-weight:700; line-height:1.2}
 .chip:hover{border-color:var(--edge)}
-.chip.on{border-color:var(--accent); background:#E3EEEB}
+.chip.on{border-color:var(--accent); background:var(--picked)}
 
 .brk{margin:0 0 1rem}
 .brk h4{margin:0 0 .45rem; font-size:.74rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
@@ -355,8 +369,21 @@ body.sheet-drag .dock{transition:none}
 .cell{aspect-ratio:1; border-radius:4px; background:var(--sunk); border:0; padding:0; cursor:pointer;
   min-height:1.6rem; box-shadow:inset 0 0 0 1px var(--edge)}
 .cell:hover{outline:1.5px solid var(--ink); outline-offset:1px}
-.cell.ok{background:var(--ok); box-shadow:none}
-.cell.bad{background:var(--cellbad); box-shadow:none}
+.cell.g1,.cell.g2,.cell.g3,.cell.g4,.cell.bad{box-shadow:none}
+.cell.g1,.legend .g1{background:var(--cellok1)}
+.cell.g2,.legend .g2{background:var(--cellok2)}
+.cell.g3,.legend .g3{background:var(--cellok3)}
+.cell.g4,.legend .g4{background:var(--ok)}
+/* the slash is the ✗ a bare square cannot carry: under protanopia the red
+   lands on the third green, and colour alone would call it right */
+.cell.bad,.legend .bad{background:
+  linear-gradient(to top right, transparent calc(50% - .8px), var(--card) calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)),
+  var(--cellbad)}
+.legend .g0{background:var(--sunk); box-shadow:inset 0 0 0 1px var(--edge)}
+.legend .land{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.legend .ramp i{margin-right:2px}
+.legend .ramp i:first-of-type{margin-left:.35rem}
+.legend .ramp i:last-of-type{margin-right:.28rem}
 .cell.land{box-shadow:inset 0 0 0 1.5px var(--gold)!important}
 .cell.now{outline:2px solid var(--ink); outline-offset:1px}
 
@@ -385,7 +412,7 @@ body.exam .bar, body.exam .dock, body.exam .burger{display:none}
 body.exam .nav{transform:translateX(-101%)}
 .exambar{
   position:relative;
-  flex:0 0 auto; display:flex; align-items:center; gap:.7rem; background:var(--ink); color:var(--paper);
+  flex:0 0 auto; display:flex; align-items:center; gap:.7rem; background:var(--tipbg); color:var(--tipink);
   padding:calc(.5rem + var(--sat)) calc(.85rem + var(--sar)) .55rem calc(.85rem + var(--sal));
   font-size:.88rem;
 }
@@ -394,7 +421,7 @@ body.exam .nav{transform:translateX(-101%)}
 .exambar .clock{margin-left:auto; font-weight:700; font-variant-numeric:tabular-nums}
 .exambar .clock.low{color:#FF9A92}
 .exambar .prog{position:absolute; left:0; right:0; bottom:0; height:3px; background:rgba(242,245,244,.2)}
-.exambar .prog i{display:block; height:100%; background:var(--paper)}
+.exambar .prog i{display:block; height:100%; background:var(--tipink)}
 
 /* ------------------------------------------------ desktop
    The drawer stops overlaying and becomes a permanent rail; the progress
@@ -466,9 +493,8 @@ body.exam .nav{transform:translateX(-101%)}
     height:auto; max-height:70dvh; border-radius:0; box-shadow:none;
     transform:none!important;
   }
-  .grab{padding:.55rem 1.5rem .1rem; cursor:default; display:flex; touch-action:auto}
-  .grab-txt{font-size:.79rem}
-  .dock-in{padding:.2rem 1.5rem .75rem; max-width:calc(var(--shell) + 3rem); margin:0 auto}
+  .grab{display:none}                  /* the legend says it; the numbers are the sheet's */
+  .dock-in{padding:.55rem 1.5rem .75rem; max-width:calc(var(--shell) + 3rem); margin:0 auto}
   .stats{display:none}                 /* the numbers are a phone-sheet thing */
   .dock-body{overflow:visible}
   .dock-head{display:flex}
@@ -527,7 +553,7 @@ body.exam .nav{transform:translateX(-101%)}
 /* the stem's trigger, and the token inside the right option */
 .q mark.trig, .opt mark.tok{background:transparent; color:inherit}
 .q mark.trig{border-bottom:2px solid var(--gold); font-weight:700}
-.opt mark.tok{background:#C9E4D6; border-radius:4px; padding:.02rem .18rem; font-weight:700}
+.opt mark.tok{background:var(--gloss); border-radius:4px; padding:.02rem .18rem; font-weight:700}
 /* Most triggers are glossary terms too, and the gloss nests with the mark. Its
    dotted line would sit on or under the trigger's solid one, so it gives way;
    the term still opens on a tap. */

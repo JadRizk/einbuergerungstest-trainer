@@ -126,7 +126,8 @@ no bundler: `git push` is the deploy.
 | | |
 | --- | --- |
 | `index.html` | The shell — markup only |
-| `app.css` | All styling, and the self-hosted `@font-face` |
+| `tokens.css` | The colours both pages share, light and dark |
+| `app.css` | All the app's styling, and the self-hosted `@font-face` |
 | `app.js` | The whole app, an ES module, ~800 lines |
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
@@ -148,7 +149,9 @@ The answers use `position: sticky` rather than being pinned: a short question ha
 them, and a tall picture question still keeps them on screen. Progress is a bottom sheet on a
 phone — shut or open, no half-way — and the bar across the bottom on a wide screen. The 310-cell
 grid is wide-screen only, where 9px cells read as one glanceable image; at a thumb-sized 26px it
-would be two dozen rows of squares saying less than the numbers above it.
+would be two dozen rows of squares saying less than the numbers above it. Each cell is shaded by
+right answers minus wrong ones, in four greens, so the grid shows what you know well and not just
+what you have seen; a question you last got wrong is red, slashed, until you get it right again.
 
 <details>
 <summary><b>If you change something</b> — caching rules worth knowing first</summary>

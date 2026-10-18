@@ -1,7 +1,8 @@
 # Einbürgerungstest trainer
 
 A civic study tool. Paper-grey ground, one deep teal signal, white cards, a
-single variable grotesque, light only — the register of a government form that
+single variable grotesque, light by default and the same paper unlit in the
+dark — the register of a government form that
 someone actually made usable.
 
 ## Thesis
@@ -63,12 +64,16 @@ done as part of the brand pass.
 
 Stated as prohibitions. Stage 03 applies these to the mark verbatim.
 
-- **One accent.** `#0B6357` is the only signal colour. The mark gets one colour
+- **One accent.** `#0B6357` is the only signal colour — `#6AB5A6` in dark,
+  which is the same teal lifted, not a second one. The mark gets one colour
   and no gradient, no second brand hue, no rainbow. Gold `#8A5A12` is not a
   second accent — it means *regional* and nothing else.
-- **Light only.** `color-scheme:light` is declared and no dark variant exists.
-  The kit therefore ships a light-ground mark; a dark-ground variant exists only
-  as the inverted asset, not as a theme.
+- **One palette, two lights.** Dark mode is the same paper with the light
+  off: the same hues at the same low chroma, only lightness moves. No colour
+  exists in one theme and not the other, and dark is never a "night mode" —
+  no black canvas, no glow. It follows the system setting, with a System /
+  Light / Dark choice in the drawer. Values and measurements in `PALETTE.md`.
+  *Replaced 18 October 2026: this line used to read "Light only".*
 - **No celebration.** No confetti, no badges, no mascot. A right answer
   advances. The one concession is the streak in Practice: two plain-text
   numbers in the top bar ("Streak 4 · Best 12"), muted labels, the current
@@ -76,7 +81,7 @@ Stated as prohibitions. Stage 03 applies these to the mark verbatim.
   just reads 0. The best is a number, not an achievement. The mark is
   therefore not a character and not a smiley.
 - **State is never carried by colour alone.** Every answer carries ✓ or ✗;
-  every map legend entry carries its word. Measured justification in
+  every map legend entry carries its word, and a wrong map cell carries a slash. Measured justification in
   `PALETTE.md` — the status hues *do* collapse toward the accent under
   dichromacy, and the glyphs are why that is survivable.
 - **Text clears 4.5:1** against its ground. Measured ratios live beside the
@@ -131,7 +136,7 @@ animates on a release surface: README, social card, favicon.
 | Prohibition | How the mark complies |
 |---|---|
 | One accent | The mark is `#0B6357` and nothing else. Its reversals are white on that accent — no second hue, no gradient, no gold. |
-| Light only | The mark is drawn for a light ground; `mark-inverted.svg` exists for the accent tile, not as a dark theme. |
+| One palette, two lights | The mark is drawn for a light ground. On the dark theme's canvas the plain mark is not used — its teal sits at 2.50:1 there — and the tile or `mark-inverted.svg` stands in. The mark is never recoloured to the dark accent. |
 | No celebration | No character, no face, no tick, no star. A green check was the most legible candidate drawn and was refused on exactly this line. |
 | State never by colour alone | The mark carries no state, so the rule does not bind it — but it is why the tick was refused: a check *is* a state rendered as a shape. |
 | Not the Bundesadler, not the tricolour | Neither appears. The mark is a letterform, which is the one civic-adjacent form that cannot be mistaken for a coat of arms. |
