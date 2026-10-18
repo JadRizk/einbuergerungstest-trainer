@@ -1,0 +1,278 @@
+/* Wie es geschah — the timeline page. A prototype.
+   Same colours (tokens.css) and typeface as the app. One spine runs down the
+   page; in 1949 it forks into two, the Federal Republic and the GDR, and in
+   1990 the two join again. Between 1961 and 1989 the gap between them is the
+   Wall. Every piece of the spine belongs to the row it sits in, so a card
+   opening pushes the spine down with it instead of the spine being redrawn. */
+@font-face{
+  font-family:'Archivo'; font-style:normal; font-weight:400 700; font-display:swap;
+  src:url('font/archivo-latin-var.woff2') format('woff2-variations');
+}
+:root{
+  /* the four lanes, reusing the organigram's measured strokes */
+  --de:var(--accent);
+  --west:#2F5DA8;
+  --east:#8A5A12;
+  --welt:#5B4B8A;
+  --wall:#4F6167;
+
+  --ease-out:cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out:cubic-bezier(0.77, 0, 0.175, 1);
+
+  --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --page:64rem;
+  --sp:4.5rem;          /* the spine's column */
+  --doty:1.45rem;       /* where a dot sits, level with the card's date line */
+  --barh:7rem;          /* measured by timeline.js; anchors land below the bar */
+}
+:root[data-theme="dark"]{
+  --west:#7CA5E9;
+  --east:#D6A866;
+  --welt:#A79AD8;
+  --wall:#ABBBBE;
+}
+.theming, .theming *, .theming *::before, .theming *::after{transition:none!important}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(var(--barh) + .5rem)}
+html,body{margin:0}
+body{background:var(--paper); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.5;
+     -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%}
+button{font:inherit; color:inherit}
+:focus-visible{outline:2.5px solid var(--accent); outline-offset:2px; border-radius:4px}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+
+/* ---------------- the bar: sticky, with the year you are reading ---------------- */
+.bar{position:sticky; top:0; z-index:10; padding-top:env(safe-area-inset-top,0px);
+     background:color-mix(in srgb, var(--paper) 88%, transparent);
+     -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px);
+     border-bottom:1px solid transparent; transition:border-color .2s ease}
+.bar.stuck{border-bottom-color:var(--rule)}
+.bar-row{display:flex; gap:.8rem; align-items:center; padding:.8rem 1rem .35rem; max-width:var(--page); margin:0 auto}
+.back{flex:0 0 auto; width:2.6rem; height:2.6rem; display:grid; place-items:center; border-radius:9px;
+      color:var(--ink); text-decoration:none; font-size:1.25rem; border:1px solid var(--edge); background:var(--card)}
+.title{flex:1 1 auto; min-width:0}
+.title h1{margin:0; font-size:1.35rem; letter-spacing:-.02em; line-height:1.2}
+.title h1 small{font-size:.92rem; font-weight:500; color:var(--muted); letter-spacing:0; margin-left:.2rem}
+.title p{margin:.1rem 0 0; color:var(--muted); font-size:.84rem}
+.year{flex:0 0 auto; font-size:1.7rem; font-weight:700; letter-spacing:-.03em; color:var(--accent);
+      font-variant-numeric:tabular-nums; min-width:3.2ch; text-align:right}
+
+.opt-row{flex:0 0 auto; display:flex; align-items:center; gap:.5rem; padding:.4rem .55rem; min-height:2.5rem;
+         border-radius:8px; cursor:pointer; user-select:none}
+.opt-row .lb{font-size:.86rem}
+.sw{flex:0 0 auto; width:2.4rem; height:1.4rem; border-radius:99px; background:var(--edge); position:relative; transition:background .15s ease}
+.sw::after{content:''; position:absolute; top:2px; left:2px; width:calc(1.4rem - 4px); height:calc(1.4rem - 4px);
+           border-radius:50%; background:var(--card); transition:transform .15s var(--ease-out)}
+.opt-row[aria-checked=true] .sw{background:var(--accent)}
+.opt-row[aria-checked=true] .sw::after{transform:translateX(1rem)}
+
+/* Era chips. The filled copy sits exactly over the outlined one and is cut
+   down by clip-path to the active chip, so moving between eras slides one
+   shape across instead of fading two. */
+.eras{max-width:var(--page); margin:0 auto; padding:0 1rem .6rem}
+.eras-scroll{position:relative; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch}
+.eras-scroll::-webkit-scrollbar{display:none}
+.chips{list-style:none; margin:0; padding:0; display:flex; gap:.35rem; width:max-content}
+.chips button{display:flex; align-items:baseline; gap:.4rem; white-space:nowrap; cursor:pointer;
+              border:1px solid var(--rule); background:var(--card); border-radius:99px; padding:.3rem .8rem; font-size:.84rem; font-weight:600}
+.chips button small{font-weight:500; color:var(--muted); font-variant-numeric:tabular-nums; font-size:.76rem}
+.chips.lit{position:absolute; inset:0 auto 0 0; pointer-events:none;
+           clip-path:inset(0 100% 0 0 round 99px); transition:clip-path .28s var(--ease-in-out)}
+.chips.lit button{background:var(--accent); border-color:var(--accent); color:var(--card)}
+.chips.lit button small{color:color-mix(in srgb, var(--card) 80%, transparent)}
+@media (hover:hover) and (pointer:fine){
+  .back:hover{border-color:var(--muted)}
+  .opt-row:hover{background:var(--sunk)}
+  .chips:not(.lit) button:hover{border-color:var(--edge)}
+}
+
+/* ---------------- the timeline grid ---------------- */
+.wrap{max-width:var(--page); margin:0 auto; padding:1rem 1rem 0}
+.tl{list-style:none; margin:0; padding:0}
+.row{display:grid; grid-template-columns:1fr var(--sp) 1fr; position:relative}
+/* Interleaving. On a wide screen a card may start beside the one before it on
+   the other side; timeline.js measures and sets --pull, the distance a row
+   rides up over the one before (negative: pushed down, clear of a long card).
+   Every strand starts at --pull, which is exactly where the row before it
+   ended, so the pieces of the spine still meet end to end. The rows overlap,
+   so only what is drawn in them takes the pointer. */
+.row{margin-top:calc(-1 * var(--pull, 0px)); pointer-events:none}
+.row .card, .row .label{pointer-events:auto}
+.spine{grid-column:2; grid-row:1; position:relative}
+.row > .card, .row > .label{grid-row:1}
+.side-l > .card{grid-column:1; justify-self:end}
+.side-r > .card{grid-column:3; justify-self:start}
+
+/* strands: a grey track with a coloured fill the scroll position draws in */
+.st{position:absolute; top:var(--pull, 0px); bottom:0; width:2px; margin-left:-1px; background:var(--rule); overflow:hidden}
+.st.s-c{left:50%} .st.s-w{left:30%} .st.s-e{left:70%}
+.fill{position:absolute; inset:0; transform-origin:50% 0; transform:scaleY(0); will-change:transform}
+.s-c .fill{background:var(--de)}
+.s-w .fill{background:var(--west)}
+.s-e .fill{background:var(--east)}
+.st.dash{background:repeating-linear-gradient(to bottom, var(--edge) 0 4px, transparent 4px 10px)}
+.st.dash .fill{background:repeating-linear-gradient(to bottom, var(--de) 0 4px, transparent 4px 10px)}
+
+/* the Wall: hatching between the two strands, built as you scroll through it */
+.wall{position:absolute; top:var(--pull, 0px); bottom:0; left:calc(30% + 3px); right:calc(30% + 3px); overflow:hidden}
+.wall.from{top:var(--doty)}
+.wall.to{bottom:calc(100% - var(--doty))}
+.wall .fill{background:repeating-linear-gradient(-45deg, var(--wall) 0 1.5px, transparent 1.5px 5px); opacity:.55}
+
+.dot{position:absolute; top:var(--doty); width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:50%;
+     background:var(--card); border:2.5px solid var(--lane); z-index:1;
+     transition:transform .2s var(--ease-out), background-color .2s ease, box-shadow .2s ease}
+.dot.d-c{left:50%} .dot.d-w{left:30%} .dot.d-e{left:70%}
+.row.now .dot{transform:scale(1.3); background:var(--lane); box-shadow:0 0 0 5px color-mix(in srgb, var(--lane) 22%, transparent)}
+
+.lane-de{--lane:var(--de)} .lane-west{--lane:var(--west)} .lane-east{--lane:var(--east)} .lane-welt{--lane:var(--welt)}
+
+/* fork and merge: drawn in a box that stretches, the stroke kept at 2px */
+.junc .spine{height:4.5rem}
+/* a junction pushed down clear of a long card bridges the gap with a lead-in */
+.st.lead{bottom:100%}
+.junc svg{position:absolute; inset:0; width:100%; height:100%; overflow:visible}
+.junc path{fill:none; stroke-width:2; vector-effect:non-scaling-stroke}
+.junc .base{stroke:var(--rule)}
+.junc .pf{stroke-dasharray:1 1; stroke-dashoffset:1}
+.junc .pf.w{stroke:var(--west)} .junc .pf.e{stroke:var(--east)}
+.junc .label{font-size:.8rem; font-weight:600; align-self:end; padding-bottom:.1rem}
+.junc .label.l{grid-column:1; justify-self:end; text-align:right; color:var(--west)}
+.junc .label.r{grid-column:3; justify-self:start; color:var(--east)}
+.junc .label em{display:block; font-style:normal; font-weight:500; color:var(--muted); font-size:.74rem}
+
+/* era headers: a station sign laid over the spine */
+.era .spine{min-height:7rem}
+.era .label{grid-column:1 / -1; align-self:center; justify-self:center; text-align:center; position:relative; z-index:2;
+            background:var(--paper); padding:.5rem 1rem; border-radius:12px}
+.era .yrs{display:block; font-size:.78rem; font-weight:600; letter-spacing:.08em; color:var(--muted); font-variant-numeric:tabular-nums}
+.era h2{margin:.05rem 0 0; font-size:1.45rem; letter-spacing:-.02em; line-height:1.15}
+.era .en{display:block; color:var(--muted); font-size:.9rem}
+
+.gap .spine{height:5.5rem}
+.gap .label{grid-column:3; align-self:center; justify-self:start; color:var(--muted); font-size:.84rem; font-style:italic; padding-left:.4rem}
+
+/* ---------------- cards ---------------- */
+.card{width:100%; max-width:26rem; margin:.35rem .2rem 1.6rem; position:relative;
+      background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:.8rem 1rem .5rem;
+      transition:border-color .2s ease, box-shadow .2s ease}
+/* a notch pointing at the spine */
+.card::before{content:''; position:absolute; top:calc(var(--doty) - .35rem - 6px); width:12px; height:12px;
+              background:var(--card); border:1px solid var(--rule); transform:rotate(45deg); transition:border-color .2s ease}
+.side-l > .card::before{right:-7px; border-left:0; border-bottom:0}
+.side-r > .card::before{left:-7px; border-right:0; border-top:0}
+.card.open{border-color:var(--lane); box-shadow:0 6px 24px color-mix(in srgb, var(--ink) 8%, transparent)}
+.card.open::before{border-color:var(--lane)}
+
+.when{display:flex; align-items:baseline; gap:.5rem; margin:0; font-size:.8rem; font-weight:700; color:var(--lane);
+      font-variant-numeric:tabular-nums; letter-spacing:.02em}
+.tag{font-size:.7rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+     border:1px solid var(--rule); border-radius:99px; padding:0 .45rem}
+.card h3{margin:.15rem 0 0; font-size:1.12rem; line-height:1.25; letter-spacing:-.01em}
+.card .t-en{margin:0; color:var(--muted); font-size:.86rem}
+.what{margin:.45rem 0 0; font-size:.93rem}
+.en-text{display:none; margin:.3rem 0 0; color:var(--muted); font-size:.86rem}
+body.en .en-text{display:block}
+
+.toggle{display:flex; align-items:center; gap:.5rem; width:calc(100% + 1rem); margin:.55rem -.5rem 0; padding:.45rem .5rem;
+        border:0; border-radius:8px; background:transparent; cursor:pointer; text-align:left; font-size:.84rem; color:var(--muted)}
+.toggle .n{color:var(--ink); font-weight:600}
+.chev{margin-left:auto; width:10px; height:10px; border-right:2px solid currentColor; border-bottom:2px solid currentColor;
+      transform:translateY(-2px) rotate(45deg); transition:transform .2s var(--ease-out)}
+.card.open .chev{transform:translateY(2px) rotate(-135deg)}
+@media (hover:hover) and (pointer:fine){
+  .toggle:hover{background:var(--sunk)}
+  .card:not(.open):hover{border-color:var(--edge)}
+}
+
+/* what you know: one square per question, the app's own verdict */
+.mq{display:flex; gap:3px}
+.mq i{width:9px; height:9px; border-radius:2px; background:var(--soft); border:1px solid var(--rule)}
+.mq i.k-solid{background:var(--ok); border-color:var(--ok)}
+.mq i.k-shaky{background:var(--goldbg); border-color:var(--gold)}
+.mq i.k-wrong{background:var(--no); border-color:var(--no)}
+
+/* the body: height measured and animated by timeline.js */
+.more{overflow:hidden; height:0}
+.more[hidden]{display:none}
+.more-in{padding:.3rem 0 .6rem; opacity:0; transition:opacity .2s ease}
+.card.open .more-in{opacity:1}
+.why{margin:.2rem 0 0; font-size:.9rem}
+.trap{margin:.7rem 0 0; padding:.5rem .7rem; border-radius:9px; background:var(--goldbg); border-left:3px solid var(--gold); font-size:.86rem}
+.trap b{display:block; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--gold)}
+.more h4{margin:.9rem 0 .2rem; font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.qs{list-style:none; margin:0; padding:0}
+.q{padding:.55rem 0; border-top:1px solid var(--soft)}
+.q .qn{display:flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:600; color:var(--muted); letter-spacing:.03em}
+.q p{margin:.1rem 0 .3rem; font-size:.88rem; font-weight:500}
+.q ul{list-style:none; margin:0; padding:0; font-size:.83rem}
+.q li{display:flex; gap:.4rem; padding:.05rem 0}
+.q li.ok{color:var(--ok); font-weight:600}
+.q li.no{color:var(--dim)}
+.q img{display:block; max-width:100%; height:auto; margin:.2rem 0 .4rem; border-radius:8px; border:1px solid var(--rule); background:#fff}
+.also{font-size:.84rem}
+.also summary{cursor:pointer; color:var(--muted); padding:.3rem 0; font-size:.8rem}
+
+/* the end of the line: today, and what you know of it */
+.end{padding-bottom:45vh}               /* room for the last events to reach the reading line */
+.end .spine{min-height:9rem}
+.end .st{bottom:auto; height:calc(2.2rem - var(--pull, 0px))}
+.end .cap{position:absolute; left:50%; top:2.2rem; width:18px; height:18px; margin:-9px 0 0 -9px; border-radius:50%;
+          background:var(--de); box-shadow:0 0 0 5px color-mix(in srgb, var(--de) 22%, transparent)}
+.end .label{grid-column:1 / -1; justify-self:center; text-align:center; padding-top:3.4rem; max-width:30rem}
+.end h2{margin:0; font-size:1.45rem; letter-spacing:-.02em}
+.end p{margin:.3rem 0 0; color:var(--muted); font-size:.9rem}
+.end .tally{display:grid; grid-template-columns:repeat(26, 11px); justify-content:center; gap:3px; margin:.9rem auto 0}
+.end .tally i{width:11px; height:11px}
+.key{display:flex; justify-content:center; gap:.9rem; margin:.5rem 0 0; padding:0; list-style:none; font-size:.76rem; color:var(--muted)}
+.key li{display:flex; align-items:center; gap:.3rem}
+.key .mq{display:inline-flex}
+.end a{display:inline-block; margin-top:1rem; padding:.5rem 1rem; border-radius:99px; border:1px solid var(--edge);
+       background:var(--card); color:var(--ink); text-decoration:none; font-weight:600; font-size:.9rem}
+@media (hover:hover) and (pointer:fine){ .end a:hover{border-color:var(--muted)} }
+
+.fail{margin:0; padding:2rem 1.2rem; color:var(--no); font-weight:500}
+
+/* ---------------- entering: once, as a row first comes into view ----------------
+   Only with JavaScript running, so nothing is ever hidden without it. */
+.js .row .card, .js .row .label{opacity:0; transform:translateY(14px)}
+.js .row .dot{opacity:0; transform:scale(.6)}
+.js .row.in .card, .js .row.in .label{opacity:1; transform:none;
+  transition:opacity .45s var(--ease-out) var(--d,0ms), transform .55s var(--ease-out) var(--d,0ms),
+             border-color .2s ease, box-shadow .2s ease}
+.js .row.in .dot{opacity:1; transform:none;
+  transition:opacity .3s var(--ease-out) var(--d,0ms), transform .3s var(--ease-out) var(--d,0ms), background-color .2s ease, box-shadow .2s ease}
+.js .row.in.now .dot{transform:scale(1.3)}
+
+/* Less motion: things still fade in and the card still opens, but nothing
+   travels and nothing grows. */
+@media (prefers-reduced-motion:reduce){
+  .js .row .card, .js .row .label, .js .row .dot{transform:none}
+  .js .row.in .card, .js .row.in .label, .js .row.in .dot{transition:opacity .2s ease}
+  .row.now .dot, .js .row.in.now .dot{transform:none}
+  .chips.lit{transition:none}
+  .chev, .sw::after{transition:none}
+}
+
+/* ---------------- narrow: one column, the spine on the left ---------------- */
+@media (max-width:51.99rem){
+  :root{--sp:3rem}
+  .row{grid-template-columns:var(--sp) 1fr}
+  .spine{grid-column:1}
+  .side-l > .card, .side-r > .card{grid-column:2; justify-self:stretch; max-width:none}
+  .side-l > .card::before{left:-7px; right:auto; border:1px solid var(--rule); border-right:0; border-top:0}
+  .card.open::before{border-color:var(--lane)}
+  .end .label{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
+  .end .tally{grid-template-columns:repeat(13, 11px); justify-content:start; margin-left:0}
+  .key{justify-content:flex-start}
+  .era .label, .gap .label{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
+  .era .spine::after{content:''; position:absolute; left:50%; top:50%; width:12px; height:12px; margin:-6px 0 0 -6px;
+                     background:var(--paper); border:2.5px solid var(--edge); border-radius:3px; transform:rotate(45deg)}
+  .junc .label.l, .junc .label.r{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
+  .junc .label.l{align-self:start; padding-top:.6rem}
+  .junc .label.r{align-self:end}
+  .title h1 small{display:block; margin:0}
+  .title p{display:none}               /* the sticky bar stays short on a phone */
+  .year{font-size:1.35rem}
+  .opt-row .lb{display:none}
+}

@@ -1,0 +1,530 @@
+{
+ "meta": {
+  "source": "written for this app; question numbers refer to data/questions.json",
+  "catalog_date": "2025-05-26",
+  "status": "draft",
+  "note": "A study aid, not part of the official catalogue. Each event lists the catalogue questions it answers (qs) and, where useful, questions it is background to (also). Question text is read from data/questions.json at runtime, never copied here. 'trap' names a wrong option the catalogue uses to test this event.",
+  "lanes": {
+   "de":   {"de": "Deutschland", "en": "Germany"},
+   "west": {"de": "Bundesrepublik", "en": "West Germany"},
+   "east": {"de": "DDR", "en": "East Germany"},
+   "welt": {"de": "Europa und Welt", "en": "Europe and the world"}
+  },
+  "eras": [
+   {"id": "frueh",     "from": "0321", "to": "1933", "de": "Vor 1933", "en": "Before 1933"},
+   {"id": "ns",        "from": "1933", "to": "1945", "de": "Nationalsozialismus", "en": "National Socialism"},
+   {"id": "besatzung", "from": "1945", "to": "1949", "de": "Besatzungszeit", "en": "Occupation"},
+   {"id": "teilung",   "from": "1949", "to": "1990", "de": "Zwei deutsche Staaten", "en": "Two German states"},
+   {"id": "einheit",   "from": "1990", "to": null,   "de": "Das vereinte Deutschland", "en": "United Germany"}
+  ]
+ },
+ "events": [
+  {
+   "id": "juedisches-leben",
+   "date": "0321-12-11",
+   "when": {"de": "321", "en": "321"},
+   "era": "frueh", "lane": "de",
+   "title": {"de": "Erste jüdische Gemeinde", "en": "The first Jewish community"},
+   "what": {
+    "de": "Ein Gesetz des römischen Kaisers Konstantin nennt Juden in Köln. Es ist der älteste Beweis für jüdisches Leben auf dem Gebiet des heutigen Deutschlands.",
+    "en": "A law of the Roman emperor Constantine mentions Jews in Cologne. It is the oldest evidence of Jewish life in what is now Germany."
+   },
+   "why": {
+    "de": "Jüdisches Leben gibt es hier also seit etwa 1700 Jahren. 2021 hat Deutschland dieses Jubiläum gefeiert.",
+    "en": "So Jewish life here goes back about 1,700 years. Germany marked the anniversary in 2021."
+   },
+   "qs": [59],
+   "also": [66]
+  },
+  {
+   "id": "machtergreifung",
+   "date": "1933-01-30",
+   "end": "1945-05-08",
+   "when": {"de": "30. Januar 1933", "en": "30 January 1933"},
+   "era": "ns", "lane": "de",
+   "title": {"de": "Hitler wird Reichskanzler", "en": "Hitler becomes chancellor"},
+   "what": {
+    "de": "Adolf Hitler wird Reichskanzler. Die Nationalsozialisten machen Deutschland in wenigen Monaten zu einer Diktatur, dem „Dritten Reich“. Sie bleiben bis 1945 an der Macht.",
+    "en": "Adolf Hitler becomes chancellor. Within months the National Socialists turn Germany into a dictatorship, the “Third Reich”. They stay in power until 1945."
+   },
+   "why": {
+    "de": "In der Diktatur gibt es keine freien Wahlen und keine Pressefreiheit. Andere Parteien werden verboten, Gegner willkürlich verhaftet. Der Staat verfolgt Juden und betreibt Rassismus als Politik.",
+    "en": "The dictatorship has no free elections and no free press. Other parties are banned and opponents arrested at will. The state persecutes Jews and makes racism its policy."
+   },
+   "qs": [152, 155, 156, 157, 158, 159, 161, 170],
+   "also": [20]
+  },
+  {
+   "id": "novemberpogrome",
+   "date": "1938-11-09",
+   "when": {"de": "9. November 1938", "en": "9 November 1938"},
+   "era": "ns", "lane": "de",
+   "title": {"de": "Novemberpogrome", "en": "The November pogroms"},
+   "what": {
+    "de": "In der Nacht zum 10. November zerstören Nationalsozialisten und ihre Anhänger in ganz Deutschland Synagogen und jüdische Geschäfte. Viele Juden werden getötet oder in Lager gebracht.",
+    "en": "During the night into 10 November, National Socialists and their supporters destroy synagogues and Jewish shops across Germany. Many Jews are killed or taken to camps."
+   },
+   "why": {
+    "de": "Die Verfolgung der Juden wird offene Gewalt auf der Straße.",
+    "en": "The persecution of Jews becomes open violence in the street."
+   },
+   "trap": {
+    "de": "Der 9. November ist in der deutschen Geschichte mehrmals wichtig: 1938 die Pogrome, 1989 die Öffnung der Mauer.",
+    "en": "9 November matters more than once in German history: the pogroms in 1938, the opening of the Wall in 1989."
+   },
+   "qs": [163, 164],
+   "also": [182]
+  },
+  {
+   "id": "zweiter-weltkrieg",
+   "date": "1939-09-01",
+   "end": "1945-05-08",
+   "when": {"de": "1939 bis 1945", "en": "1939 to 1945"},
+   "era": "ns", "lane": "de",
+   "title": {"de": "Der Zweite Weltkrieg", "en": "The Second World War"},
+   "what": {
+    "de": "Am 1. September 1939 greift Deutschland Polen an. Damit beginnt der Zweite Weltkrieg. Er dauert bis 1945.",
+    "en": "On 1 September 1939 Germany attacks Poland. This starts the Second World War, which lasts until 1945."
+   },
+   "why": {
+    "de": "Es ist der Krieg mit den meisten Toten in der Geschichte. Ein großer Teil Europas wird zerstört.",
+    "en": "It is the deadliest war in history. Much of Europe is destroyed."
+   },
+   "trap": {
+    "de": "Der Erste Weltkrieg war 1914 bis 1918.",
+    "en": "The First World War was 1914 to 1918."
+   },
+   "qs": [160]
+  },
+  {
+   "id": "20-juli",
+   "date": "1944-07-20",
+   "when": {"de": "20. Juli 1944", "en": "20 July 1944"},
+   "era": "ns", "lane": "de",
+   "title": {"de": "Attentat auf Hitler", "en": "The plot to kill Hitler"},
+   "what": {
+    "de": "Der Offizier Claus Schenk Graf von Stauffenberg legt eine Bombe in Hitlers Hauptquartier. Hitler überlebt. Stauffenberg und viele andere werden hingerichtet.",
+    "en": "The officer Claus Schenk Graf von Stauffenberg plants a bomb in Hitler’s headquarters. Hitler survives. Stauffenberg and many others are executed."
+   },
+   "why": {
+    "de": "Der 20. Juli steht heute für den Widerstand gegen den Nationalsozialismus.",
+    "en": "Today 20 July stands for resistance against National Socialism."
+   },
+   "qs": [162]
+  },
+  {
+   "id": "auschwitz",
+   "date": "1945-01-27",
+   "when": {"de": "27. Januar 1945", "en": "27 January 1945"},
+   "era": "ns", "lane": "de",
+   "title": {"de": "Befreiung von Auschwitz", "en": "Auschwitz is liberated"},
+   "what": {
+    "de": "Soldaten der Sowjetunion befreien das Vernichtungslager Auschwitz. Die Nationalsozialisten haben rund sechs Millionen europäische Juden ermordet (Holocaust, Schoah), dazu Sinti und Roma und viele andere Menschen.",
+    "en": "Soviet soldiers liberate the Auschwitz extermination camp. The National Socialists murdered about six million European Jews (the Holocaust, or Shoah), as well as Sinti and Roma and many others."
+   },
+   "why": {
+    "de": "Seit 1996 ist der 27. Januar in Deutschland der Gedenktag für die Opfer des Nationalsozialismus. „Stolpersteine“ im Gehweg erinnern an einzelne Opfer vor ihrem letzten Wohnort. Aus diesen Verbrechen folgt Deutschlands besondere Verantwortung für Israel.",
+    "en": "Since 1996, 27 January has been Germany’s day of remembrance for the victims of National Socialism. “Stolpersteine”, small brass stones in the pavement, remember individual victims outside their last home. Germany’s special responsibility for Israel comes from these crimes."
+   },
+   "qs": [220, 206, 288],
+   "also": [96, 149, 111]
+  },
+  {
+   "id": "kriegsende",
+   "date": "1945-05-08",
+   "when": {"de": "8. Mai 1945", "en": "8 May 1945"},
+   "era": "besatzung", "lane": "de",
+   "title": {"de": "Ende des Krieges in Europa", "en": "The war in Europe ends"},
+   "what": {
+    "de": "Deutschland kapituliert bedingungslos. Damit endet der Zweite Weltkrieg in Europa.",
+    "en": "Germany surrenders unconditionally. This ends the Second World War in Europe."
+   },
+   "why": {
+    "de": "Das Ende der Diktatur. Deutschland verliert seine Regierung, die Siegermächte übernehmen.",
+    "en": "The end of the dictatorship. Germany loses its government and the victorious powers take over."
+   },
+   "trap": {
+    "de": "Hitler hat sich schon am 30. April das Leben genommen. Das Ende des Krieges ist aber die Kapitulation, nicht sein Tod.",
+    "en": "Hitler had already killed himself on 30 April. But the war ends with the surrender, not with his death."
+   },
+   "qs": [153, 154, 179]
+  },
+  {
+   "id": "besatzungszonen",
+   "date": "1945-06-05",
+   "end": "1949",
+   "when": {"de": "Juni 1945", "en": "June 1945"},
+   "era": "besatzung", "lane": "de",
+   "title": {"de": "Vier Besatzungszonen", "en": "Four zones of occupation"},
+   "what": {
+    "de": "Die vier Siegermächte USA, Sowjetunion, Großbritannien und Frankreich teilen Deutschland in vier Besatzungszonen. Großbritannien bekommt den Nordwesten, die Sowjetunion den Osten, die USA den Süden, Frankreich den Südwesten. Berlin wird in vier Sektoren geteilt.",
+    "en": "The four victorious powers, the USA, the Soviet Union, Britain and France, divide Germany into four zones of occupation. Britain takes the north-west, the Soviet Union the east, the USA the south, France the south-west. Berlin is split into four sectors."
+   },
+   "why": {
+    "de": "Aus den drei westlichen Zonen wird 1949 die Bundesrepublik, aus der sowjetischen Zone die DDR.",
+    "en": "In 1949 the three western zones become the Federal Republic, and the Soviet zone becomes the GDR."
+   },
+   "trap": {
+    "de": "Japan war keine Besatzungsmacht in Deutschland.",
+    "en": "Japan was not an occupying power in Germany."
+   },
+   "qs": [167, 168, 175, 176, 177],
+   "also": [64]
+  },
+  {
+   "id": "israel",
+   "date": "1948-05-14",
+   "when": {"de": "14. Mai 1948", "en": "14 May 1948"},
+   "era": "besatzung", "lane": "welt",
+   "title": {"de": "Gründung Israels", "en": "Israel is founded"},
+   "what": {
+    "de": "Der Staat Israel wird gegründet. Grundlage ist eine Resolution der Vereinten Nationen von 1947.",
+    "en": "The State of Israel is founded. Its basis is a United Nations resolution from 1947."
+   },
+   "qs": [184],
+   "also": [288]
+  },
+  {
+   "id": "luftbruecke",
+   "date": "1948-06-24",
+   "end": "1949-05-12",
+   "when": {"de": "Juni 1948 bis Mai 1949", "en": "June 1948 to May 1949"},
+   "era": "besatzung", "lane": "de",
+   "title": {"de": "Berliner Luftbrücke", "en": "The Berlin Airlift"},
+   "what": {
+    "de": "Die Sowjetunion sperrt alle Wege über Land nach West-Berlin. Die Westmächte versorgen die Stadt fast ein Jahr lang mit Flugzeugen.",
+    "en": "The Soviet Union blocks every route over land into West Berlin. The Western powers supply the city by plane for almost a year."
+   },
+   "why": {
+    "de": "Die Blockade zeigt, dass sich Ost und West trennen. Ein Jahr später gibt es zwei deutsche Staaten.",
+    "en": "The blockade shows East and West splitting apart. A year later there are two German states."
+   },
+   "qs": [178]
+  },
+  {
+   "id": "brd",
+   "date": "1949-05-23",
+   "when": {"de": "23. Mai 1949", "en": "23 May 1949"},
+   "era": "teilung", "lane": "west",
+   "title": {"de": "Gründung der Bundesrepublik", "en": "The Federal Republic is founded"},
+   "what": {
+    "de": "In den drei westlichen Zonen tritt das Grundgesetz in Kraft. Die Bundesrepublik Deutschland ist gegründet. Erster Bundeskanzler wird Konrad Adenauer.",
+    "en": "The Basic Law (Grundgesetz) comes into force in the three western zones, and the Federal Republic of Germany is founded. Konrad Adenauer becomes its first chancellor."
+   },
+   "why": {
+    "de": "Das Grundgesetz ist bis heute die Verfassung Deutschlands. Seit 1990 gilt es auch im Osten.",
+    "en": "The Basic Law is still Germany’s constitution today. Since 1990 it also applies in the east."
+   },
+   "qs": [169, 165, 180],
+   "also": [6, 11, 212]
+  },
+  {
+   "id": "ddr",
+   "date": "1949-10-07",
+   "end": "1990-10-03",
+   "when": {"de": "7. Oktober 1949", "en": "7 October 1949"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Gründung der DDR", "en": "The GDR is founded"},
+   "what": {
+    "de": "In der sowjetischen Besatzungszone wird die Deutsche Demokratische Republik (DDR) gegründet. Sie besteht bis 1990.",
+    "en": "The German Democratic Republic (DDR, GDR in English) is founded in the Soviet zone of occupation. It exists until 1990."
+   },
+   "why": {
+    "de": "Trotz des Namens ist die DDR keine Demokratie. Seit 1959 hat ihre schwarz-rot-goldene Flagge ein Wappen: Hammer, Zirkel und Ährenkranz.",
+    "en": "Despite its name, the GDR is not a democracy. From 1959 its black-red-gold flag carries an emblem: hammer, compass and a wreath of grain."
+   },
+   "qs": [174, 172, 190, 217, 187, 209]
+  },
+  {
+   "id": "leben-in-der-ddr",
+   "date": "1950",
+   "end": "1990",
+   "when": {"de": "1949 bis 1990", "en": "1949 to 1990"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Leben in der DDR", "en": "Life in the GDR"},
+   "what": {
+    "de": "Die Wirtschaft der DDR ist eine Planwirtschaft: Der Staat bestimmt, was produziert wird. Der Geheimdienst, die „Stasi“ (Ministerium für Staatssicherheit), überwacht die Menschen.",
+    "en": "The GDR has a planned economy: the state decides what is produced. The secret police, the “Stasi” (Ministry for State Security), watches the population."
+   },
+   "why": {
+    "de": "Die DDR holt Arbeitskräfte vor allem aus Vietnam, Polen und Mosambik.",
+    "en": "The GDR brings in workers mainly from Vietnam, Poland and Mozambique."
+   },
+   "trap": {
+    "de": "Die Stasi war der Geheimdienst der DDR, nicht des „Dritten Reiches“.",
+    "en": "The Stasi was the GDR’s secret police, not the Third Reich’s."
+   },
+   "qs": [199, 208, 203, 298]
+  },
+  {
+   "id": "wirtschaftswunder",
+   "date": "1950",
+   "end": "1960",
+   "when": {"de": "50er Jahre", "en": "The 1950s"},
+   "era": "teilung", "lane": "west",
+   "title": {"de": "Das Wirtschaftswunder", "en": "The economic miracle"},
+   "what": {
+    "de": "Die Wirtschaft der Bundesrepublik wächst sehr schnell. Nach dem Krieg haben viele Menschen bald wieder Arbeit und Wohlstand.",
+    "en": "West Germany’s economy grows very fast. Soon after the war many people have work and prosperity again."
+   },
+   "why": {
+    "de": "Die Grundlage ist die soziale Marktwirtschaft: Angebot und Nachfrage bestimmen die Wirtschaft, der Staat sorgt für sozialen Ausgleich.",
+    "en": "It rests on the social market economy: supply and demand drive the economy, and the state provides social balance."
+   },
+   "qs": [183],
+   "also": [171]
+  },
+  {
+   "id": "17-juni",
+   "date": "1953-06-17",
+   "when": {"de": "17. Juni 1953", "en": "17 June 1953"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Volksaufstand in der DDR", "en": "The uprising in the GDR"},
+   "what": {
+    "de": "In der ganzen DDR streiken Menschen und demonstrieren gegen die Regierung. Sowjetische Panzer schlagen den Aufstand nieder.",
+    "en": "Across the GDR people strike and demonstrate against the government. Soviet tanks crush the uprising."
+   },
+   "why": {
+    "de": "In der Bundesrepublik war der 17. Juni bis 1990 ein Feiertag.",
+    "en": "In West Germany, 17 June was a public holiday until 1990."
+   },
+   "trap": {
+    "de": "„Wir sind das Volk“ riefen die Menschen 1989, nicht 1953.",
+    "en": "“Wir sind das Volk” was the call of 1989, not 1953."
+   },
+   "qs": [186, 210]
+  },
+  {
+   "id": "warschauer-pakt",
+   "date": "1955-05-14",
+   "when": {"de": "Mai 1955", "en": "May 1955"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Zwei Militärbündnisse", "en": "Two military alliances"},
+   "what": {
+    "de": "Die Bundesrepublik tritt der NATO bei. Wenige Tage später gründen die Sowjetunion und ihre Verbündeten den Warschauer Pakt. Die DDR ist Mitglied.",
+    "en": "West Germany joins NATO. A few days later the Soviet Union and its allies found the Warsaw Pact, with the GDR as a member."
+   },
+   "why": {
+    "de": "Im „Kalten Krieg“ trennt der „Eiserne Vorhang“ Europa: Die Staaten des Warschauer Pakts schotten sich gegen den Westen ab.",
+    "en": "In the Cold War the “Iron Curtain” divides Europe: the Warsaw Pact states seal themselves off from the West."
+   },
+   "trap": {
+    "de": "Die Bundesrepublik war kein Gründungsmitglied der NATO. Gründungsmitglied ist sie bei der EU (über die EWG, 1957).",
+    "en": "West Germany was not a founding member of NATO. It is a founding member of the EU (through the EEC, 1957)."
+   },
+   "qs": [202, 207, 185]
+  },
+  {
+   "id": "gastarbeiter",
+   "date": "1955-12-20",
+   "when": {"de": "1955", "en": "1955"},
+   "era": "teilung", "lane": "west",
+   "title": {"de": "Die ersten Gastarbeiter", "en": "The first guest workers"},
+   "what": {
+    "de": "Die Bundesrepublik schließt einen Vertrag mit Italien und wirbt Arbeitskräfte an. Später folgen Verträge mit weiteren Ländern, zum Beispiel Spanien, Griechenland und der Türkei.",
+    "en": "West Germany signs an agreement with Italy to recruit workers. Agreements with other countries follow, such as Spain, Greece and Turkey."
+   },
+   "why": {
+    "de": "Im Wirtschaftswunder fehlen Arbeitskräfte. Die angeworbenen Menschen nennt man „Gastarbeiter“. Viele bleiben für immer.",
+    "en": "The economic miracle needs more workers. The people recruited are called “Gastarbeiter” (guest workers). Many stay for good."
+   },
+   "trap": {
+    "de": "Die ersten kamen aus Italien, nicht aus der Türkei.",
+    "en": "The first came from Italy, not from Turkey."
+   },
+   "qs": [299, 300]
+  },
+  {
+   "id": "roemische-vertraege",
+   "date": "1957-03-25",
+   "when": {"de": "25. März 1957", "en": "25 March 1957"},
+   "era": "teilung", "lane": "welt",
+   "title": {"de": "Römische Verträge", "en": "The Treaties of Rome"},
+   "what": {
+    "de": "Sechs Staaten gründen in Rom die Europäische Wirtschaftsgemeinschaft (EWG). Die Bundesrepublik ist dabei.",
+    "en": "Six states found the European Economic Community (EEC) in Rome. West Germany is one of them."
+   },
+   "why": {
+    "de": "Aus der EWG wird später die Europäische Union. Deshalb ist Deutschland ein Gründungsmitglied der EU.",
+    "en": "The EEC later becomes the European Union, which makes Germany a founding member of the EU."
+   },
+   "qs": [237, 239, 173]
+  },
+  {
+   "id": "mauerbau",
+   "date": "1961-08-13",
+   "end": "1989-11-09",
+   "when": {"de": "13. August 1961", "en": "13 August 1961"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Bau der Mauer", "en": "The Wall goes up"},
+   "what": {
+    "de": "Die DDR baut eine Mauer quer durch Berlin. Von 1961 bis 1989 ist die Stadt geteilt.",
+    "en": "The GDR builds a wall right through Berlin. From 1961 to 1989 the city is divided."
+   },
+   "why": {
+    "de": "Immer mehr Menschen flohen aus der DDR in den Westen. Die Mauer sollte das verhindern.",
+    "en": "More and more people were fleeing the GDR to the West. The Wall was meant to stop them."
+   },
+   "trap": {
+    "de": "1953 war der Aufstand, 1961 der Mauerbau.",
+    "en": "1953 was the uprising; 1961 was the Wall."
+   },
+   "qs": [151, 188, 189, 193]
+  },
+  {
+   "id": "kniefall",
+   "date": "1970-12-07",
+   "when": {"de": "7. Dezember 1970", "en": "7 December 1970"},
+   "era": "teilung", "lane": "west",
+   "title": {"de": "Kniefall von Warschau", "en": "Brandt kneels in Warsaw"},
+   "what": {
+    "de": "Bundeskanzler Willy Brandt kniet in Warschau vor dem Denkmal für den Aufstand im jüdischen Ghetto. Er bittet damit Polen und die polnischen Juden um Vergebung.",
+    "en": "Chancellor Willy Brandt kneels in Warsaw before the memorial to the Jewish ghetto uprising. With it he asks Poland and Polish Jews for forgiveness."
+   },
+   "why": {
+    "de": "Am selben Tag unterschreibt er einen Vertrag mit Polen. Mit seinen „Ostverträgen“ verbessert Brandt die Beziehungen zu den Staaten im Osten.",
+    "en": "The same day he signs a treaty with Poland. With these “Ostverträge” (eastern treaties) Brandt improves relations with the countries to the east."
+   },
+   "qs": [181, 211]
+  },
+  {
+   "id": "europawahl",
+   "date": "1979-06",
+   "when": {"de": "Juni 1979", "en": "June 1979"},
+   "era": "teilung", "lane": "welt",
+   "title": {"de": "Erste Europawahl", "en": "The first European election"},
+   "what": {
+    "de": "Die Bürger wählen das Europäische Parlament zum ersten Mal direkt.",
+    "en": "Citizens elect the European Parliament directly for the first time."
+   },
+   "why": {
+    "de": "Seitdem wählt man alle 5 Jahre die Abgeordneten des Europäischen Parlaments. Das Parlament arbeitet in Straßburg, Luxemburg und Brüssel.",
+    "en": "Since then its members have been elected every 5 years. The Parliament works in Strasbourg, Luxembourg and Brussels."
+   },
+   "qs": [230, 232],
+   "also": [234, 238]
+  },
+  {
+   "id": "verdun",
+   "date": "1984-09-22",
+   "when": {"de": "22. September 1984", "en": "22 September 1984"},
+   "era": "teilung", "lane": "welt",
+   "title": {"de": "Mitterrand und Kohl in Verdun", "en": "Mitterrand and Kohl at Verdun"},
+   "what": {
+    "de": "Der französische Präsident François Mitterrand und Bundeskanzler Helmut Kohl stehen Hand in Hand in Verdun. Sie gedenken der Toten beider Weltkriege.",
+    "en": "French President François Mitterrand and Chancellor Helmut Kohl stand hand in hand at Verdun, remembering the dead of both world wars."
+   },
+   "why": {
+    "de": "Frankreich und Deutschland waren lange Feinde. Das Bild steht für das Ziel der EU: Frieden und Sicherheit in Europa.",
+    "en": "France and Germany were enemies for a long time. The picture stands for the EU’s aim: peace and security in Europe."
+   },
+   "qs": [235]
+  },
+  {
+   "id": "schengen",
+   "date": "1985-06-14",
+   "when": {"de": "1985", "en": "1985"},
+   "era": "teilung", "lane": "welt",
+   "title": {"de": "Schengener Abkommen", "en": "The Schengen Agreement"},
+   "what": {
+    "de": "Im Ort Schengen in Luxemburg vereinbaren Deutschland und andere Staaten, die Grenzkontrollen abzuschaffen. Seit 1995 gilt das in der Praxis.",
+    "en": "In the village of Schengen in Luxembourg, Germany and other states agree to remove border checks. Since 1995 this has applied in practice."
+   },
+   "why": {
+    "de": "Deutsche können in viele Länder Europas ohne Passkontrolle reisen.",
+    "en": "Germans can travel to many European countries without passport checks."
+   },
+   "trap": {
+    "de": "Viele Länder, nicht jedes Land. Und Schengen hat nichts mit dem Euro zu tun.",
+    "en": "Many countries, not every country. And Schengen has nothing to do with the euro."
+   },
+   "qs": [221]
+  },
+  {
+   "id": "friedliche-revolution",
+   "date": "1989-09",
+   "when": {"de": "Herbst 1989", "en": "Autumn 1989"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Friedliche Revolution", "en": "The peaceful revolution"},
+   "what": {
+    "de": "In Leipzig und anderen Städten demonstrieren jeden Montag immer mehr Menschen gegen die Regierung. Sie rufen: „Wir sind das Volk“.",
+    "en": "In Leipzig and other cities, more and more people demonstrate against the government every Monday. They call out “Wir sind das Volk” (“We are the people”)."
+   },
+   "why": {
+    "de": "Diese Zeit nennt man „die Wende“: Die DDR wandelt sich ohne Gewalt von einer Diktatur zur Demokratie.",
+    "en": "This time is called “die Wende” (the turn): the GDR changes, without violence, from a dictatorship to a democracy."
+   },
+   "qs": [166, 196]
+  },
+  {
+   "id": "mauerfall",
+   "date": "1989-11-09",
+   "when": {"de": "9. November 1989", "en": "9 November 1989"},
+   "era": "teilung", "lane": "east",
+   "title": {"de": "Die Mauer fällt", "en": "The Wall falls"},
+   "what": {
+    "de": "Die DDR öffnet die Grenze. Die Mauer in Berlin ist für alle offen.",
+    "en": "The GDR opens its border. The Wall in Berlin is open to everyone."
+   },
+   "why": {
+    "de": "Weniger als ein Jahr später ist Deutschland wieder ein Staat.",
+    "en": "Less than a year later Germany is one state again."
+   },
+   "trap": {
+    "de": "Auch am 9. November 1938 war etwas: die Novemberpogrome.",
+    "en": "9 November 1938 was also a key date: the November pogroms."
+   },
+   "qs": [191]
+  },
+  {
+   "id": "wiedervereinigung",
+   "date": "1990-10-03",
+   "when": {"de": "3. Oktober 1990", "en": "3 October 1990"},
+   "era": "einheit", "lane": "de",
+   "title": {"de": "Deutsche Wiedervereinigung", "en": "German reunification"},
+   "what": {
+    "de": "Die DDR tritt der Bundesrepublik bei. Fünf neue Bundesländer kommen hinzu: Brandenburg, Mecklenburg-Vorpommern, Sachsen, Sachsen-Anhalt und Thüringen. Ost- und West-Berlin werden eine Stadt.",
+    "en": "The GDR joins the Federal Republic. Five new federal states are added: Brandenburg, Mecklenburg-Vorpommern, Saxony, Saxony-Anhalt and Thuringia. East and West Berlin become one city."
+   },
+   "why": {
+    "de": "Der 3. Oktober ist seitdem der Tag der Deutschen Einheit. Seit 1990 hat Deutschland seine heutigen Grenzen. Die neuen Länder gehören nun auch zur Europäischen Gemeinschaft, der heutigen EU. Helmut Kohl nennt man den „Kanzler der Einheit“.",
+    "en": "Since then 3 October has been the Day of German Unity. Germany has had its current borders since 1990. The new states now also belong to the European Community, today’s EU. Helmut Kohl is called the “chancellor of unity”."
+   },
+   "trap": {
+    "de": "Es war ein Beitritt: Der Osten ist der Bundesrepublik beigetreten. Niemand hat den anderen Staat besetzt.",
+    "en": "It was an accession: the east joined the Federal Republic. Neither state occupied the other."
+   },
+   "qs": [194, 228, 204, 218, 219, 205, 215, 192, 195, 197, 198, 200, 201],
+   "also": [64]
+  },
+  {
+   "id": "maastricht",
+   "date": "1993-11-01",
+   "when": {"de": "1993", "en": "1993"},
+   "era": "einheit", "lane": "welt",
+   "title": {"de": "Die Europäische Union entsteht", "en": "The European Union is born"},
+   "what": {
+    "de": "Mit dem Vertrag von Maastricht wird aus der Europäischen Gemeinschaft die Europäische Union (EU).",
+    "en": "With the Maastricht Treaty, the European Community becomes the European Union (EU)."
+   },
+   "why": {
+    "de": "Diesen Zusammenschluss europäischer Staaten zur EU nennt man „europäische Integration“. Heute hat die EU 27 Mitgliedstaaten.",
+    "en": "This joining of European states into the EU is called “European integration”. Today the EU has 27 member states."
+   },
+   "qs": [231],
+   "also": [224, 236]
+  },
+  {
+   "id": "euro",
+   "date": "2002-01-01",
+   "when": {"de": "1. Januar 2002", "en": "1 January 2002"},
+   "era": "einheit", "lane": "welt",
+   "title": {"de": "Der Euro in bar", "en": "Euro notes and coins"},
+   "what": {
+    "de": "In Deutschland bezahlt man ab jetzt mit Euro-Scheinen und -Münzen. Die D-Mark gibt es nicht mehr.",
+    "en": "From now on Germany pays with euro notes and coins. The Deutsche Mark is gone."
+   },
+   "qs": [240]
+  }
+ ]
+}

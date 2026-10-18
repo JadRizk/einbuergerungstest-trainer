@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="timeline.css">
+<link rel="preload" as="fetch" type="application/json" href="data/timeline.json" crossorigin>
+<link rel="preload" as="fetch" type="application/json" href="data/questions.json" crossorigin>
+<title>Wie es geschah — Einbürgerungstest</title>
+<meta name="description" content="How it happened: the events behind the history questions of the official German citizenship test, on one timeline.">
+<meta name="theme-color" content="#EDF0EF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10191B" media="(prefers-color-scheme: dark)">
+<!-- after the theme-color metas, which it pins; before the body, which it themes -->
+<script src="theme.js"></script>
+<link rel="icon" href="icon/favicon.ico" sizes="32x32">
+<link rel="icon" href="icon/favicon.svg" type="image/svg+xml">
+<script type="module" src="timeline.js"></script>
+</head>
+<body>
+
+<header class="bar" id="bar">
+  <div class="bar-row">
+    <a class="back" href="./" aria-label="Back to the question catalogue">←</a>
+    <div class="title">
+      <h1><span lang="de">Wie es geschah</span> <small>How it happened</small></h1>
+      <p><span id="count">…</span></p>
+    </div>
+    <div class="year" aria-hidden="true"><span id="year">321</span></div>
+    <div class="opt-row" id="t-en" role="checkbox" tabindex="0" aria-checked="false">
+      <span class="lb">English</span><span class="sw"></span>
+    </div>
+  </div>
+  <nav class="eras" aria-label="Eras">
+    <div class="eras-scroll" id="eras-scroll">
+      <ol class="chips" id="chips"></ol>
+      <!-- the same chips again, filled; clip-path shows only the active one -->
+      <ol class="chips lit" id="chips-lit" aria-hidden="true"></ol>
+    </div>
+  </nav>
+</header>
+
+<main class="wrap">
+  <ol class="tl" id="tl" lang="de"></ol>
+</main>
+
+</body>
+</html>
