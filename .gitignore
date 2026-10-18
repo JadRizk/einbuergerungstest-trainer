@@ -1,3 +1,6 @@
 # Python leaves this behind if brand/build.py is imported rather than run.
 __pycache__/
 *.pyc
+
+# Claude Code makes a git worktree per session here; launch.json beside it stays tracked.
+.claude/worktrees/
