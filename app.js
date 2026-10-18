@@ -2,7 +2,7 @@
    Data lives in data/*.json and is fetched here, so a UI change does not make
    returning visitors re-download the 460-question catalogue. */
 
-import { level as levelOf, solid as solidOf } from './grade.js';
+import { level as levelOf, solid as solidOf, run } from './grade.js';
 import { json, esc } from './util.js';
 import { drawer, fillNav, THEMES } from './nav.js';
 
@@ -865,7 +865,7 @@ function paintStreak(){
    the level the map draws and solid or shaky reads. */
 function record(q,ok){
   const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
-  if(ok){ st.r++; st.c=(st.c||0)+1; } else { st.w++; st.c=0; }
+  if(ok){ st.c=run(st)+1; st.r++; } else { st.w++; st.c=0; }
 }
 const level=q=>levelOf(S.stats[q.id]);
 const solid=q=>solidOf(S.stats[q.id]);
