@@ -2,14 +2,21 @@
    Data lives in data/*.json and is fetched here, so a UI change does not make
    returning visitors re-download the 460-question catalogue. */
 
-import { level as levelOf, solid as solidOf } from './grade.js';
+import { level as levelOf, solid as solidOf, run } from './grade.js';
 import { json, esc } from './util.js';
 import { drawer, fillNav, THEMES } from './nav.js';
 
 /* the menu's shared sections go in before the catalogue is awaited */
 fillNav();
 
-const [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
+let DATA, GLOS;
+try {
+  [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
+} catch (err) {
+  document.getElementById('view').innerHTML = `<div class="empty"><b>The catalogue could not be loaded</b>${
+    navigator.onLine ? '' : 'You are offline, and the app has not been saved for offline use yet. '}Reload to try again.</div>`;
+  throw err;
+}
 
 /* Intrinsic pixel size of every question image, read from the WebP headers.
    Used only to reserve the box before the image arrives, so answers do not
@@ -60,20 +67,29 @@ const GCAT={
 const catEn=c=>GCAT[c]||c;
 const S={
   land:'Berlin', mode:'drill', filter:'all',
-  idx:0, picked:null, pin:null, again:null, stats:{}, exam:null,
+  idx:0, picked:null, pin:null, keep:null, again:null, stats:{}, exam:null,
   gloss:true, hooks:false, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
   streak:0, bestStreak:0,               /* right answers in a row in Practice */
   voice:'', rate:0.85,
-  theme:'system'                        /* or 'light' / 'dark'; theme.js reads it before paint */
+  theme:'system',                       /* or 'light' / 'dark'; theme.js reads it before paint */
+  wiped:0                               /* when Reset last ran, so other tabs follow it */
 };
-function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
-  shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto,theme:S.theme}); }
+/* what outlives the tab; the rest of S is where you are right now */
+const SAVED=['land','stats','gloss','hooks','shufQ','shufA','auto','seed','railOpen','exams',
+  'bestStreak','voice','rate','escope','efrom','eto','theme','wiped'];
+/* Each of them as this tab last knew it in storage, written or taken up. A
+   field that differs from it here is a change not saved yet -- a range being
+   typed, a new shuffle -- and another tab's save does not take it away. */
+const stored={};
+const mark=d=>{ for(const k of SAVED) if(k in d) stored[k]=JSON.stringify(d[k]); };
+const unsaved=k=>JSON.stringify(S[k])!==stored[k];
+function save(){ const d=Object.fromEntries(SAVED.map(k=>[k,S[k]])); mark(d); store.set(KEY,d); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
+  mark(S);
 }
 
 /* ---------------- glossary decoration ---------------- */
@@ -254,8 +270,9 @@ function view(){
   /* While an answer is on screen its question stays in the list, even when
      that answer just moved it out of the selection (a first answer under "Not
      seen yet", a recovery under "My mistakes"). Otherwise the list shifts under
-     S.idx and the next question is drawn as already answered. */
-  const held=q=>S.picked!==null && q.id===S.pin;
+     S.idx and the next question is drawn as already answered. S.keep holds a
+     question another tab's answer moved out while it was on screen here. */
+  const held=q=>(S.picked!==null && q.id===S.pin) || q.id===S.keep;
   let l;
   switch(true){
     case S.filter==='unseen': l=p.filter(q=>!S.stats[q.id]||held(q)); break;
@@ -396,7 +413,7 @@ function applyRoute(){
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
-  if(changed){ S.picked=null; S.idx=0; stopSpeech(); }
+  if(changed){ S.picked=S.keep=null; S.idx=0; stopSpeech(); }
   if(m!=='exam') S.exam=null;
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
@@ -411,8 +428,8 @@ $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
 $('m-exam').onclick =()=>go('exam');
 
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=null;S.exam=null;stopSpeech();save();closeNav();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=null;stopSpeech();closeNav();render();};
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;S.picked=S.keep=null;S.exam=null;stopSpeech();save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;S.picked=S.keep=null;stopSpeech();closeNav();render();};
 
 function toggle(id,key,after){
   const el=$(id);
@@ -423,20 +440,63 @@ function toggle(id,key,after){
 toggle('t-gloss','gloss',()=>{hideTip(); render();});
 toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
-toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
-toggle('t-shufa','shufA',()=>{S.picked=null; render();});
+toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=S.keep=null; render();});
+toggle('t-shufa','shufA',()=>{S.picked=S.keep=null; render();});
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
-/* The chart and the timeline save a theme chosen in their menu into this
-   blob too. Taken up here, or this tab's next save would put its old one back. */
+/* a is the fuller record of one question: more answers, then more right,
+   then a longer run -- the same order in every tab, so they agree */
+const more=(a,b)=>!b || (a.r+a.w-b.r-b.w || a.r-b.r || run(a)-run(b))>0;
+/* what Reset clears: none of it is taken from a tab that has not seen this tab's Reset */
+const WIPED=['stats','exams','bestStreak','wiped'];
+/* Another tab saved: a second Practice tab, or the chart or the timeline
+   with a theme chosen in their menu. What it saved is taken up at once, or
+   this tab's next save would put its own old copy back over it.
+
+   The answers are merged question by question, keeping the fuller record,
+   so two tabs answering at once both keep theirs, and the merge is written
+   back if it added anything. A Reset is followed rather than merged with:
+   `wiped` says which side reset last.
+
+   The question on screen stays on screen. The list it sits in can shift
+   (an answer elsewhere moves questions out of "Not seen yet"), so it is
+   found again by id, and held in the list like an answered one if it has
+   left it. The redraw waits while an answer is on screen, an exam is
+   running or a field on the page is being filled in; the next step draws
+   the new state. */
 addEventListener('storage',e=>{
   if(e.key!==KEY) return;
-  let t; try{ t=JSON.parse(e.newValue)?.theme; }catch(err){ return; }
-  if(THEMES.includes(t) && t!==S.theme){ S.theme=t; window.theme?.set(t); paintThemeBtns(); }
+  let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
+  if(!d) return;
+  const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
+  const cur=S.mode==='exam' ? null : view()[S.idx];
+  const theirs=d.stats||{}, since=(d.wiped||0)-(S.wiped||0);
+  let gained=false;
+  if(since>0){ S.stats=theirs; S.wiped=d.wiped; S.streak=0; }   /* wiped there: follow it */
+  else if(since===0){
+    const merged={...theirs};
+    for(const [id,a] of Object.entries(S.stats)) if(more(a,theirs[id])){ merged[id]=a; gained=true; }
+    S.stats=merged;
+  }
+  const skip=since<0 ? WIPED : ['stats','wiped'];
+  for(const k of SAVED) if(!skip.includes(k) && k in d && !unsaved(k)) S[k]=d[k];
+  mark(d);
+  if(gained || since<0) save();               /* hand back what that tab is missing */
+  if(cur){
+    if(!view().some(x=>x.id===cur.id)) S.keep=cur.id;
+    S.idx=view().findIndex(x=>x.id===cur.id);
+  }
+  if(!THEMES.includes(S.theme)) S.theme=was.theme;
+  if(S.theme!==was.theme) window.theme?.set(S.theme);
+  if(S.railOpen!==was.railOpen) applyRail();
+  if(S.voice!==was.voice) paintVoices();
+  paintThemeBtns();
+  const typing=viewEl.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+  if(S.picked===null && !(S.exam && !S.exam.done) && !typing) render();
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.wiped=Date.now(); S.idx=0; S.picked=S.keep=null; S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
@@ -815,7 +875,7 @@ function step(d){
      it can drop it from the list and shift every index after it */
   const to=list[(S.idx+d+list.length)%list.length];
   if(S.again!==null){ requeue(list,S.again,to); S.again=null; }
-  S.picked=null;
+  S.picked=S.keep=null;
   list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
@@ -846,7 +906,7 @@ function paintStreak(){
    the level the map draws and solid or shaky reads. */
 function record(q,ok){
   const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
-  if(ok){ st.r++; st.c=(st.c||0)+1; } else { st.w++; st.c=0; }
+  if(ok){ st.c=run(st)+1; st.r++; } else { st.w++; st.c=0; }
 }
 const level=q=>levelOf(S.stats[q.id]);
 const solid=q=>solidOf(S.stats[q.id]);
@@ -910,7 +970,7 @@ function paintStats(){
 
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
     S.filter=b.dataset.f; filterSel.value=S.filter;
-    S.idx=0; S.picked=null; stopSpeech(); setSheet(false); render();
+    S.idx=0; S.picked=S.keep=null; stopSpeech(); setSheet(false); render();
   });
 }
 
@@ -945,7 +1005,7 @@ function paintDock(){
     b.onclick=()=>{
       /* Not in the current selection: widen it to everything, since the
          question you tapped is the one you asked for. */
-      S.picked=null;                     /* releases the held question first */
+      S.picked=S.keep=null;              /* releases the held question first */
       let at=view().findIndex(x=>x.id===q.id);
       if(at<0){
         S.filter='all'; filterSel.value='all';
@@ -1195,6 +1255,7 @@ function renderResult(){
 }
 
 /* ---------------- keyboard ---------------- */
+const CONTROL='button,a[href],summary,[role=checkbox],[role=button]';
 document.addEventListener('keydown',e=>{
   if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)){
     if(e.key==='Escape'&&!veil.hidden) closeGlos();
@@ -1202,6 +1263,12 @@ document.addEventListener('keydown',e=>{
   }
   const k=e.key;
   if(k==='Escape'){ stopSpeech(); if(!lens.hidden) closeLens(); else if(!veil.hidden) closeGlos(); else if(navOpen()) closeNav(); else hideTip(); return; }
+  /* The open drawer and the picture lens get every key, and a focused
+     control answers Enter and Space itself: taking them here ran step() and
+     cancelled the control's own click, so Enter on the Glossary button
+     skipped a question instead. */
+  if(navOpen() || !lens.hidden) return;
+  if((k==='Enter'||k===' ') && e.target.matches?.(CONTROL)) return;
   if(!veil.hidden) return;
   if(k==='g'||k==='G'){ e.preventDefault(); openGlos(); return; }
   if(k==='c'||k==='C'){

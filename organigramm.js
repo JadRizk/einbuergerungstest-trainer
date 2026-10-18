@@ -26,7 +26,7 @@ try {
   [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 } catch (err) {
   document.getElementById('chart').innerHTML = `<p class="fail">The catalogue could not be loaded${
-    navigator.onLine ? '' : ' — you are offline, and this page has not been opened online yet'}. Reload to try again.</p>`;
+    navigator.onLine ? '' : ' — you are offline, and the app has not been saved for offline use yet'}. Reload to try again.</p>`;
   throw err;
 }
 const Q = DATA.questions;

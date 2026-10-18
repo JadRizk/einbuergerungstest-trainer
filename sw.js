@@ -22,15 +22,17 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18q';
+const VERSION = 'ebt-2026-10-18r';
 const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js', 'theme.js', 'manifest.json',
                  'nav.css', 'nav.js',
                  'organigramm.html', 'organigramm.css', 'organigramm.js',
                  'timeline.html', 'timeline.css', 'timeline.js',
-                 /* The catalogue and the glossary are cached as Practice reads them on
-                    every visit. Only the timeline reads its events, so a timeline never
-                    opened online would have nothing to show without this. */
-                 'data/timeline.json'];
+                 /* The data and the font are precached too, not left to their routes.
+                    On a first visit the page fetches them before this worker controls
+                    it, so the routes never see those requests and nothing would be
+                    cached: the next reload offline would hang on "Loading…". */
+                 'data/questions.json', 'data/glossary.json', 'data/hooks.json', 'data/timeline.json',
+                 'font/archivo-latin-var.woff2'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

@@ -20,9 +20,13 @@
    fall back to the tally, and a tie there counts as a miss because the order
    is unknown. */
 
+/* the current run of right answers, with that fallback for old records;
+   record() counts on from here, so an old green stays green */
+export const run = s => 'c' in s ? s.c : (s.r > s.w ? 2 : 0);
+
 export function level(s) {
   if (!s) return null;
-  const net = s.r - s.w, c = 'c' in s ? s.c : (s.r > s.w ? 2 : 0);
+  const net = s.r - s.w, c = run(s);
   if (net < 0) return Math.max(-3, net);
   if (c === 0) return -1;
   if ((c === 1 && s.w > 0) || net === 0) return 0;    /* the first right since a miss, or level */
