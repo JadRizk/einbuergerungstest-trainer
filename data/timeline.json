@@ -51,8 +51,8 @@
     "en": "The persecution of Jews becomes open violence in the street."
    },
    "trap": {
-    "de": "Der 9. November ist in der deutschen Geschichte mehrmals wichtig: 1938 die Pogrome, 1989 die Öffnung der Mauer.",
-    "en": "9 November matters more than once in German history: the pogroms in 1938, the opening of the Wall in 1989."
+    "de": "Der Angriff auf Polen war am 1. September 1939. Damit begann der Zweite Weltkrieg, nicht am 9. November 1938.",
+    "en": "The attack on Poland was on 1 September 1939. That started the Second World War, not 9 November 1938."
    },
    "qs": [163, 164],
    "also": [182]
@@ -105,8 +105,8 @@
     "en": "Soviet soldiers liberate the Auschwitz extermination camp. The National Socialists murdered about six million European Jews (the Holocaust, or Shoah), as well as Sinti and Roma and many others."
    },
    "why": {
-    "de": "Seit 1996 ist der 27. Januar in Deutschland der Gedenktag für die Opfer des Nationalsozialismus. „Stolpersteine“ im Gehweg erinnern an einzelne Opfer vor ihrem letzten Wohnort. Aus diesen Verbrechen folgt Deutschlands besondere Verantwortung für Israel.",
-    "en": "Since 1996, 27 January has been Germany’s day of remembrance for the victims of National Socialism. “Stolpersteine”, small brass stones in the pavement, remember individual victims outside their last home. Germany’s special responsibility for Israel comes from these crimes."
+    "de": "Seit 1996 ist der 27. Januar in Deutschland der Gedenktag für die Opfer des Nationalsozialismus. „Stolpersteine“ im Gehweg erinnern an einzelne Opfer vor ihrem letzten frei gewählten Wohnort. Aus diesen Verbrechen folgt Deutschlands besondere Verantwortung für Israel.",
+    "en": "Since 1996, 27 January has been Germany’s day of remembrance for the victims of National Socialism. “Stolpersteine”, small brass plates set into the pavement, remember individual victims outside the last home they chose freely. Germany’s special responsibility for Israel comes from these crimes."
    },
    "qs": [220, 206, 288],
    "also": [96, 149, 111]
@@ -122,8 +122,8 @@
     "en": "Germany surrenders unconditionally. This ends the Second World War in Europe."
    },
    "why": {
-    "de": "Das Ende der Diktatur. Deutschland verliert seine Regierung, die Siegermächte übernehmen.",
-    "en": "The end of the dictatorship. Germany loses its government and the victorious powers take over."
+    "de": "Das Ende der Diktatur. Danach übernehmen die Siegermächte die Regierung in Deutschland.",
+    "en": "The end of the dictatorship. After it, the victorious powers take over the government of Germany."
    },
    "trap": {
     "de": "Hitler hat sich schon am 30. April das Leben genommen. Das Ende des Krieges ist aber die Kapitulation, nicht sein Tod.",
@@ -174,8 +174,8 @@
    "era": "besatzung", "lane": "de",
    "title": {"de": "Berliner Luftbrücke", "en": "The Berlin Airlift"},
    "what": {
-    "de": "Die Sowjetunion sperrt alle Wege über Land nach West-Berlin. Die Westmächte versorgen die Stadt fast ein Jahr lang mit Flugzeugen.",
-    "en": "The Soviet Union blocks every route over land into West Berlin. The Western powers supply the city by plane for almost a year."
+    "de": "Die Sowjetunion sperrt alle Wege über Land nach West-Berlin. Die Westmächte versorgen die Stadt mit Flugzeugen. Die Blockade dauert fast ein Jahr.",
+    "en": "The Soviet Union blocks every route over land into West Berlin. The Western powers supply the city by plane. The blockade lasts almost a year."
    },
    "why": {
     "de": "Die Blockade zeigt, dass sich Ost und West trennen. Ein Jahr später gibt es zwei deutsche Staaten.",
@@ -190,8 +190,8 @@
    "era": "teilung", "lane": "west",
    "title": {"de": "Gründung der Bundesrepublik", "en": "The Federal Republic is founded"},
    "what": {
-    "de": "In den drei westlichen Zonen tritt das Grundgesetz in Kraft. Die Bundesrepublik Deutschland ist gegründet. Erster Bundeskanzler wird Konrad Adenauer.",
-    "en": "The Basic Law (Grundgesetz) comes into force in the three western zones, and the Federal Republic of Germany is founded. Konrad Adenauer becomes its first chancellor."
+    "de": "In den drei westlichen Zonen wird das Grundgesetz verkündet. Die Bundesrepublik Deutschland ist gegründet. Im September wird Konrad Adenauer der erste Bundeskanzler.",
+    "en": "The Basic Law (Grundgesetz) is proclaimed in the three western zones, and the Federal Republic of Germany is founded. In September Konrad Adenauer becomes its first chancellor."
    },
    "why": {
     "de": "Das Grundgesetz ist bis heute die Verfassung Deutschlands. Seit 1990 gilt es auch im Osten.",
@@ -271,8 +271,8 @@
     "en": "In West Germany, 17 June was a public holiday until 1990."
    },
    "trap": {
-    "de": "„Wir sind das Volk“ riefen die Menschen 1989, nicht 1953.",
-    "en": "“Wir sind das Volk” was the call of 1989, not 1953."
+    "de": "Der 20. Juli erinnert an das Attentat auf Hitler 1944, der 9. November an die Öffnung der Mauer 1989. Der Feiertag für den Aufstand war der 17. Juni.",
+    "en": "20 July recalls the plot against Hitler in 1944, 9 November the opening of the Wall in 1989. The holiday for the uprising was 17 June."
    },
    "qs": [186, 210]
   },
@@ -291,8 +291,8 @@
     "en": "In the Cold War the “Iron Curtain” divides Europe: the Warsaw Pact states seal themselves off from the West."
    },
    "trap": {
-    "de": "Die Bundesrepublik war kein Gründungsmitglied der NATO. Gründungsmitglied ist sie bei der EU (über die EWG, 1957).",
-    "en": "West Germany was not a founding member of NATO. It is a founding member of the EU (through the EEC, 1957)."
+    "de": "Die DDR war im Warschauer Pakt, nicht in der NATO. In der NATO war die Bundesrepublik.",
+    "en": "The GDR was in the Warsaw Pact, not in NATO. NATO was West Germany’s alliance."
    },
    "qs": [202, 207, 185]
   },
@@ -329,6 +329,10 @@
    "why": {
     "de": "Aus der EWG wird später die Europäische Union. Deshalb ist Deutschland ein Gründungsmitglied der EU.",
     "en": "The EEC later becomes the European Union, which makes Germany a founding member of the EU."
+   },
+   "trap": {
+    "de": "Gründungsmitglied ist die Bundesrepublik bei der EU. Bei der NATO war sie es nicht (Beitritt 1955), bei den Vereinten Nationen auch nicht (Beitritt 1973).",
+    "en": "West Germany is a founding member of the EU. It was not one of NATO (joined 1955) or of the United Nations (joined 1973)."
    },
    "qs": [237, 239, 173]
   },
@@ -436,6 +440,10 @@
     "de": "Diese Zeit nennt man „die Wende“: Die DDR wandelt sich ohne Gewalt von einer Diktatur zur Demokratie.",
     "en": "This time is called “die Wende” (the turn): the GDR changes, without violence, from a dictatorship to a democracy."
    },
+   "trap": {
+    "de": "„Wir sind das Volk“ riefen die Menschen 1989, nicht beim Aufstand 1953.",
+    "en": "“Wir sind das Volk” was the call of 1989, not of the 1953 uprising."
+   },
    "qs": [166, 196]
   },
   {
@@ -449,12 +457,8 @@
     "en": "The GDR opens its border. The Wall in Berlin is open to everyone."
    },
    "why": {
-    "de": "Weniger als ein Jahr später ist Deutschland wieder ein Staat.",
-    "en": "Less than a year later Germany is one state again."
-   },
-   "trap": {
-    "de": "Auch am 9. November 1938 war etwas: die Novemberpogrome.",
-    "en": "9 November 1938 was also a key date: the November pogroms."
+    "de": "Weniger als ein Jahr später ist Deutschland wieder ein Staat. Der 9. November ist auch der Tag der Novemberpogrome 1938.",
+    "en": "Less than a year later Germany is one state again. 9 November is also the date of the November pogroms in 1938."
    },
    "qs": [191]
   },
@@ -486,8 +490,8 @@
    "era": "einheit", "lane": "welt",
    "title": {"de": "Die Europäische Union entsteht", "en": "The European Union is born"},
    "what": {
-    "de": "Mit dem Vertrag von Maastricht wird aus der Europäischen Gemeinschaft die Europäische Union (EU).",
-    "en": "With the Maastricht Treaty, the European Community becomes the European Union (EU)."
+    "de": "Der Vertrag von Maastricht tritt am 1. November 1993 in Kraft. Damit wird die Europäische Union (EU) gegründet.",
+    "en": "The Maastricht Treaty comes into force on 1 November 1993. It founds the European Union (EU)."
    },
    "why": {
     "de": "Diesen Zusammenschluss europäischer Staaten zur EU nennt man „europäische Integration“. Heute hat die EU 27 Mitgliedstaaten.",
@@ -503,8 +507,8 @@
    "era": "einheit", "lane": "welt",
    "title": {"de": "Der Euro in bar", "en": "Euro notes and coins"},
    "what": {
-    "de": "In Deutschland bezahlt man ab jetzt mit Euro-Scheinen und -Münzen. Die D-Mark gibt es nicht mehr.",
-    "en": "From now on Germany pays with euro notes and coins. The Deutsche Mark is gone."
+    "de": "In Deutschland bezahlt man ab jetzt mit Euro-Scheinen und -Münzen. Die D-Mark ist kein offizielles Geld mehr.",
+    "en": "From now on Germany pays with euro notes and coins. The Deutsche Mark is no longer legal tender."
    },
    "qs": [240]
   }
