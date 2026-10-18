@@ -1,0 +1,230 @@
+/* Wer wählt wen? — the organisational chart page.
+   Same tokens and typeface as app.css, so it reads as part of the app, but a
+   page of its own: it scrolls like a document instead of being a fixed shell. */
+@font-face{
+  font-family:'Archivo'; font-style:normal; font-weight:400 700; font-display:swap;
+  src:url('font/archivo-latin-var.woff2') format('woff2-variations');
+}
+:root{
+  --paper:#EDF0EF; --card:#FFFFFF; --ink:#152227; --muted:#4F6167; --dim:#5C6E74;
+  --edge:#788584; --rule:#DBE2E1; --soft:#E7EBEA; --sunk:#F1F4F4;
+  --accent:#0B6357; --gold:#8A5A12; --goldbg:#F8F0DC;
+  --ok:#0F5132; --okbg:#DEEDE4; --no:#B3332B;
+  --tipbg:#152227; --tipink:#F2F5F4;
+
+  /* arrow kinds */
+  --k-elect:#0B6357; --k-appt:#8A5A12; --k-ctl:#2F5DA8; --k-form:#33465E; --k-bg:#6E7B79;   /* >=3:1 on white, as a line must be */
+  /* branches: tint + stroke */
+  --leg:#E2F0EB;  --leg-s:#0B6357;
+  --exe:#F8F0DC;  --exe-s:#8A5A12;
+  --jud:#ECE8F4;  --jud-s:#5B4B8A;
+  --head:#E5EAF1; --head-s:#33465E;
+
+  --font:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --panel:21rem;
+  --page:100rem;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.5;
+     -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%}
+button,select{font:inherit; color:inherit}
+:focus-visible{outline:2.5px solid var(--accent); outline-offset:2px; border-radius:4px}
+
+/* ---------------- header: title left, controls right ---------------- */
+.bar{display:flex; flex-wrap:wrap; gap:.6rem 1rem; align-items:center; padding:.9rem 1rem .3rem; max-width:var(--page); margin:0 auto}
+.back{flex:0 0 auto; width:2.6rem; height:2.6rem; display:grid; place-items:center; border-radius:9px;
+      color:var(--ink); text-decoration:none; font-size:1.25rem; border:1px solid var(--edge); background:var(--card)}
+.back:hover{border-color:var(--muted)}
+.title{flex:1 1 12rem; min-width:0}
+.title h1{margin:0; font-size:1.4rem; letter-spacing:-.02em; line-height:1.2}
+.title h1 small{font-size:.95rem; font-weight:500; color:var(--muted); letter-spacing:0; margin-left:.2rem}
+.title p{margin:.15rem 0 0; color:var(--muted); font-size:.86rem}
+
+.controls{display:flex; flex-wrap:wrap; gap:.3rem .6rem; align-items:center}
+.field{display:flex; align-items:center; gap:.5rem}
+.field>span{font-size:.8rem; color:var(--muted)}
+.pick{
+  appearance:none; -webkit-appearance:none; min-width:12rem; background:var(--card); border:1px solid var(--edge);
+  border-radius:8px; padding:.45rem 2.3rem .45rem 12px; font-size:.9rem; cursor:pointer; min-height:2.5rem;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.6 L6 6.4 L11 1.6' stroke='%234F6167' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center;
+}
+.pick:hover{border-color:var(--muted)}
+.opt-row{display:flex; align-items:center; gap:.55rem; padding:.4rem .55rem; min-height:2.5rem; border-radius:8px; cursor:pointer; user-select:none}
+.opt-row:hover{background:var(--sunk)}
+.opt-row .lb{font-size:.88rem}
+.sw{flex:0 0 auto; width:2.4rem; height:1.4rem; border-radius:99px; background:var(--edge); position:relative; transition:background .15s}
+.sw::after{content:''; position:absolute; top:2px; left:2px; width:calc(1.4rem - 4px); height:calc(1.4rem - 4px); border-radius:50%; background:var(--card); transition:transform .15s}
+.opt-row[aria-checked=true] .sw{background:var(--accent)}
+.opt-row[aria-checked=true] .sw::after{transform:translateX(1rem)}
+
+/* ---------------- legend: one line where it fits ---------------- */
+.legend{list-style:none; display:flex; flex-wrap:wrap; gap:.25rem 1rem; align-items:center;
+        padding:.35rem 1rem .5rem; margin:0 auto; max-width:var(--page); font-size:.8rem; color:var(--muted)}
+.legend li{display:flex; align-items:center; gap:.4rem}
+.legend li span{color:var(--ink); font-weight:500}
+.legend em{font-style:normal}
+.legend .gap{width:1px; height:1rem; background:var(--rule)}
+.legend .ln{display:inline-block; width:22px; height:0; border-top:2.5px solid}
+.legend .ln.k-elect{border-color:var(--k-elect)}
+.legend .ln.k-appt{border-color:var(--k-appt)}
+.legend .ln.k-ctl{border-color:var(--k-ctl); border-top-style:dashed}
+.legend .ln.k-form{border-color:var(--k-form)}
+.legend .ln.k-bg{border-color:var(--k-bg); border-top-style:dotted}
+.legend .bx{display:inline-block; width:16px; height:12px; border-radius:3px; border:1.5px solid}
+.bx.b-leg{background:var(--leg); border-color:var(--leg-s)}
+.bx.b-exe{background:var(--exe); border-color:var(--exe-s)}
+.bx.b-jud{background:var(--jud); border-color:var(--jud-s)}
+.bx.b-head{background:var(--head); border-color:var(--head-s)}
+.legend button{background:var(--card); border:1px solid var(--edge); border-radius:99px; padding:.2rem .75rem;
+               font-size:.8rem; cursor:pointer; color:var(--muted)}
+.legend button span{color:var(--ink)}
+.legend button:hover{border-color:var(--muted)}
+
+/* ---------------- chart ---------------- */
+.wrap{max-width:var(--page); margin:0 auto; padding:.2rem 1rem 2rem; display:flex; gap:1rem; align-items:flex-start}
+/* On a narrow screen the drawing would shrink past legibility, so it keeps a
+   minimum width and its own container scrolls sideways, not the page. */
+.chart{flex:1 1 auto; min-width:0; overflow-x:auto; background:var(--card); border:1px solid var(--rule);
+       border-radius:14px; -webkit-overflow-scrolling:touch}
+.chart svg{display:block; width:100%; min-width:60rem; height:auto; font-family:var(--font)}
+
+.col rect{fill:var(--sunk); stroke:var(--soft)}
+.col text{font-size:13px; font-weight:700; text-anchor:middle; fill:var(--muted); letter-spacing:.08em; text-transform:uppercase}
+.col{cursor:pointer}
+.col:hover rect{fill:#EBF0EF}
+
+.legis rect{fill:none; stroke:var(--leg-s); stroke-width:1.3; stroke-dasharray:5 4; opacity:.7}
+.legis text{font-size:12px; fill:var(--leg-s); font-weight:600}
+.legis{cursor:pointer}
+
+.node{cursor:pointer}
+.node rect{stroke-width:1.6}
+.node .name{font-size:16px; font-weight:700; text-anchor:middle; fill:var(--ink); letter-spacing:-.01em}
+.node .sub{font-size:12.5px; text-anchor:middle; fill:var(--muted)}
+.sub.en, .gsub.en{font-style:italic; fill:var(--accent)}
+.grp{cursor:pointer}
+.grp rect{stroke-width:1.4; stroke-dasharray:6 4}
+.grp .gname{font-size:12.5px; font-weight:700; fill:var(--exe-s); text-transform:uppercase; letter-spacing:.06em}
+.grp .gsub{font-size:12px; fill:var(--muted)}
+
+.b-leg rect{fill:var(--leg); stroke:var(--leg-s)}
+.b-exe rect{fill:var(--exe); stroke:var(--exe-s)}
+.b-jud rect{fill:var(--jud); stroke:var(--jud-s)}
+.b-head rect{fill:var(--head); stroke:var(--head-s)}
+.b-volk rect{fill:var(--card); stroke:var(--ink); stroke-width:2}
+.b-volk .name{font-size:17px}
+.b-volk .sub{font-size:13px}
+.grp.b-exe rect{fill:#FCF8EE}
+.node:hover rect, .node.sel rect{stroke-width:3}
+/* An outline on an SVG <g> is not painted everywhere, so focus is drawn on
+   the shapes themselves. */
+.chart [data-ref]:focus{outline:none}
+.node:focus-visible rect, .grp:focus-visible > rect, .col:focus-visible rect, .legis:focus-visible rect{
+  stroke:var(--accent); stroke-width:3.5; stroke-dasharray:none}
+.edge:focus-visible .line{stroke-width:4.5}
+.edge:focus-visible .pill:not(.subpill){stroke-width:3}
+.grp:hover > rect, .grp.sel > rect{stroke-width:2.4}
+
+.edge{cursor:pointer}
+.edge .hit{fill:none; stroke:transparent; stroke-width:18}
+.edge .line{fill:none; stroke-width:2.4}
+.edge .pill{fill:var(--card); stroke-width:1.4}
+.edge .verb{font-size:13px; font-weight:600; text-anchor:middle}
+.edge .pill.subpill{fill:var(--card); stroke:none}
+.edge .esub{font-size:12px; text-anchor:middle; fill:var(--muted)}
+.edge .esub.first{font-weight:600; fill:var(--ink)}
+.k-elect .line{stroke:var(--k-elect)} .k-elect .pill{stroke:var(--k-elect)} .k-elect .verb{fill:var(--k-elect)}
+.k-appt .line{stroke:var(--k-appt)}   .k-appt .pill{stroke:var(--k-appt)}   .k-appt .verb{fill:var(--k-appt)}
+.k-ctl .line{stroke:var(--k-ctl); stroke-dasharray:7 4} .k-ctl .pill{stroke:var(--k-ctl)} .k-ctl .verb{fill:var(--k-ctl)}
+.k-lead .line, .k-form .line{stroke:var(--k-form)} .k-lead .pill, .k-form .pill{stroke:var(--k-form)} .k-lead .verb, .k-form .verb{fill:var(--k-form)}
+.k-bg .line{stroke:var(--k-bg); stroke-dasharray:2 4; stroke-width:2} .k-bg .pill{stroke:var(--k-bg); stroke-dasharray:2 2} .k-bg .verb{fill:var(--dim); font-weight:500; font-style:italic}
+.ah.k-elect{fill:var(--k-elect)} .ah.k-appt{fill:var(--k-appt)} .ah.k-ctl{fill:var(--k-ctl)}
+.ah.k-lead, .ah.k-form{fill:var(--k-form)} .ah.k-bg{fill:var(--k-bg)}
+.edge:hover .line, .edge.sel .line{stroke-width:3.6}
+.edge:hover .pill:not(.subpill), .edge.sel .pill:not(.subpill){stroke-width:2.4}
+
+/* focusing: everything not touching the hovered or selected thing fades */
+.node, .edge, .grp, .legis{transition:opacity .15s}
+svg.focusing .node:not(.lit), svg.focusing .grp:not(.lit), svg.focusing .legis:not(.lit){opacity:.3}
+svg.focusing .edge:not(.lit){opacity:.1}
+@media (prefers-reduced-motion:reduce){ .node, .edge, .grp, .legis{transition:none} }
+
+.fail{margin:0; padding:2rem 1.2rem; color:var(--no); font-weight:500}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap}
+
+/* ---------------- tooltip ---------------- */
+.tip{position:fixed; z-index:50; max-width:20rem; background:var(--tipbg); color:var(--tipink);
+     padding:.5rem .7rem; border-radius:9px; font-size:.84rem; line-height:1.4; pointer-events:none;
+     box-shadow:0 6px 20px rgba(10,18,20,.22)}
+.tip b{display:block; font-weight:600}
+.tip span{display:block; opacity:.8}
+.tip i{font-style:normal; color:#9FD8C9}
+.tip em{display:block; margin-top:.25rem; font-style:normal; color:#E8C98A; font-size:.78rem}
+.tip[hidden]{display:none}
+
+/* ---------------- the panel ---------------- */
+.panel{flex:0 0 var(--panel); position:sticky; top:1rem; max-height:calc(100dvh - 2rem); overflow:auto;
+       background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:1rem 1.1rem 1.2rem}
+.panel[hidden]{display:none}
+.close{position:absolute; top:.6rem; right:.6rem; width:2.2rem; height:2.2rem; border:0; background:transparent;
+       border-radius:8px; cursor:pointer; color:var(--muted); font-size:1rem}
+.close:hover{background:var(--soft)}
+body:not(.has-sel) .close{display:none}
+.panel h2{margin:0 2rem .1rem 0; font-size:1.15rem; line-height:1.25; letter-spacing:-.01em}
+.panel h2:focus{outline:none}
+.panel .en{margin:0; color:var(--accent); font-weight:500; font-size:.92rem}
+.panel .gloss{margin:.35rem 0 0; color:var(--muted); font-size:.85rem}
+.panel .branch{margin:.5rem 0 0; font-size:.8rem; display:inline-block; padding:.1rem .55rem; border-radius:99px; border:1px solid}
+.branch.b-leg{background:var(--leg); border-color:var(--leg-s)}
+.branch.b-exe{background:var(--exe); border-color:var(--exe-s)}
+.branch.b-jud{background:var(--jud); border-color:var(--jud-s)}
+.branch.b-head{background:var(--head); border-color:var(--head-s)}
+.panel .verbline{margin:.55rem 0 0; padding:.4rem .6rem; border-radius:9px; background:var(--sunk); border-left:3px solid; font-size:.86rem}
+.panel .verbline span{color:var(--muted); font-size:.8rem}
+.verbline.k-elect{border-color:var(--k-elect)} .verbline.k-appt{border-color:var(--k-appt)}
+.verbline.k-ctl{border-color:var(--k-ctl)} .verbline.k-lead, .verbline.k-form{border-color:var(--k-form)}
+.verbline.k-bg{border-color:var(--k-bg)}
+.bgnote{margin:.8rem 0 0; padding:.6rem .75rem; border-radius:9px; background:var(--sunk); border:1px dashed var(--k-bg); font-size:.84rem}
+.bgnote p{margin:.35rem 0 0}
+.bgnote p+p{color:var(--muted)}
+.panel h3{margin:1rem 0 .4rem; font-size:.74rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.panel .none{color:var(--muted); font-size:.85rem}
+.qs{list-style:none; margin:0; padding:0}
+.q{padding:.6rem 0; border-top:1px solid var(--soft)}
+.q .qn{font-size:.72rem; font-weight:600; color:var(--muted); letter-spacing:.03em}
+.q p{margin:.1rem 0 .35rem; font-size:.9rem; font-weight:500}
+.q ul{list-style:none; margin:0; padding:0; font-size:.84rem}
+.q li{display:flex; gap:.4rem; padding:.08rem 0}
+.q li.ok{color:var(--ok); font-weight:600}
+.q li.no{color:var(--dim)}
+.q li.no s{text-decoration-color:rgba(92,110,116,.5)}
+
+.guide{margin:.7rem 0 0; padding-left:1.2rem; font-size:.86rem; color:var(--muted)}
+.guide li{margin:.3rem 0}
+.guide b{color:var(--ink)}
+.traps{list-style:none; margin:0; padding:0}
+.traps li+li{margin-top:.4rem}
+.traps button{display:block; width:100%; text-align:left; cursor:pointer; background:var(--sunk);
+              border:1px solid transparent; border-radius:9px; padding:.5rem .65rem; font-size:.86rem; font-weight:500; line-height:1.35}
+.traps button:hover{border-color:var(--edge); background:var(--card)}
+.traps em{display:block; font-style:normal; font-weight:400; color:var(--muted); font-size:.78rem; margin-top:.15rem}
+
+/* Below 80rem the drawing needs every pixel of width: the panel becomes a
+   sheet over the bottom of the screen, and only appears for a selection. */
+@media (max-width:79.99rem){
+  .wrap{display:block}
+  .panel{position:fixed; left:0; right:0; bottom:0; top:auto; max-height:62dvh; border-radius:16px 16px 0 0;
+         z-index:40; box-shadow:0 -8px 30px rgba(10,18,20,.18); padding-bottom:calc(1.2rem + env(safe-area-inset-bottom,0px))}
+  body.panel-open .wrap{padding-bottom:62dvh}
+}
+@media (max-width:40rem){
+  .title h1{font-size:1.2rem}
+  .title h1 small{display:block; margin:0}
+  .controls{width:100%}
+  .field{flex:1 1 100%}
+  .pick{flex:1}
+  .legend .gap{display:none}
+}
