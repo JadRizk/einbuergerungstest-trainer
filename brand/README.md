@@ -102,9 +102,13 @@ Last run: 2026-09-18 — **31 pass · 0 advisory · 0 fail**, and **19 pass · 0
 ## What is not decided
 
 - **Nobody with a colour vision deficiency has seen this.** Every CVD number in
-  `PALETTE.md` is simulated. The progress map rests on a single measurement
-  (ΔE 12.8 between correct and wrong under protanopia) and deserves one real
-  reader. That is the highest-value open item here.
+  `PALETTE.md` is simulated. The progress map runs three reds, an even grey and
+  four greens, and under simulated dichromacy no red or grey clears every green
+  (worst ΔE 3.7 in light, 3.0 in dark, both under protanopia). So the states
+  are carried by shape: a slash on red cells, a dash on the even cell. Whether
+  a slash and a dash at map size actually read for a colour-blind reader is
+  untested, and deserves one real reader. That is the highest-value open item
+  here.
 - **The accent is below the validator's chroma floor** (C 0.078 against 0.1) and
   was inherited rather than chosen against alternatives. It is defended on
   thesis grounds in `PALETTE.md`; no saturated candidate was drawn and compared.
