@@ -181,7 +181,7 @@ function view(){
   let l;
   switch(true){
     case S.filter==='unseen': l=p.filter(q=>!S.stats[q.id]); break;
-    case S.filter==='wrong':  l=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>0&&S.stats[q.id].w>=S.stats[q.id].r); break;
+    case S.filter==='wrong':  l=p.filter(shaky); break;
     case S.filter==='images': l=p.filter(q=>q.img); break;
     case S.filter==='land':   l=landQs(); break;
     case S.filter.startsWith('t:'): l=p.filter(q=>q.topic===S.filter.slice(2)); break;
@@ -867,8 +867,7 @@ function answer(orig){
   /* Hooks mode is a rehearsal of what you already learnt, not an attempt at
      the question, so it stays out of the statistics and out of the map. */
   if(S.mode!=='hooks'){
-    const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
-    right? st.r++ : st.w++;
+    record(q,right);
     save();
   }
   render();
@@ -886,7 +885,21 @@ function step(d){
 }
 
 /* ---------------- the numbers -----------------------------------------------
-   Laplace-smoothed per question, so one lucky guess is not "mastered" and an
+   Each question keeps a lifetime tally (r, w) and its latest outcome (l). The
+   tally feeds the projection; the latest outcome decides solid or shaky, since
+   a question you just missed is one to review, however often you got it right
+   before. Judged on the tally alone, it stayed green until the misses
+   outnumbered the hits. Records saved before `l` existed fall back to the
+   tally, and a tie there counts as shaky because the order is unknown. */
+function record(q,ok){
+  const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0});
+  ok? st.r++ : st.w++;
+  st.l=ok?1:0;
+}
+const solid=q=>{ const s=S.stats[q.id]; return !!s && ('l' in s ? s.l===1 : s.r>s.w); };
+const shaky=q=>!!S.stats[q.id] && !solid(q);
+
+/* Laplace-smoothed per question, so one lucky guess is not "mastered" and an
    unseen question sits at exactly 0.5 instead of needing a special case. */
 const pOf=q=>{ const s=S.stats[q.id], r=s?s.r:0, w=s?s.w:0; return (r+1)/(r+w+2); };
 const mean=a=>a.length? a.reduce((x,y)=>x+y,0)/a.length : 0.5;
@@ -904,13 +917,13 @@ function paintStats(){
   const el=$('stats');
   const p=pool();
   const done=p.filter(q=>S.stats[q.id]).length;
-  const weak=p.filter(q=>{const s=S.stats[q.id]; return s&&s.w>s.r;}).length;
+  const weak=p.filter(shaky).length;
   const unseen=p.length-done;
   const proj=projected(), passed=proj>=17, known=canProject();
 
   const topics=[...new Set(general.map(q=>q.topic))]
     .map(t=>{ const qs=general.filter(q=>q.topic===t);
-      return {t, n:qs.length, solid:qs.filter(q=>{const s=S.stats[q.id];return s&&s.r>=s.w;}).length}; })
+      return {t, n:qs.length, solid:qs.filter(solid).length}; })
     .sort((a,b)=>b.n-a.n);
 
   const past=S.exams.slice(-6).reverse();
@@ -954,10 +967,10 @@ function paintDock(){
      reading or writing it against view() lands on an unrelated question. */
   const p=pool(), list=curList(), map=$('map');
   const done=p.filter(q=>S.stats[q.id]).length;
-  const solid=p.filter(q=>S.stats[q.id]&&S.stats[q.id].r>=S.stats[q.id].w).length;
-  const weak=p.filter(q=>S.stats[q.id]&&S.stats[q.id].w>S.stats[q.id].r).length;
+  const nSolid=p.filter(solid).length;
+  const weak=p.filter(shaky).length;
   $('dock-stat').innerHTML= (railed() || !canProject())
-    ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${solid}</b> solid · <b>${weak}</b> shaky`
+    ? `<b>${done}</b> of <b>${p.length}</b> attempted · <b>${nSolid}</b> solid · <b>${weak}</b> shaky`
     : `<b>${projected()}</b>/33 projected · <b>${done}</b> of <b>${p.length}</b> attempted`;
   if(!railed() && sheetOn) paintStats();
   /* The grid is not optional on a wide screen. It costs 46px and hiding it
@@ -971,7 +984,7 @@ function paintDock(){
   p.forEach(q=>{
     const b=document.createElement('button'), st=S.stats[q.id];
     let cls='cell';
-    if(st) cls+=(st.r>=st.w)?' ok':' bad';
+    if(st) cls+=solid(q)?' ok':' bad';
     if(q.state) cls+=' land';
     if(cur&&q.id===cur.id) cls+=' now';
     b.className=cls;
@@ -1203,7 +1216,7 @@ function renderResult(){
   const rows=S.exam.ids.map((id,n)=>{
     const q=Q.find(x=>x.id===id), a=S.exam.answers[id], ok=(a===q.answer);
     if(ok) score++;
-    if(fresh){ const st=S.stats[q.id]||(S.stats[q.id]={r:0,w:0}); ok?st.r++:st.w++; }
+    if(fresh) record(q,ok);
     return `<div class="row"><span class="n">${n+1}</span><span class="s ${ok?'ok':'bad'}">${ok?'✓':'✗'}</span>
       <span class="b" lang="de">${deco(q.q)}<em>Correct: ${deco(q.options[q.answer])}${ok?'':' · You chose: '+(a==null?'—':deco(q.options[a]))}</em></span></div>`;
   }).join('');
