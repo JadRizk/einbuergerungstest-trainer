@@ -1,4 +1,4 @@
-/* Wie es geschah — the history questions of the catalogue as one timeline.
+/* How it happened — the history questions of the catalogue as one timeline.
    A prototype.
 
    The events and their texts are in data/timeline.json; each names the
@@ -16,7 +16,6 @@ const json = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status +
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
-const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
 let TL, DATA;
@@ -33,9 +32,16 @@ const byNum = new Map(DATA.questions.filter(q => q.state === null).map(q => [q.n
 const ERAS = new Map(TL.meta.eras.map(e => [e.id, e]));
 const LANES = TL.meta.lanes;
 
+/* The page is in English. The data keeps its German texts as well, so a
+   second interface language later is a change to this one line. */
+const LOCALE = 'en';
+const tx = o => o[LOCALE];
+const count = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 /* ---------------- what you know, as the app judges it ----------------
    The same rule as app.js's level(): a question is solid once it has been
-   answered right more often than wrong and right the last time. */
+   answered right more often than wrong and right the last time, except that
+   the first right answer after a miss is not enough on its own. */
 const STATS = (read('ebt.v2') || {}).stats || {};
 function verdict(q) {
   const s = STATS[q.id];
@@ -43,7 +49,7 @@ function verdict(q) {
   const net = s.r - s.w, c = 'c' in s ? s.c : (s.r > s.w ? 2 : 0);
   if (net < 0) return 'wrong';
   if (c === 0) return 'wrong';
-  if (c === 1 || net === 0) return 'shaky';
+  if ((c === 1 && s.w > 0) || net === 0) return 'shaky';
   return 'solid';
 }
 
@@ -62,11 +68,11 @@ function wall(e) {
   return `<i class="wall${cls}"><b class="fill"></b></i>`;
 }
 function eraRow(era, mode) {
-  const to = era.to ? year(era.to) : 'heute';
+  const to = era.to ? year(era.to) : 'today';
   return `<li class="row era" id="era-${era.id}" data-era="${era.id}" data-year="${year(era.from)}">
     <div class="spine" aria-hidden="true">${strands(mode)}</div>
     <div class="label"><span class="yrs">${year(era.from)} – ${to}</span>
-      <h2>${esc(era.de)}</h2><span class="en" lang="en">${esc(era.en)}</span></div></li>`;
+      <h2>${esc(tx(era))}</h2></div></li>`;
 }
 /* fork in 1949, merge in 1990: the same curve, upside down */
 function juncRow(kind, era) {
@@ -74,8 +80,8 @@ function juncRow(kind, era) {
     ? { w: 'M50 0 C50 55 30 45 30 100', e: 'M50 0 C50 55 70 45 70 100' }
     : { w: 'M30 0 C30 55 50 45 50 100', e: 'M70 0 C70 55 50 45 50 100' };
   const labels = kind === 'fork'
-    ? `<div class="label l">${esc(LANES.west.de)}<em lang="en">${esc(LANES.west.en)}</em></div>
-       <div class="label r">${esc(LANES.east.de)}<em lang="en">${esc(LANES.east.en)}</em></div>` : '';
+    ? `<div class="label l">${esc(tx(LANES.west))}<em lang="de">${esc(LANES.west.de)}</em></div>
+       <div class="label r">${esc(tx(LANES.east))}<em lang="de">${esc(LANES.east.de)}</em></div>` : '';
   const lead = kind === 'fork' ? '<i class="st s-c lead"><b class="fill"></b></i>'
     : '<i class="st s-w lead"><b class="fill"></b></i><i class="st s-e lead"><b class="fill"></b></i>';
   return `<li class="row junc" data-era="${era}">
@@ -90,27 +96,26 @@ function endRow(era) {
   const vs = TL.events.flatMap(e => e.qs).filter(n => byNum.has(n)).map(n => verdict(byNum.get(n)));
   const solid = vs.filter(v => v === 'solid').length, seen = vs.filter(Boolean).length;
   const line = seen
-    ? `Du kannst <b>${solid} von ${vs.length}</b> Fragen dieser Zeitleiste sicher.`
-    : `Du hast noch keine der ${vs.length} Fragen dieser Zeitleiste beantwortet.`;
-  const en = seen ? `You know ${solid} of these ${vs.length} questions.` : `You have not answered any of these ${vs.length} questions yet.`;
+    ? `You know <b>${solid} of the ${vs.length}</b> questions on this timeline.`
+    : `You have not answered any of the ${vs.length} questions on this timeline yet.`;
   return `<li class="row end" data-era="${era}" data-year="${new Date().getFullYear()}">
     <div class="spine" aria-hidden="true">${strands(1)}<i class="cap"></i></div>
-    <div class="label"><h2>Heute</h2><p>${line}</p><p class="en-text" lang="en">${en}</p>
+    <div class="label"><h2>Today</h2><p>${line}</p>
       <span class="mq tally" aria-hidden="true">${vs.map(v => `<i class="${v ? 'k-' + v : ''}"></i>`).join('')}</span>
-      ${seen ? `<ul class="key" aria-hidden="true">${[['solid', 'sicher'], ['shaky', 'unsicher'], ['wrong', 'zuletzt falsch'], ['', 'offen']]
+      ${seen ? `<ul class="key" aria-hidden="true">${[['solid', 'known'], ['shaky', 'not sure yet'], ['wrong', 'wrong last time'], ['', 'not seen']]
         .map(([k, t]) => `<li><span class="mq"><i class="${k ? 'k-' + k : ''}"></i></span>${t}</li>`).join('')}</ul>` : ''}
-      <a href="./">Zurück zum Üben</a></div></li>`;
+      <a href="./">Back to Practice</a></div></li>`;
 }
 
 function qHTML(num) {
   const q = byNum.get(num); if (!q) return '';
   const v = verdict(q);
   const opts = q.options.map((o, i) => i === q.answer
-    ? `<li class="ok"><span aria-hidden="true">✓</span><span class="sr" lang="en">Correct: </span>${esc(o)}</li>`
-    : `<li class="no"><span aria-hidden="true">✗</span><span class="sr" lang="en">Wrong: </span><s>${esc(o)}</s></li>`).join('');
-  const img = q.img ? `<img src="img/${esc(q.img)}.webp" alt="Bild zu Frage ${q.num}" loading="lazy">` : '';
-  return `<li class="q"><div class="qn"><span class="mq" aria-hidden="true"><i class="${v ? 'k-' + v : ''}"></i></span>Frage ${q.num}</div>
-    <p>${esc(q.q)}</p>${img}<ul>${opts}</ul></li>`;
+    ? `<li class="ok"><span aria-hidden="true">✓</span><span class="sr" lang="en">Correct: </span><span lang="de">${esc(o)}</span></li>`
+    : `<li class="no"><span aria-hidden="true">✗</span><span class="sr" lang="en">Wrong: </span><s lang="de">${esc(o)}</s></li>`).join('');
+  const img = q.img ? `<img src="img/${esc(q.img)}.webp" alt="The picture for question ${q.num}" loading="lazy">` : '';
+  return `<li class="q"><div class="qn"><span class="mq" aria-hidden="true"><i class="${v ? 'k-' + v : ''}"></i></span>Question ${q.num}</div>
+    <p lang="de">${esc(q.q)}</p>${img}<ul>${opts}</ul></li>`;
 }
 
 function eventRow(e, mode, side) {
@@ -119,25 +124,24 @@ function eventRow(e, mode, side) {
   const solid = vs.filter(v => v === 'solid').length;
   const seen = vs.filter(Boolean).length;
   const dot = mode === 2 ? (e.lane === 'east' ? 'd-e' : 'd-w') : 'd-c';
-  const tag = e.lane === 'welt' || mode === 2 ? `<span class="tag">${esc(LANES[e.lane].de)}</span>` : '';
-  const pair = (o, cls) => o ? `<p class="${cls}">${esc(o.de)}</p><p class="en-text" lang="en">${esc(o.en)}</p>` : '';
+  const tag = e.lane === 'welt' || mode === 2 ? `<span class="tag">${esc(tx(LANES[e.lane]))}</span>` : '';
+  const para = (o, cls) => o ? `<p class="${cls}">${esc(tx(o))}</p>` : '';
   return `<li class="row ev side-${side} lane-${e.lane}" id="e-${e.id}" data-era="${e.era}" data-year="${year(e.date)}">
     <div class="spine" aria-hidden="true">${strands(mode)}${mode === 2 ? wall(e) : ''}<i class="dot ${dot}"></i></div>
     <article class="card" aria-labelledby="h-${e.id}">
-      <p class="when"><span>${esc(e.when.de)}</span>${tag}</p>
-      <h3 id="h-${e.id}">${esc(e.title.de)}</h3>
-      <p class="t-en" lang="en">${esc(e.title.en)}</p>
-      ${pair(e.what, 'what')}
+      <p class="when"><span>${esc(tx(e.when))}</span>${tag}</p>
+      <h3 id="h-${e.id}">${esc(tx(e.title))}</h3>
+      ${para(e.what, 'what')}
       <button class="toggle" type="button" aria-expanded="false" aria-controls="m-${e.id}">
         <span class="mq" aria-hidden="true">${vs.map(v => `<i class="${v ? 'k-' + v : ''}"></i>`).join('')}</span>
-        <span><span class="n">${qs.length} ${qs.length === 1 ? 'Frage' : 'Fragen'}</span>${
-          seen ? ` · ${solid} sicher` : ''}<span class="sr" lang="en"> — show the questions and background</span></span>
+        <span><span class="n">${count(qs.length, 'question')}</span>${
+          seen ? ` · ${solid} known` : ''}<span class="sr"> — show the questions and background</span></span>
         <i class="chev" aria-hidden="true"></i></button>
       <div class="more" id="m-${e.id}" hidden><div class="more-in">
-        ${pair(e.why, 'why')}
-        ${e.trap ? `<div class="trap"><b>Nicht verwechseln</b>${esc(e.trap.de)}<p class="en-text" lang="en">${esc(e.trap.en)}</p></div>` : ''}
-        <h4>Im Katalog</h4><ol class="qs">${qs.map(qHTML).join('')}</ol>
-        ${e.also?.length ? `<details class="also"><summary>Hintergrund · ${e.also.length} ${e.also.length === 1 ? 'Frage' : 'Fragen'}</summary>
+        ${para(e.why, 'why')}
+        ${e.trap ? `<div class="trap"><b>Don’t confuse</b>${esc(tx(e.trap))}</div>` : ''}
+        <h4>In the catalogue</h4><ol class="qs">${qs.map(qHTML).join('')}</ol>
+        ${e.also?.length ? `<details class="also"><summary>Background · ${count(e.also.length, 'question')}</summary>
           <ol class="qs">${e.also.map(qHTML).join('')}</ol></details>` : ''}
       </div></div>
     </article></li>`;
@@ -160,14 +164,14 @@ function build() {
   out.push(endRow(era));
   $('tl').innerHTML = out.join('');
   const qn = TL.events.reduce((n, e) => n + e.qs.length, 0);
-  $('count').textContent = `${TL.events.length} Ereignisse · ${qn} Fragen aus dem Katalog`;
+  $('count').textContent = `${count(TL.events.length, 'event')} · ${qn} catalogue questions`;
 }
 build();
 
 /* ---------------- era chips ---------------- */
 const chips = $('chips'), lit = $('chips-lit');
 chips.innerHTML = lit.innerHTML = TL.meta.eras.map(e =>
-  `<li><button type="button" data-go="${e.id}">${esc(e.de)} <small>${year(e.from)}</small></button></li>`).join('');
+  `<li><button type="button" data-go="${e.id}">${esc(tx(e))} <small>${year(e.from)}</small></button></li>`).join('');
 lit.querySelectorAll('button').forEach(b => { b.tabIndex = -1; });
 let eraNow = null;
 function showEra(id) {
@@ -186,19 +190,6 @@ chips.addEventListener('click', e => {
   const b = e.target.closest('[data-go]'); if (!b) return;
   $('era-' + b.dataset.go)?.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
 });
-
-/* ---------------- English ---------------- */
-const P = Object.assign({ en: false }, read('ebt.tl') || {});
-const tEn = $('t-en');
-function setEn(on) {
-  P.en = on; write('ebt.tl', P);
-  document.body.classList.toggle('en', on);
-  tEn.setAttribute('aria-checked', String(on));
-  for (const m of document.querySelectorAll('.card.open .more')) m.style.height = 'auto';
-}
-setEn(!!P.en);
-tEn.addEventListener('click', () => setEn(!P.en));
-tEn.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setEn(!P.en); } });
 
 /* ---------------- opening a card ----------------
    Height is the one layout property animated here, because a card's body has

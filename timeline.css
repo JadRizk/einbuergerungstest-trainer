@@ -1,4 +1,4 @@
-/* Wie es geschah — the timeline page. A prototype.
+/* How it happened — the timeline page. A prototype.
    Same colours (tokens.css) and typeface as the app. One spine runs down the
    page; in 1949 it forks into two, the Federal Republic and the GDR, and in
    1990 the two join again. Between 1961 and 1989 the gap between them is the
@@ -52,19 +52,10 @@ button{font:inherit; color:inherit}
       color:var(--ink); text-decoration:none; font-size:1.25rem; border:1px solid var(--edge); background:var(--card)}
 .title{flex:1 1 auto; min-width:0}
 .title h1{margin:0; font-size:1.35rem; letter-spacing:-.02em; line-height:1.2}
-.title h1 small{font-size:.92rem; font-weight:500; color:var(--muted); letter-spacing:0; margin-left:.2rem}
 .title p{margin:.1rem 0 0; color:var(--muted); font-size:.84rem}
 .year{flex:0 0 auto; font-size:1.7rem; font-weight:700; letter-spacing:-.03em; color:var(--accent);
       font-variant-numeric:tabular-nums; min-width:3.2ch; text-align:right}
 
-.opt-row{flex:0 0 auto; display:flex; align-items:center; gap:.5rem; padding:.4rem .55rem; min-height:2.5rem;
-         border-radius:8px; cursor:pointer; user-select:none}
-.opt-row .lb{font-size:.86rem}
-.sw{flex:0 0 auto; width:2.4rem; height:1.4rem; border-radius:99px; background:var(--edge); position:relative; transition:background .15s ease}
-.sw::after{content:''; position:absolute; top:2px; left:2px; width:calc(1.4rem - 4px); height:calc(1.4rem - 4px);
-           border-radius:50%; background:var(--card); transition:transform .15s var(--ease-out)}
-.opt-row[aria-checked=true] .sw{background:var(--accent)}
-.opt-row[aria-checked=true] .sw::after{transform:translateX(1rem)}
 
 /* Era chips. The filled copy sits exactly over the outlined one and is cut
    down by clip-path to the active chip, so moving between eras slides one
@@ -82,7 +73,6 @@ button{font:inherit; color:inherit}
 .chips.lit button small{color:color-mix(in srgb, var(--card) 80%, transparent)}
 @media (hover:hover) and (pointer:fine){
   .back:hover{border-color:var(--muted)}
-  .opt-row:hover{background:var(--sunk)}
   .chips:not(.lit) button:hover{border-color:var(--edge)}
 }
 
@@ -145,7 +135,6 @@ button{font:inherit; color:inherit}
             background:var(--paper); padding:.5rem 1rem; border-radius:12px}
 .era .yrs{display:block; font-size:.78rem; font-weight:600; letter-spacing:.08em; color:var(--muted); font-variant-numeric:tabular-nums}
 .era h2{margin:.05rem 0 0; font-size:1.45rem; letter-spacing:-.02em; line-height:1.15}
-.era .en{display:block; color:var(--muted); font-size:.9rem}
 
 
 /* ---------------- cards ---------------- */
@@ -165,10 +154,7 @@ button{font:inherit; color:inherit}
 .tag{font-size:.7rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
      border:1px solid var(--rule); border-radius:99px; padding:0 .45rem}
 .card h3{margin:.15rem 0 0; font-size:1.12rem; line-height:1.25; letter-spacing:-.01em}
-.card .t-en{margin:0; color:var(--muted); font-size:.86rem}
 .what{margin:.45rem 0 0; font-size:.93rem}
-.en-text{display:none; margin:.3rem 0 0; color:var(--muted); font-size:.86rem}
-body.en .en-text{display:block}
 
 .toggle{display:flex; align-items:center; gap:.5rem; width:calc(100% + 1rem); margin:.55rem -.5rem 0; padding:.45rem .5rem;
         border:0; border-radius:8px; background:transparent; cursor:pointer; text-align:left; font-size:.84rem; color:var(--muted)}
@@ -247,7 +233,7 @@ body.en .en-text{display:block}
   .js .row.in .card, .js .row.in .label, .js .row.in .dot{transition:opacity .2s ease}
   .row.now .dot, .js .row.in.now .dot{transform:none}
   .chips.lit{transition:none}
-  .chev, .sw::after{transition:none}
+  .chev{transition:none}
 }
 
 /* ---------------- narrow: one column, the spine on the left ---------------- */
@@ -267,8 +253,6 @@ body.en .en-text{display:block}
   .junc .label.l, .junc .label.r{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
   .junc .label.l{align-self:start; padding-top:.6rem}
   .junc .label.r{align-self:end}
-  .title h1 small{display:block; margin:0}
   .title p{display:none}               /* the sticky bar stays short on a phone */
   .year{font-size:1.35rem}
-  .opt-row .lb{display:none}
 }
