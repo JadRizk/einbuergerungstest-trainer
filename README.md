@@ -149,9 +149,11 @@ The answers use `position: sticky` rather than being pinned: a short question ha
 them, and a tall picture question still keeps them on screen. Progress is a bottom sheet on a
 phone — shut or open, no half-way — and the bar across the bottom on a wide screen. The 310-cell
 grid is wide-screen only, where 9px cells read as one glanceable image; at a thumb-sized 26px it
-would be two dozen rows of squares saying less than the numbers above it. Each cell is shaded by
-right answers minus wrong ones, in four greens, so the grid shows what you know well and not just
-what you have seen; a question you last got wrong is red, slashed, until you get it right again.
+would be two dozen rows of squares saying less than the numbers above it. Each cell sits on one
+scale from red through an even grey to green, set by right answers minus wrong ones, so the grid
+shows what you know well and not just what you have seen. A miss turns any question red; the next
+right answer makes it even, and the one after gives back its green. Red cells are slashed and the
+even cell carries a dash, so none of it rests on colour alone.
 
 <details>
 <summary><b>If you change something</b> — caching rules worth knowing first</summary>

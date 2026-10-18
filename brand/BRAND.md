@@ -81,7 +81,7 @@ Stated as prohibitions. Stage 03 applies these to the mark verbatim.
   just reads 0. The best is a number, not an achievement. The mark is
   therefore not a character and not a smiley.
 - **State is never carried by colour alone.** Every answer carries ✓ or ✗;
-  every map legend entry carries its word, and a wrong map cell carries a slash. Measured justification in
+  every map legend entry carries its word, a red map cell carries a slash and an even one a dash. Measured justification in
   `PALETTE.md` — the status hues *do* collapse toward the accent under
   dichromacy, and the glyphs are why that is survivable.
 - **Text clears 4.5:1** against its ground. Measured ratios live beside the

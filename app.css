@@ -13,9 +13,13 @@
   --railpad:1rem;        /* where control boxes start */
   /* the shared colours are in tokens.css; these are the app's own */
   --nobg:#FAE4E2;
-  /* map only. Four shades of right, the darkest being --ok, and one red. No
-     red clears all four greens under dichromacy, so a wrong cell is slashed */
-  --cellbad:#D9534F;
+  /* map only: three reds, an even grey and four greens, the last being --ok.
+     Under dichromacy no red or grey clears every green, so red cells carry a
+     slash and the even cell a dash -- the colour is never the only signal */
+  --cellno1:#F4B4AE; --cellno2:#D9534F; --cellno3:#9E2B26;
+  --celleven:#828D9F;
+  --cellmark:var(--card);              /* a red cell's slash                  */
+  --cellmark1:var(--cellno3);          /* ...on the palest red, where --card vanishes */
   --cellok1:#ABE0C0; --cellok2:#72B68F; --cellok3:#3E815D;
   --picked:#E3EEEB;                    /* a chosen answer, chip, copy button  */
   --gloss:#C9E4D6;                     /* a glossed word in an answer         */
@@ -34,8 +38,12 @@
    ones and measured in brand/PALETTE.md. */
 :root[data-theme="dark"]{
   --nobg:#3F2220;
-  /* the ramp runs the other way: more right is brighter on a dark page */
-  --cellbad:#972622;
+  /* The greens run the other way, more right being brighter on a dark page.
+     The reds do not: the lightest red sits next to even in both themes, so
+     one miss reads as the mild end and three as the dim, heavy one */
+  --cellno1:#D0524C; --cellno2:#972622; --cellno3:#5A2522;
+  --celleven:#5F6A7B;
+  --cellmark:var(--ink); --cellmark1:var(--ink);   /* a dark slash is lost on dark red */
   --cellok1:#214D34; --cellok2:#367854; --cellok3:#56A276;
   --picked:#1F3531;
   --gloss:#284B3B;
@@ -369,16 +377,24 @@ body.sheet-drag .dock{transition:none}
 .cell{aspect-ratio:1; border-radius:4px; background:var(--sunk); border:0; padding:0; cursor:pointer;
   min-height:1.6rem; box-shadow:inset 0 0 0 1px var(--edge)}
 .cell:hover{outline:1.5px solid var(--ink); outline-offset:1px}
-.cell.g1,.cell.g2,.cell.g3,.cell.g4,.cell.bad{box-shadow:none}
+.cell:is(.g1,.g2,.g3,.g4,.even,.r1,.r2,.r3){box-shadow:none}
 .cell.g1,.legend .g1{background:var(--cellok1)}
 .cell.g2,.legend .g2{background:var(--cellok2)}
 .cell.g3,.legend .g3{background:var(--cellok3)}
 .cell.g4,.legend .g4{background:var(--ok)}
-/* the slash is the ✗ a bare square cannot carry: under protanopia the red
-   lands on the third green, and colour alone would call it right */
-.cell.bad,.legend .bad{background:
-  linear-gradient(to top right, transparent calc(50% - .8px), var(--card) calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)),
-  var(--cellbad)}
+/* The marks are the ✗ and the = a bare square has no room for: under
+   protanopia a red lands on one of the greens, and a grey on another, so
+   colour alone would call them right. --cellmark1 is the palest red's slash,
+   which a --card line would vanish into on a light page. */
+.cell:is(.r1,.r2,.r3),.legend :is(.r1,.r2,.r3){--mark:var(--cellmark); background:
+  linear-gradient(to top right, transparent calc(50% - .8px), var(--mark) calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)),
+  var(--fill)}
+.cell.r1,.legend .r1{--fill:var(--cellno1); --mark:var(--cellmark1)}
+.cell.r2,.legend .r2{--fill:var(--cellno2)}
+.cell.r3,.legend .r3{--fill:var(--cellno3)}
+.cell.even,.legend .even{background:
+  linear-gradient(transparent calc(50% - .8px), var(--card) calc(50% - .8px) calc(50% + .8px), transparent calc(50% + .8px)) center / 60% 100% no-repeat,
+  var(--celleven)}
 .legend .g0{background:var(--sunk); box-shadow:inset 0 0 0 1px var(--edge)}
 .legend .land{box-shadow:inset 0 0 0 1.5px var(--gold)}
 .legend .ramp i{margin-right:2px}
