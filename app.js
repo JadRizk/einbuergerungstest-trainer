@@ -9,7 +9,14 @@ import { drawer, fillNav, THEMES } from './nav.js';
 /* the menu's shared sections go in before the catalogue is awaited */
 fillNav();
 
-const [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
+let DATA, GLOS;
+try {
+  [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
+} catch (err) {
+  document.getElementById('view').innerHTML = `<div class="empty"><b>The catalogue could not be loaded</b>${
+    navigator.onLine ? '' : 'You are offline, and the app has not been saved for offline use yet. '}Reload to try again.</div>`;
+  throw err;
+}
 
 /* Intrinsic pixel size of every question image, read from the WebP headers.
    Used only to reserve the box before the image arrives, so answers do not
