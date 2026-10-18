@@ -58,6 +58,9 @@ states. The exam you sit draws 33 of them.
   pass a practice app and fail the exam. The question shuffle leans toward what you get wrong:
   questions you currently have wrong come up early in the order, and a question you miss
   comes back after four other questions, again and again until you answer it right.
+- **Streak.** In Practice, the top bar shows how many you have right in a row and your best
+  ("Streak 4 · Best 12"). A wrong answer puts the streak back to 0, and every visit starts at 0.
+  Your best is kept with your progress.
 - **Copy or translate** any question with one click, for looking something up elsewhere or
   pasting it into your own notes.
 - **Wer wählt wen?** A chart of who elects, appoints and scrutinises whom — Bund, Länder,

@@ -51,11 +51,12 @@ const S={
   gloss:true, hooks:false, shufQ:false, shufA:false, auto:true, seed:1, railOpen:true,
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
+  streak:0, bestStreak:0,               /* right answers in a row in Practice */
   voice:'', rate:0.85
 };
 function save(){ store.set(KEY,{land:S.land,stats:S.stats,gloss:S.gloss,hooks:S.hooks,shufQ:S.shufQ,
   shufA:S.shufA,auto:S.auto,seed:S.seed,railOpen:S.railOpen,exams:S.exams,
-  voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
+  bestStreak:S.bestStreak,voice:S.voice,rate:S.rate,escope:S.escope,efrom:S.efrom,eto:S.eto}); }
 async function load(){
   const d=await store.get(KEY);
   if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
@@ -454,7 +455,7 @@ toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0;
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
@@ -754,7 +755,7 @@ function render(){
   if(!list.length){
     viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="empty">
       <b>Nothing left</b>This selection is empty — pick another one from the menu.</div></div></div>`;
-    $('barnow').textContent=''; paintDock(); return;
+    paintStreak(); paintDock(); return;
   }
   if(S.idx>=list.length) S.idx=0;
   const q=list[S.idx], ord=optOrder(q);
@@ -763,7 +764,7 @@ function render(){
   const atPos=ord.indexOf(q.answer)+1;
   const h=hookFor(q);
   if(hookWanted(q) && !HOOKS) loadHooks().then(()=>{ if(HOOKS && S.mode!=='exam' && !autoTimer) render(); });
-  $('barnow').innerHTML=`<b>${S.idx+1}</b> / ${list.length}`;
+  paintStreak();
 
   viewEl.innerHTML=`<div class="stage">
     <div class="meta">
@@ -816,6 +817,7 @@ function answer(orig){
   S.picked=orig; S.pin=q.id;
   const right=(orig===q.answer);
   record(q,right);
+  countStreak(right);
   save();
   S.again=(!right && S.mode==='drill' && S.shufQ) ? q.id : null;
   render();
@@ -836,6 +838,24 @@ function step(d){
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
   hideTip(); stopSpeech(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
+}
+
+/* ---------------- streak ----------------------------------------------------
+   Right answers in a row, across questions. Only Practice can get here: Browse
+   never takes an answer and the exam has its own handler, where a running
+   count would give away which answers were right. Each visit starts at 0, so
+   only the best is saved. A question that comes back after a miss counts like
+   any other. */
+function countStreak(ok){
+  S.streak=ok?S.streak+1:0;
+  if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+}
+/* Both numbers stay on screen in Practice, 0 included, so a miss reads as the
+   count going back to 0 rather than as something disappearing. */
+function paintStreak(){
+  $('streak').hidden=(S.mode!=='drill');
+  $('s-now').textContent=S.streak;
+  $('s-best').textContent=S.bestStreak;
 }
 
 /* ---------------- the numbers -----------------------------------------------
@@ -1043,7 +1063,6 @@ function examOptionsHtml(q, ord, chosen){
 
 function renderExam(){
   stopTick();
-  $('barnow').textContent='';
   if(!S.exam){
     viewEl.innerHTML=`<div class="stage"><div class="scroll"><div class="panel">
       <h2>Mock exam</h2>
