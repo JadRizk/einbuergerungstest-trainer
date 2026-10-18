@@ -147,7 +147,14 @@ export function mountNav(here) {
   </div>
 </nav>`);
 
-  const { close, isOpen } = drawer();
+  remember(document.getElementById('settings'));
+  standalone(drawer());
+}
+
+/* What the menu does with no page driving it: Escape closes the drawer, and
+   a theme is saved straight into the app's blob. The chart and the timeline
+   always run it this way; Practice only when its catalogue failed to load. */
+export function standalone({ close, isOpen }) {
   /* Escape closes the drawer and nothing else: caught on the way down, so
      the page under it (the chart closing its panel) never sees it. */
   addEventListener('keydown', e => {
@@ -155,7 +162,6 @@ export function mountNav(here) {
     e.stopPropagation();
     close();
   }, true);
-  remember(document.getElementById('settings'));
 
   const saved = () => (read('ebt.v2') || {}).theme || 'system';
   const paint = t => THEMES.forEach(x => document.getElementById('th-' + x).setAttribute('aria-pressed', String(x === t)));

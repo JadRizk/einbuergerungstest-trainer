@@ -4,7 +4,7 @@
 
 import { level as levelOf, solid as solidOf, run } from './grade.js';
 import { json, esc } from './util.js';
-import { drawer, fillNav, THEMES } from './nav.js';
+import { drawer, fillNav, standalone, THEMES } from './nav.js';
 
 /* the menu's shared sections go in before the catalogue is awaited */
 fillNav();
@@ -38,6 +38,10 @@ try {
 } catch (err) {
   document.getElementById('view').innerHTML = `<div class="empty"><b>The catalogue could not be loaded</b>${
     navigator.onLine ? '' : 'You are offline, and the app has not been saved for offline use yet. '}Reload to try again.</div>`;
+  /* The menu keeps what works without the catalogue -- the chart, the
+     timeline, Appearance, About -- and runs as it does on those pages. */
+  document.querySelectorAll('#practise, #glosBtn, #settings .nav-sec:not(#appearance)').forEach(el=>el.remove());
+  standalone({close:closeNav, isOpen:navOpen});
   throw err;
 }
 
