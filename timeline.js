@@ -10,12 +10,12 @@
    strand, so opening a card stretches its row and the spine with it. Scrolling
    fills each piece in proportion to how far the reading line has passed it. */
 
+import { json, esc, read } from './util.js';
+import { level, solid } from './grade.js';
+
 document.documentElement.classList.add('js');
 
-const json = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status + ' ' + url); return r.json(); });
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
 let TL, DATA;
@@ -39,18 +39,12 @@ const tx = o => o[LOCALE];
 const count = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 /* ---------------- what you know, as the app judges it ----------------
-   The same rule as app.js's level(): a question is solid once it has been
-   answered right more often than wrong and right the last time, except that
-   the first right answer after a miss is not enough on its own. */
+   grade.js's level, the one the Practice map is coloured by, in three words:
+   green is solid, even is shaky, red is wrong. */
 const STATS = (read('ebt.v2') || {}).stats || {};
 function verdict(q) {
-  const s = STATS[q.id];
-  if (!s) return '';
-  const net = s.r - s.w, c = 'c' in s ? s.c : (s.r > s.w ? 2 : 0);
-  if (net < 0) return 'wrong';
-  if (c === 0) return 'wrong';
-  if ((c === 1 && s.w > 0) || net === 0) return 'shaky';
-  return 'solid';
+  const s = STATS[q.id], lv = level(s);
+  return lv === null ? '' : solid(s) ? 'solid' : lv === 0 ? 'shaky' : 'wrong';
 }
 
 /* ---------------- the rows ---------------- */
@@ -97,9 +91,9 @@ function juncRow(kind, era) {
 /* the end of the line: today, and every question on it as one square */
 function endRow(era) {
   const vs = TL.events.flatMap(e => e.qs).filter(n => byNum.has(n)).map(n => verdict(byNum.get(n)));
-  const solid = vs.filter(v => v === 'solid').length, seen = vs.filter(Boolean).length;
+  const known = vs.filter(v => v === 'solid').length, seen = vs.filter(Boolean).length;
   const line = seen
-    ? `You know <b>${solid} of the ${vs.length}</b> questions on this timeline.`
+    ? `You know <b>${known} of the ${vs.length}</b> questions on this timeline.`
     : `You have not answered any of the ${vs.length} questions on this timeline yet.`;
   return `<li class="row end" data-era="${era}" data-year="${new Date().getFullYear()}">
     <div class="spine" aria-hidden="true">${strands(1)}<i class="cap"></i></div>
@@ -124,7 +118,7 @@ function qHTML(num) {
 function eventRow(e, mode, side) {
   const qs = e.qs.filter(n => byNum.has(n));
   const vs = qs.map(n => verdict(byNum.get(n)));
-  const solid = vs.filter(v => v === 'solid').length;
+  const known = vs.filter(v => v === 'solid').length;
   const seen = vs.filter(Boolean).length;
   const dot = mode === 2 ? (e.lane === 'east' ? 'd-e' : 'd-w') : 'd-c';
   const tag = e.lane === 'welt' || mode === 2 ? `<span class="tag">${esc(tx(LANES[e.lane]))}</span>` : '';
@@ -138,7 +132,7 @@ function eventRow(e, mode, side) {
       <button class="toggle" type="button" aria-expanded="false" aria-controls="m-${e.id}">
         <span class="mq" aria-hidden="true">${vs.map(v => `<i class="${v ? 'k-' + v : ''}"></i>`).join('')}</span>
         <span><span class="n">${count(qs.length, 'question')}</span>${
-          seen ? ` · ${solid} known` : ''}<span class="sr"> — show the questions and background</span></span>
+          seen ? ` · ${known} known` : ''}<span class="sr"> — show the questions and background</span></span>
         <i class="chev" aria-hidden="true"></i></button>
       <div class="more" id="m-${e.id}" hidden><div class="more-in">
         ${para(e.why, 'why')}
@@ -299,10 +293,12 @@ function layout() {
 }
 let laying = false;
 const relayout = () => { if (!laying) { laying = true; requestAnimationFrame(() => {
-  laying = false; layout(); pinned?.scrollIntoView({ block: 'start' }); tick();
+  laying = false; layout(); measure(); pinned?.scrollIntoView({ block: 'start' }); tick();
 }); } };
 const ro = new ResizeObserver(relayout);
 tl.querySelectorAll('.row').forEach(r => ro.observe(r));
+// whatever sits above the timeline moves every row with it when it rewraps
+ro.observe(document.body);
 wide.addEventListener('change', relayout);
 layout();
 
@@ -315,17 +311,29 @@ const bar = $('bar'), yearEl = $('year');
 const rows = [...document.querySelectorAll('.row')];
 const fills = [...document.querySelectorAll('.st .fill, .wall .fill')].map(el => ({ el, box: el.parentElement, f: -1 }));
 const paths = [...document.querySelectorAll('.junc svg')].map(svg => ({ svg, ps: [...svg.querySelectorAll('.pf')], f: -1 }));
+const rowTop = [];
 const clamp = x => x < 0 ? 0 : x > 1 ? 1 : x;
-let nowRow = null, ticking = false;
+let nowRow = null, ticking = false, barH = 0;
+
+/* Where the spine sits is measured once per layout, not on every scroll
+   frame: each piece's top on the page and its height. Nothing on the spine
+   moves by transform, so this holds until a row or the page above it
+   changes size, and both of those relayout. */
+const at = el => { const r = el.getBoundingClientRect(); return [r.top + scrollY, r.height]; };
+function measure() {
+  for (const x of fills) [x.top, x.h] = at(x.box);
+  for (const x of paths) [x.top, x.h] = at(x.svg);
+  rows.forEach((r, i) => { rowTop[i] = at(r)[0]; });
+  barH = bar.offsetHeight;
+}
 
 function frame() {
   ticking = false;
-  const line = Math.min(innerHeight * .45, bar.offsetHeight + 24 + scrollY);
-  // read everything first, then write, so the browser lays out once
-  const fr = fills.map(x => { const r = x.box.getBoundingClientRect(); return clamp((line - r.top) / (r.height || 1)); });
-  const pr = paths.map(x => { const r = x.svg.getBoundingClientRect(); return clamp((line - r.top) / (r.height || 1)); });
+  const y = scrollY, line = Math.min(innerHeight * .45, barH + 24 + y) + y;   // on the page, not the screen
+  const fr = fills.map(x => clamp((line - x.top) / (x.h || 1)));
+  const pr = paths.map(x => clamp((line - x.top) / (x.h || 1)));
   let cur = null;
-  for (const r of rows) { if (r.getBoundingClientRect().top > line) break; if (r.dataset.year) cur = r; }
+  for (let i = 0; i < rows.length; i++) { if (rowTop[i] > line) break; if (rows[i].dataset.year) cur = rows[i]; }
   cur = cur || rows.find(r => r.dataset.year);
 
   fills.forEach((x, i) => { const f = Math.round(fr[i] * 1000) / 1000; if (f !== x.f) { x.f = f; x.el.style.transform = `scaleY(${f})`; } });
@@ -337,13 +345,17 @@ function frame() {
     yearEl.textContent = cur.dataset.year;
     showEra(cur.dataset.era);
   }
-  bar.classList.toggle('stuck', scrollY > 4);
+  bar.classList.toggle('stuck', y > 4);
 }
 const tick = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
 addEventListener('scroll', tick, { passive: true });
-addEventListener('resize', tick);
+addEventListener('resize', relayout);
 // anchors land below the bar, whatever height it wraps to
-new ResizeObserver(([e]) => document.documentElement.style.setProperty('--barh', e.target.offsetHeight + 'px')).observe(bar);
+new ResizeObserver(([e]) => {
+  barH = e.target.offsetHeight;
+  document.documentElement.style.setProperty('--barh', barH + 'px');
+}).observe(bar);
+measure();
 frame();
 
 /* ---------------- deep links: timeline.html#e-mauerbau ----------------

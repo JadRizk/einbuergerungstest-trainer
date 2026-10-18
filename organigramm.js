@@ -11,7 +11,8 @@
    The state-specific labels (term length, voting age, what the head of
    government is called) are likewise lifted from that state's ten questions. */
 
-const json = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status + ' ' + url); return r.json(); });
+import { json, esc, read } from './util.js';
+
 let DATA, GLOS;
 try {
   [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
@@ -25,10 +26,8 @@ const byId = new Map(Q.map(q => [q.id, q]));
 const GL = new Map(GLOS.map(g => [g.de, g.en]));
 
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------------- preferences: the app's state, our own toggles ---------------- */
-const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 /* The app's own blob is read, never written: the app keeps `land` in memory
    and would overwrite any change made here on its next save. The chart starts

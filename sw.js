@@ -22,8 +22,8 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18n';
-const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'theme.js', 'manifest.json',
+const VERSION = 'ebt-2026-10-18o';
+const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js', 'theme.js', 'manifest.json',
                  'organigramm.html', 'organigramm.css', 'organigramm.js'];
 
 self.addEventListener('install', e => {
