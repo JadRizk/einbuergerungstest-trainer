@@ -73,11 +73,12 @@ const S={
   exams:[],                             /* past mock scores, newest last */
   streak:0, bestStreak:0,               /* right answers in a row in Practice */
   voice:'', rate:0.85,
-  theme:'system'                        /* or 'light' / 'dark'; theme.js reads it before paint */
+  theme:'system',                       /* or 'light' / 'dark'; theme.js reads it before paint */
+  wiped:0                               /* when Reset last ran, so other tabs follow it */
 };
 /* what outlives the tab; the rest of S is where you are right now */
 const SAVED=['land','stats','gloss','hooks','shufQ','shufA','auto','seed','railOpen','exams',
-  'bestStreak','voice','rate','escope','efrom','eto','theme'];
+  'bestStreak','voice','rate','escope','efrom','eto','theme','wiped'];
 /* Each of them as this tab last knew it in storage, written or taken up. A
    field that differs from it here is a change not saved yet -- a range being
    typed, a new shuffle -- and another tab's save does not take it away. */
@@ -443,23 +444,44 @@ toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0;
 toggle('t-shufa','shufA',()=>{S.picked=S.keep=null; render();});
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
+/* a is the fuller record of one question: more answers, then more right,
+   then a longer run -- the same order in every tab, so they agree */
+const more=(a,b)=>!b || (a.r+a.w-b.r-b.w || a.r-b.r || run(a)-run(b))>0;
+/* what Reset clears: none of it is taken from a tab that has not seen this tab's Reset */
+const WIPED=['stats','exams','bestStreak','wiped'];
 /* Another tab saved: a second Practice tab, or the chart or the timeline
-   with a theme chosen in their menu. Everything it saved is taken up at
-   once, or this tab's next save would put its own old copy back over it --
-   answers included. The question on screen stays on screen: the list it
-   sits in can shift (an answer elsewhere moves questions out of "Not seen
-   yet"), so it is found again by id, and held in the list like an answered
-   one if it has left it. The redraw waits while an answer is on screen, an
-   exam is running or a field on the page is being filled in; the next step
-   draws the new state. */
+   with a theme chosen in their menu. What it saved is taken up at once, or
+   this tab's next save would put its own old copy back over it.
+
+   The answers are merged question by question, keeping the fuller record,
+   so two tabs answering at once both keep theirs, and the merge is written
+   back if it added anything. A Reset is followed rather than merged with:
+   `wiped` says which side reset last.
+
+   The question on screen stays on screen. The list it sits in can shift
+   (an answer elsewhere moves questions out of "Not seen yet"), so it is
+   found again by id, and held in the list like an answered one if it has
+   left it. The redraw waits while an answer is on screen, an exam is
+   running or a field on the page is being filled in; the next step draws
+   the new state. */
 addEventListener('storage',e=>{
   if(e.key!==KEY) return;
   let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
   if(!d) return;
   const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
   const cur=S.mode==='exam' ? null : view()[S.idx];
-  for(const k of SAVED) if(k in d && !unsaved(k)) S[k]=d[k];
+  const theirs=d.stats||{}, since=(d.wiped||0)-(S.wiped||0);
+  let gained=false;
+  if(since>0){ S.stats=theirs; S.wiped=d.wiped; S.streak=0; }   /* wiped there: follow it */
+  else if(since===0){
+    const merged={...theirs};
+    for(const [id,a] of Object.entries(S.stats)) if(more(a,theirs[id])){ merged[id]=a; gained=true; }
+    S.stats=merged;
+  }
+  const skip=since<0 ? WIPED : ['stats','wiped'];
+  for(const k of SAVED) if(!skip.includes(k) && k in d && !unsaved(k)) S[k]=d[k];
   mark(d);
+  if(gained || since<0) save();               /* hand back what that tab is missing */
   if(cur){
     if(!view().some(x=>x.id===cur.id)) S.keep=cur.id;
     S.idx=view().findIndex(x=>x.id===cur.id);
@@ -474,7 +496,7 @@ addEventListener('storage',e=>{
 });
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
-  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=S.keep=null; S.exam=null; save(); closeNav(); render();
+  S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.wiped=Date.now(); S.idx=0; S.picked=S.keep=null; S.exam=null; save(); closeNav(); render();
 };
 
 /* ---------------- progress sheet -------------------------------------------
