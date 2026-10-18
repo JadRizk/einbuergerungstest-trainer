@@ -1214,6 +1214,7 @@ function renderResult(){
 }
 
 /* ---------------- keyboard ---------------- */
+const CONTROL='button,a[href],summary,[role=checkbox],[role=button]';
 document.addEventListener('keydown',e=>{
   if(/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)){
     if(e.key==='Escape'&&!veil.hidden) closeGlos();
@@ -1221,6 +1222,11 @@ document.addEventListener('keydown',e=>{
   }
   const k=e.key;
   if(k==='Escape'){ stopSpeech(); if(!lens.hidden) closeLens(); else if(!veil.hidden) closeGlos(); else if(navOpen()) closeNav(); else hideTip(); return; }
+  /* The open drawer gets every key, and a focused control answers Enter and
+     Space itself: taking them here ran step() and cancelled the control's own
+     click, so Enter on the Glossary button skipped a question instead. */
+  if(navOpen()) return;
+  if((k==='Enter'||k===' ') && e.target.matches?.(CONTROL)) return;
   if(!veil.hidden) return;
   if(k==='g'||k==='G'){ e.preventDefault(); openGlos(); return; }
   if(k==='c'||k==='C'){
