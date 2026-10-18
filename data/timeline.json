@@ -11,7 +11,6 @@
    "welt": {"de": "Europa und Welt", "en": "Europe and the world"}
   },
   "eras": [
-   {"id": "frueh",     "from": "0321", "to": "1933", "de": "Vor 1933", "en": "Before 1933"},
    {"id": "ns",        "from": "1933", "to": "1945", "de": "Nationalsozialismus", "en": "National Socialism"},
    {"id": "besatzung", "from": "1945", "to": "1949", "de": "Besatzungszeit", "en": "Occupation"},
    {"id": "teilung",   "from": "1949", "to": "1990", "de": "Zwei deutsche Staaten", "en": "Two German states"},
@@ -19,23 +18,6 @@
   ]
  },
  "events": [
-  {
-   "id": "juedisches-leben",
-   "date": "0321-12-11",
-   "when": {"de": "321", "en": "321"},
-   "era": "frueh", "lane": "de",
-   "title": {"de": "Erste jüdische Gemeinde", "en": "The first Jewish community"},
-   "what": {
-    "de": "Ein Gesetz des römischen Kaisers Konstantin nennt Juden in Köln. Es ist der älteste Beweis für jüdisches Leben auf dem Gebiet des heutigen Deutschlands.",
-    "en": "A law of the Roman emperor Constantine mentions Jews in Cologne. It is the oldest evidence of Jewish life in what is now Germany."
-   },
-   "why": {
-    "de": "Jüdisches Leben gibt es hier also seit etwa 1700 Jahren. 2021 hat Deutschland dieses Jubiläum gefeiert.",
-    "en": "So Jewish life here goes back about 1,700 years. Germany marked the anniversary in 2021."
-   },
-   "qs": [59],
-   "also": [66]
-  },
   {
    "id": "machtergreifung",
    "date": "1933-01-30",

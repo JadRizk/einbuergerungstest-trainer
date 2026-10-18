@@ -110,8 +110,6 @@ button{font:inherit; color:inherit}
 .s-c .fill{background:var(--de)}
 .s-w .fill{background:var(--west)}
 .s-e .fill{background:var(--east)}
-.st.dash{background:repeating-linear-gradient(to bottom, var(--edge) 0 4px, transparent 4px 10px)}
-.st.dash .fill{background:repeating-linear-gradient(to bottom, var(--de) 0 4px, transparent 4px 10px)}
 
 /* the Wall: hatching between the two strands, built as you scroll through it */
 .wall{position:absolute; top:var(--pull, 0px); bottom:0; left:calc(30% + 3px); right:calc(30% + 3px); overflow:hidden}
@@ -149,8 +147,6 @@ button{font:inherit; color:inherit}
 .era h2{margin:.05rem 0 0; font-size:1.45rem; letter-spacing:-.02em; line-height:1.15}
 .era .en{display:block; color:var(--muted); font-size:.9rem}
 
-.gap .spine{height:5.5rem}
-.gap .label{grid-column:3; align-self:center; justify-self:start; color:var(--muted); font-size:.84rem; font-style:italic; padding-left:.4rem}
 
 /* ---------------- cards ---------------- */
 .card{width:100%; max-width:26rem; margin:.35rem .2rem 1.6rem; position:relative;
@@ -265,7 +261,7 @@ body.en .en-text{display:block}
   .end .label{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
   .end .tally{grid-template-columns:repeat(13, 11px); justify-content:start; margin-left:0}
   .key{justify-content:flex-start}
-  .era .label, .gap .label{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
+  .era .label{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}
   .era .spine::after{content:''; position:absolute; left:50%; top:50%; width:12px; height:12px; margin:-6px 0 0 -6px;
                      background:var(--paper); border:2.5px solid var(--edge); border-radius:3px; transform:rotate(45deg)}
   .junc .label.l, .junc .label.r{grid-column:2; justify-self:start; text-align:left; padding-left:.6rem}

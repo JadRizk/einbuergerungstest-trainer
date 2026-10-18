@@ -52,9 +52,9 @@ const year = d => String(+d.slice(0, 4));
 const WALL_FROM = TL.events.find(e => e.id === 'mauerbau')?.date;
 const WALL_TO = TL.events.find(e => e.id === 'mauerfall')?.date;
 
-function strands(mode, opts = {}) {
-  const st = (pos, extra = '') => `<i class="st s-${pos}${extra}"><b class="fill"></b></i>`;
-  return mode === 2 ? st('w') + st('e') : st('c', opts.dash ? ' dash' : '');
+function strands(mode) {
+  const st = pos => `<i class="st s-${pos}"><b class="fill"></b></i>`;
+  return mode === 2 ? st('w') + st('e') : st('c');
 }
 function wall(e) {
   if (!WALL_FROM || e.date < WALL_FROM || e.date > WALL_TO) return '';
@@ -67,12 +67,6 @@ function eraRow(era, mode) {
     <div class="spine" aria-hidden="true">${strands(mode)}</div>
     <div class="label"><span class="yrs">${year(era.from)} – ${to}</span>
       <h2>${esc(era.de)}</h2><span class="en" lang="en">${esc(era.en)}</span></div></li>`;
-}
-function gapRow(from, to, era) {
-  const n = +to.slice(0, 4) - +from.slice(0, 4);
-  return `<li class="row gap" data-era="${era}">
-    <div class="spine" aria-hidden="true">${strands(1, { dash: true })}</div>
-    <div class="label">${n.toLocaleString('de-DE')} Jahre später <span lang="en">· ${n.toLocaleString('en-GB')} years later</span></div></li>`;
 }
 /* fork in 1949, merge in 1990: the same curve, upside down */
 function juncRow(kind, era) {
@@ -151,11 +145,10 @@ function eventRow(e, mode, side) {
 
 function build() {
   const out = [];
-  let era = null, alt = 0, prev = null;
+  let era = null, alt = 0;
   for (const e of TL.events) {
     if (e.era !== era) {
       if (era === 'teilung') out.push(juncRow('merge', era));
-      if (era === 'frueh' && prev) out.push(gapRow(prev.date, e.date, era));
       out.push(eraRow(ERAS.get(e.era), 1));
       if (e.era === 'teilung') out.push(juncRow('fork', e.era));
       era = e.era;
@@ -163,7 +156,6 @@ function build() {
     const mode = era === 'teilung' ? 2 : 1;
     const side = mode === 2 ? (e.lane === 'east' ? 'r' : 'l') : (alt++ % 2 ? 'l' : 'r');
     out.push(eventRow(e, mode, side));
-    prev = e;
   }
   out.push(endRow(era));
   $('tl').innerHTML = out.join('');
@@ -306,7 +298,9 @@ layout();
 
 /* ---------------- the reading line ----------------
    45% down the screen. Everything above it is drawn in; the last event above
-   it is the one you are reading, and its year is shown in the bar. */
+   it is the one you are reading, and its year is shown in the bar. At the top
+   of the page it starts just under the bar and moves down as you scroll, so
+   the page opens on its first year with nothing yet passed. */
 const bar = $('bar'), yearEl = $('year');
 const rows = [...document.querySelectorAll('.row')];
 const fills = [...document.querySelectorAll('.st .fill, .wall .fill')].map(el => ({ el, box: el.parentElement, f: -1 }));
@@ -316,7 +310,7 @@ let nowRow = null, ticking = false;
 
 function frame() {
   ticking = false;
-  const line = innerHeight * .45;
+  const line = Math.min(innerHeight * .45, bar.offsetHeight + 24 + scrollY);
   // read everything first, then write, so the browser lays out once
   const fr = fills.map(x => { const r = x.box.getBoundingClientRect(); return clamp((line - r.top) / (r.height || 1)); });
   const pr = paths.map(x => { const r = x.svg.getBoundingClientRect(); return clamp((line - r.top) / (r.height || 1)); });
