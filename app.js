@@ -4,11 +4,10 @@
 
 import { level as levelOf, solid as solidOf } from './grade.js';
 import { json, esc } from './util.js';
-import { drawer, learnHTML, remember } from './nav.js';
+import { drawer, fillNav, THEMES } from './nav.js';
 
-/* the shared half of the menu goes in before the catalogue is awaited */
-document.getElementById('learn').innerHTML=learnHTML('practice');
-remember(document.getElementById('settings'));
+/* the menu's shared sections go in before the catalogue is awaited */
+fillNav();
 
 const [DATA, GLOS] = await Promise.all([json('data/questions.json'), json('data/glossary.json')]);
 
@@ -351,8 +350,8 @@ function buildFilter(){
 const body=document.body, burger=$('burger');
 const RAIL='(min-width:62rem)';
 const railed=()=>matchMedia(RAIL).matches;
-const {close:closeNav, isOpen:navOpen}=
-  drawer({rail:RAIL, onRail:()=>{ S.railOpen=!S.railOpen; save(); applyRail(); }});
+const {close:closeNav, isOpen:navOpen, sync:syncNav}=
+  drawer({rail:RAIL, folded:()=>!S.railOpen, onRail:()=>{ S.railOpen=!S.railOpen; save(); applyRail(); }});
 
 /* Above 62rem the same button collapses the rail instead of sliding a drawer
    over the page -- the question column is the thing worth the pixels, and on
@@ -363,6 +362,7 @@ function applyRail(){
   body.classList.toggle('rail-off', off);
   burger.title = off ? 'Show the menu' : 'Hide the menu';
   if(railed()) burger.setAttribute('aria-expanded', String(!off));
+  syncNav();                            /* a folded rail is out of the Tab order */
   syncDock();
 }
 
@@ -416,9 +416,15 @@ toggle('t-hooks','hooks',render);
 toggle('t-auto','auto');
 toggle('t-shufq','shufQ',()=>{S.seed=Date.now()%100000; rankCache=null; S.idx=0; S.picked=null; render();});
 toggle('t-shufa','shufA',()=>{S.picked=null; render();});
-const THEMES=['system','light','dark'];
 const paintThemeBtns=()=>THEMES.forEach(t=>$('th-'+t).setAttribute('aria-pressed',String(S.theme===t)));
 THEMES.forEach(t=>$('th-'+t).onclick=()=>{ S.theme=t; save(); window.theme?.set(t); paintThemeBtns(); });
+/* The chart and the timeline save a theme chosen in their menu into this
+   blob too. Taken up here, or this tab's next save would put its old one back. */
+addEventListener('storage',e=>{
+  if(e.key!==KEY) return;
+  let t; try{ t=JSON.parse(e.newValue)?.theme; }catch(err){ return; }
+  if(THEMES.includes(t) && t!==S.theme){ S.theme=t; window.theme?.set(t); paintThemeBtns(); }
+});
 $('reset').onclick=()=>{
   if(!confirm('Delete all your answers and statistics?')) return;
   S.stats={}; S.exams=[]; S.streak=0; S.bestStreak=0; S.idx=0; S.picked=null; S.exam=null; save(); closeNav(); render();

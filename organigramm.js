@@ -31,9 +31,11 @@ const GL = new Map(GLOS.map(g => [g.de, g.en]));
 const $ = id => document.getElementById(id);
 
 /* ---------------- preferences: the app's state, our own toggles ---------------- */
-/* The app's own blob is read, never written: the app keeps `land` in memory
-   and would overwrite any change made here on its next save. The chart starts
-   on the app's state and remembers its own choice from then on. */
+/* The app's own blob is only read here: the app keeps `land` in memory and
+   would overwrite any change made here on its next save. The chart starts on
+   the app's state and remembers its own choice from then on. (The menu's
+   theme is the one thing written into it from this page; nav.js says how
+   the app takes that up.) */
 const P = Object.assign({ en: false, bg: true, land: null }, read('ebt.org') || {});
 let land = P.land || (read('ebt.v2') || {}).land || 'Berlin';
 if (!DATA.meta.states.includes(land)) land = 'Berlin';

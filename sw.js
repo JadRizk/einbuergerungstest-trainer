@@ -22,11 +22,15 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18p';
+const VERSION = 'ebt-2026-10-18q';
 const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js', 'theme.js', 'manifest.json',
                  'nav.css', 'nav.js',
                  'organigramm.html', 'organigramm.css', 'organigramm.js',
-                 'timeline.html', 'timeline.css', 'timeline.js'];
+                 'timeline.html', 'timeline.css', 'timeline.js',
+                 /* The catalogue and the glossary are cached as Practice reads them on
+                    every visit. Only the timeline reads its events, so a timeline never
+                    opened online would have nothing to show without this. */
+                 'data/timeline.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
