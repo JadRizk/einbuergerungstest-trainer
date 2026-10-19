@@ -17,7 +17,7 @@ No build step, no server, no account, no tracking. Open it and it works, includi
 ![Code licence](https://img.shields.io/badge/code-MIT-0B6357?style=flat-square)
 
 <a href="https://jadrizk.github.io/einbuergerungstest-trainer/">
-  <img src="docs/practice.webp" alt="The practice view after a miss, with the menu on the left grouped into Practise, Learn and Settings: the question's hook above it, the German question with civic terms underlined for English glosses, the wrong answer marked in red and the correct one in green, and a progress map of all 310 questions along the bottom, its cells running from slashed reds through a dashed grey to greens" width="880">
+  <img src="docs/practice.webp" alt="The practice view after a miss, with the menu on the left grouped into Practise, Learn and Settings: the question's hook above it, the German question with civic terms underlined for English glosses, an English subtitle under the question and each answer, the wrong answer marked in red and the correct one in green, and a progress map of all 310 questions along the bottom, its cells running from slashed reds through a dashed grey to greens" width="880">
 </a>
 
 </div>
@@ -103,7 +103,7 @@ Three ways to understand the questions rather than memorise them.
 
 ## On your phone
 
-<img src="docs/mobile.webp" alt="The app on a phone: the controls collapsed behind a menu button, the streak in the top bar, an answered question with its hook, the wrong choice in red and the correct one in green, and the progress sheet resting at the bottom with a projected score" width="300" align="right">
+<img src="docs/mobile.webp" alt="The app on a phone: the controls collapsed behind a menu button, the streak in the top bar, an answered question with its hook and English subtitles, the wrong choice in red, the right answer named beside Next, and the progress sheet resting at the bottom with a projected score" width="300" align="right">
 
 Open the link and use **Add to Home Screen**. It then launches like an app and works with no
 connection.
