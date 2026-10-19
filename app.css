@@ -453,7 +453,7 @@ body.exam .nav{transform:translateX(-101%)}
   .answers{padding:.6rem 1.5rem 1.2rem; background:transparent}
   .answers>*{max-width:var(--shell); margin-left:auto; margin-right:auto}
   .answers.stuck{box-shadow:none; border-top-color:transparent}
-  .answers.read .act{position:static; margin:.6rem 0 0; padding:0; border-top:0; box-shadow:none; background:transparent}
+  .answers.read .act{position:static; margin:.6rem auto 0; padding:0; border-top:0; box-shadow:none; background:transparent}
   .q{font-size:1.6rem; margin-bottom:1.2rem}
   .hint{display:flex}
   .opts{gap:.5rem}
