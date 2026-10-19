@@ -22,7 +22,7 @@
  * current one, icons included. Any future re-cut of the mark must bump VERSION
  * in the same commit.
  */
-const VERSION = 'ebt-2026-10-18s';
+const VERSION = 'ebt-2026-10-19s';
 const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js', 'theme.js', 'manifest.json',
                  'nav.css', 'nav.js',
                  'organigramm.html', 'organigramm.css', 'organigramm.js',
@@ -31,7 +31,8 @@ const SHELL   = ['./', 'tokens.css', 'app.css', 'app.js', 'grade.js', 'util.js',
                     On a first visit the page fetches them before this worker controls
                     it, so the routes never see those requests and nothing would be
                     cached: the next reload offline would hang on "Loading…". */
-                 'data/questions.json', 'data/glossary.json', 'data/hooks.json', 'data/timeline.json',
+                 'data/questions.json', 'data/questions-en.json', 'data/glossary.json', 'data/hooks.json',
+                 'data/timeline.json',
                  'font/archivo-latin-var.woff2'];
 
 self.addEventListener('install', e => {
