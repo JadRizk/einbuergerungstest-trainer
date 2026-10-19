@@ -28,7 +28,7 @@ stops being a drawer and becomes a rail — one copy of every control, never two
 
 ## Voice
 
-- **Label casing** — Sentence case. "Read aloud", "Federal state", "Sit a mock
+- **Label casing** — Sentence case. "Shuffle answers", "Federal state", "Sit a mock
   exam". Never Title Case, never all-caps.
 - **Separators** — `·` in compound chrome labels ("Einbürgerungstest ·
   question catalogue"; "33 questions · 60 minutes · 17 to pass"). Em dash in

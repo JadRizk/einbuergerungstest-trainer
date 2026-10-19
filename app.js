@@ -99,13 +99,12 @@ const S={
   escope:'all', efrom:1, eto:60,        /* which general questions an exam may draw */
   exams:[],                             /* past mock scores, newest last */
   streak:0, bestStreak:0,               /* right answers in a row in Practice */
-  voice:'', rate:0.85,
   theme:'system',                       /* or 'light' / 'dark'; theme.js reads it before paint */
   wiped:0                               /* when Reset last ran, so other tabs follow it */
 };
 /* what outlives the tab; the rest of S is where you are right now */
 const SAVED=['land','stats','gloss','hooks','shufQ','shufA','auto','seed','railOpen','exams',
-  'bestStreak','voice','rate','escope','efrom','eto','theme','wiped'];
+  'bestStreak','escope','efrom','eto','theme','wiped'];
 /* Each of them as this tab last knew it in storage, written or taken up. A
    field that differs from it here is a change not saved yet -- a range being
    typed, a new shuffle -- and another tab's save does not take it away. */
@@ -115,7 +114,7 @@ const unsaved=k=>JSON.stringify(S[k])!==stored[k];
 function save(){ const d=Object.fromEntries(SAVED.map(k=>[k,S[k]])); mark(d); store.set(KEY,d); }
 async function load(){
   const d=await store.get(KEY);
-  if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; Object.assign(S,d); }
+  if(d){ delete d.dark; delete d.mode; delete d.speed; delete d.mapOpen; delete d.voice; delete d.rate; Object.assign(S,d); }
   mark(S);
 }
 
@@ -222,17 +221,11 @@ async function toClipboard(text){
 function toolsHtml(q){
   return `<span class="tools">
       ${q&&q.img?`<button class="copy" id="zoomBtn" type="button" title="Show the picture full screen" aria-label="Show the picture full screen">⤢<span class="wide"> Bigger</span></button>`:''}
-      ${canSpeak?`<button class="copy" id="sayBtn" type="button" title="Read this question and its answers aloud in German (S)">Listen</button>`:''}
       <button class="copy" id="copyBtn" type="button" title="Copy the question and all four answers (C)">Copy</button>
       <a class="copy" id="gtBtn" target="_blank" rel="noopener noreferrer" title="Open this question in Google Translate">Translate</a>
     </span>`;
 }
 function wireTools(q, revealed){
-  const sb=$('sayBtn');
-  if(sb){
-    sb.onclick=()=>(speechSynthesis.speaking||speechSynthesis.pending) ? stopSpeech() : say(speakParts(q));
-    markSaying(speechSynthesis.speaking||speechSynthesis.pending);
-  }
   const text=copyText(q, revealed);
   const cb=$('copyBtn');
   if(cb) cb.onclick=async()=>{
@@ -434,7 +427,7 @@ function applyRoute(){
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
-  if(changed){ letGo(); S.idx=0; stopSpeech(); }
+  if(changed){ letGo(); S.idx=0; }
   if(m!=='exam') S.exam=null;
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
@@ -449,8 +442,8 @@ $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
 $('m-exam').onclick =()=>go('exam');
 
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;letGo();S.exam=null;stopSpeech();save();closeNav();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;letGo();stopSpeech();closeNav();render();};
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;letGo();S.exam=null;save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;letGo();closeNav();render();};
 
 function toggle(id,key,after){
   const el=$(id);
@@ -489,7 +482,7 @@ addEventListener('storage',e=>{
   if(e.key!==KEY) return;
   let d; try{ d=JSON.parse(e.newValue); }catch(err){ return; }
   if(!d) return;
-  const was={theme:S.theme, railOpen:S.railOpen, voice:S.voice};
+  const was={theme:S.theme, railOpen:S.railOpen};
   const cur=S.mode==='exam' ? null : view()[S.idx];
   const theirs=d.stats||{}, since=(d.wiped||0)-(S.wiped||0);
   let gained=false;
@@ -510,7 +503,6 @@ addEventListener('storage',e=>{
   if(!THEMES.includes(S.theme)) S.theme=was.theme;
   if(S.theme!==was.theme) window.theme?.set(S.theme);
   if(S.railOpen!==was.railOpen) applyRail();
-  if(S.voice!==was.voice) paintVoices();
   paintThemeBtns();
   const typing=viewEl.contains(document.activeElement) && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
   if(S.picked===null && !(S.exam && !S.exam.done) && !typing) render();
@@ -602,107 +594,36 @@ addEventListener('resize',()=>{
 });
 
 /* ---------------- speech ----------------------------------------------------
-   Web Speech API. The German voice comes from the operating system, so nothing
-   is downloaded, nothing leaves the machine, and this still works from file://
-   with no network. Nothing is ever spoken on its own: every utterance below is
-   the direct result of a click or a key press. getVoices() is empty until the
-   engine has loaded them, which is what the voiceschanged listener is for.   */
+   Once a question is answered, pressing 1-4 reads that answer in German, through
+   the operating system's voice: nothing is downloaded and nothing leaves the
+   machine. Only answers that are German text are read. One that is mostly a
+   number or a date ("1949", "17. Juni", "5 Jahre") is not; one that is still a
+   sentence of four or more words with the numbers set aside is. Cloze answers
+   are read with their stem, as whole sentences, for the reason copyText()
+   rebuilds them. Nothing is ever spoken on its own, only on a key press.     */
 const canSpeak = typeof speechSynthesis!=='undefined' && typeof SpeechSynthesisUtterance!=='undefined';
-let deVoices=[];
-const pickVoice=()=>deVoices.find(v=>v.voiceURI===S.voice) || deVoices[0] || null;
-
-function loadVoices(){
-  if(!canSpeak) return;
-  const de=speechSynthesis.getVoices().filter(v=>/^de(-|$)/i.test(v.lang));
-  de.sort((a,b)=>(b.localService?1:0)-(a.localService?1:0));   /* on-device first: no network */
-  deVoices=de;
-  paintVoices();
-}
-function paintVoices(){
-  if(!canSpeak) return;
-  const sel=$('voice');
-  sel.innerHTML=deVoices.map(v=>
-    `<option value="${esc(v.voiceURI)}">${esc(v.name)}${v.localService?'':' · online'}</option>`).join('');
-  const v=pickVoice(); if(v) sel.value=v.voiceURI;
-  $('voicerow').hidden = deVoices.length<2;         /* no picker for a single voice */
-  const note=$('voicenote');
-  note.hidden = deVoices.length>0;
-  if(!note.hidden) note.textContent='No German voice is installed here. On macOS add one under '
-    + 'System Settings → Accessibility → Spoken Content → System Voice → Manage Voices, then reload.';
-}
-
-/* one utterance at a time; speakSeq invalidates the callbacks of a cancelled run */
-let speakSeq=0, alive=null;
-function markSaying(on){
-  const b=$('sayBtn'); if(!b) return;
-  b.textContent = on?'Stop':'Listen';
-  b.classList.toggle('live', !!on);
-}
-function stopSpeech(){
-  speakSeq++;
-  if(canSpeak) try{ speechSynthesis.cancel(); }catch(e){}
-  clearInterval(alive); alive=null;
-  markSaying(false);
-}
-function say(parts){
-  if(!canSpeak) return;
-  const list=(Array.isArray(parts)?parts:[parts]).map(t=>String(t).trim()).filter(Boolean);
-  stopSpeech();
-  if(!list.length) return;
-  const mine=speakSeq, voice=pickVoice();
-  /* Chrome silently drops an utterance queued in the same tick as cancel() */
-  setTimeout(()=>{
-    if(mine!==speakSeq) return;
-    list.forEach((text,i)=>{
-      const u=new SpeechSynthesisUtterance(text);
-      u.lang = voice? voice.lang : 'de-DE';
-      if(voice) u.voice=voice;
-      u.rate = S.rate;
-      if(i===list.length-1){
-        u.onend  =()=>{ if(mine===speakSeq) stopSpeech(); };
-        u.onerror=()=>{ if(mine===speakSeq) stopSpeech(); };
-      }
-      speechSynthesis.speak(u);
-    });
-    markSaying(true);
-    /* Chrome pauses itself after ~15 s of speech; resume() is a no-op elsewhere */
-    alive=setInterval(()=>{
-      if(mine!==speakSeq){ clearInterval(alive); return; }
-      if(speechSynthesis.speaking) speechSynthesis.resume();
-    },9000);
-  },40);
-}
-
-/* What gets read. 106 questions are cloze — the stem ends in an ellipsis and
-   each option completes it — so those options are spoken as whole sentences,
-   for the same reason copyText() rebuilds them. Picture questions whose options
-   are only "Bild 1"–"Bild 4" are read as the question on its own.           */
 const CLOZE=/(…|\.\.\.)\s*$/;
-const bildOnly=q=>q.options.every(o=>/^Bild\s*\d+\.?$/i.test(o.trim()));
-const stemOf=q=>q.q.replace(/\s*(…|\.\.\.)\s*$/,'').trim();
+const speakable=t=>!/\d/.test(t) || (t.replace(/\S*\d\S*/g,'').match(/\p{L}{2,}/gu)||[]).length>=4;
 function sentence(q,i){
   const t=q.options[i].trim();
-  return CLOZE.test(q.q) ? stemOf(q)+' '+t : t;
+  return CLOZE.test(q.q) ? q.q.replace(CLOZE,'').trim()+' '+t : t;
 }
-function speakParts(q){
-  const out=[CLOZE.test(q.q) ? stemOf(q) : q.q];
-  if(!bildOnly(q)) q.options.forEach((o,i)=>out.push(sentence(q,i)));
-  return out;
+function germanVoice(){
+  const de=speechSynthesis.getVoices().filter(v=>/^de(-|$)/i.test(v.lang));
+  return de.find(v=>v.localService) || de[0] || null;     /* on-device first: no network */
 }
-
-function initSpeech(){
-  if(!canSpeak){
-    $('voicerow').hidden=true; $('raterow').hidden=true;
-    $('voicenote').hidden=false;
-    $('voicenote').textContent='This browser has no speech engine, so reading aloud is unavailable.';
-    return;
-  }
-  loadVoices();
-  speechSynthesis.addEventListener('voiceschanged', loadVoices);
-  $('voice').onchange=e=>{ S.voice=e.target.value; save(); say('Guten Tag.'); };
-  $('rate').onchange =e=>{ S.rate=+e.target.value; save(); };
-  addEventListener('beforeunload',()=>{ try{speechSynthesis.cancel();}catch(e){} });
+function stopSpeech(){ if(canSpeak) try{ speechSynthesis.cancel(); }catch(e){} }
+function sayAnswer(q,i){
+  if(!canSpeak || !speakable(q.options[i])) return;
+  stopSpeech();
+  const u=new SpeechSynthesisUtterance(sentence(q,i)), voice=germanVoice();
+  u.lang = voice? voice.lang : 'de-DE';
+  if(voice) u.voice=voice;
+  u.rate = 0.85;
+  /* Chrome silently drops an utterance queued in the same tick as cancel() */
+  setTimeout(()=>speechSynthesis.speak(u),40);
 }
+if(canSpeak) addEventListener('beforeunload',stopSpeech);
 
 /* ---------------- tooltip ---------------- */
 const tip=$('tip');
@@ -732,9 +653,9 @@ document.addEventListener('click',e=>{
   const btn=g.closest('.opt');
   if(btn && !btn.disabled) return;          // let the tap answer the question instead
   e.stopPropagation(); e.preventDefault();
-  /* a deliberate click on a term always reads it; on a mouse the tooltip is
+  /* a deliberate click on a term always shows it; on a mouse the tooltip is
      already open from the hover, so toggling here would just swallow the click */
-  showTip(g); say(g.dataset.de);
+  showTip(g);
 },true);
 addEventListener('scroll',hideTip,true); addEventListener('resize',hideTip);
 
@@ -811,7 +732,6 @@ function render(){
   [['t-gloss','gloss'],['t-hooks','hooks'],['t-auto','auto'],['t-shufq','shufQ'],['t-shufa','shufA']]
     .forEach(([id,k])=>$(id).setAttribute('aria-checked',String(S[k])));
   paintThemeBtns();
-  if(canSpeak) $('rate').value=String(S.rate);
   if(S.mode==='exam') return renderExam();
 
   const list=view();
@@ -850,7 +770,6 @@ function render(){
                  <span class="kbd">1</span>–<span class="kbd">4</span> answer
                  <span class="kbd">↵</span> next
                  <span class="kbd">←</span><span class="kbd">→</span> browse
-                 ${canSpeak?`<span class="kbd">S</span> listen`:''}
                  <span class="kbd">C</span> copy
                  <span class="kbd">G</span> glossary
                </span>` }
@@ -899,7 +818,7 @@ function step(d){
   letGo();
   list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
-  hideTip(); stopSpeech(); render();
+  hideTip(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
 }
 
@@ -991,7 +910,7 @@ function paintStats(){
 
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
     S.filter=b.dataset.f; filterSel.value=S.filter;
-    S.idx=0; letGo(); stopSpeech(); setSheet(false); render();
+    S.idx=0; letGo(); setSheet(false); render();
   });
 }
 
@@ -1033,7 +952,7 @@ function paintDock(){
         at=Math.max(0, view().findIndex(x=>x.id===q.id));
       }
       S.idx=at;
-      stopSpeech(); setSheet(false); render();
+      setSheet(false); render();
     };
     map.appendChild(b);
   });
@@ -1215,7 +1134,7 @@ function renderExam(){
         <div class="act">
           <button class="next quiet" id="prev" ${S.exam.at===0?'disabled':''}>Back</button>
           <span class="hint"><span class="kbd">1</span>–<span class="kbd">4</span> answer
-            <span class="kbd">↵</span> next ${canSpeak?`<span class="kbd">S</span> listen `:''}<span class="kbd">C</span> copy</span>
+            <span class="kbd">↵</span> next <span class="kbd">C</span> copy</span>
           <button class="next grow" id="fwd">${S.exam.at===examLen()-1?'See results':'Next'}</button>
         </div>
       </div>
@@ -1296,9 +1215,6 @@ document.addEventListener('keydown',e=>{
     if(e.ctrlKey||e.metaKey) return;          /* leave real Ctrl+C alone */
     const cb=$('copyBtn'); if(cb){ e.preventDefault(); cb.click(); } return;
   }
-  if(k==='s'||k==='S'){
-    const sb=$('sayBtn'); if(sb){ e.preventDefault(); sb.click(); } return;
-  }
   if(S.mode==='exam'){
     if(!S.exam||S.exam.done) return;
     if(k>='1'&&k<='4'){ const b=viewEl.querySelectorAll('.opt')[+k-1]; if(b){e.preventDefault();b.click();} }
@@ -1311,10 +1227,8 @@ document.addEventListener('keydown',e=>{
     const b=viewEl.querySelectorAll('.opt')[+k-1];
     if(!b) return;
     if(!b.disabled){ b.click(); return; }
-    if(canSpeak){                              /* already answered: read that one back */
-      const q=view()[S.idx];
-      if(q) say(sentence(q, +b.dataset.orig));
-    }
+    const q=view()[S.idx];                     /* already answered: read that one back */
+    if(q) sayAnswer(q, +b.dataset.orig);
   }
   else if(k==='Enter'||k===' '||k==='ArrowRight'){ e.preventDefault(); step(1); }
   else if(k==='ArrowLeft'){ e.preventDefault(); step(-1); }
@@ -1323,7 +1237,7 @@ document.addEventListener('keydown',e=>{
 /* ---------------- boot ---------------- */
 /* The hooks are fetched now, not on the first miss, so the card is there when
    that miss comes. render() asks for them too, and re-renders once they land. */
-(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
+(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); applyRail(); applyRoute(); loadHooks(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has

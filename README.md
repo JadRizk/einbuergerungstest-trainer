@@ -67,9 +67,8 @@ Three ways to understand the questions rather than memorise them.
   word held back until you answer; with it off, a hook appears only when you miss, so you have
   it when that question comes back. It is for recall, not comprehension — do the understanding
   first.
-- **Read aloud.** Questions can be spoken by the browser's German voice, with a choice of voice
-  and four reading speeds. Useful for the listening side of the language, and for terms whose
-  pronunciation is not obvious from spelling.
+- **Hear an answer.** Once you have answered, press 1–4 to hear that answer read by the
+  browser's German voice. Answers that are only a number or a date are not read.
 - **Shuffle questions, shuffle answers.** Shuffling answers is the one that matters — it stops
   you memorising *"the third option"* instead of the actual answer, which is the classic way to
   pass a practice app and fail the exam. The question shuffle leans toward what you get wrong:
