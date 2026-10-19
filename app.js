@@ -154,18 +154,22 @@ function locate(text, needle){
    or sit inside one, and so do 174 of the tokens. Nested ranges become nested
    elements, so a trigger keeps its tap-to-read gloss. None of them cross in
    the catalogue as it stands; if one ever does, the mark wins and that gloss
-   is dropped rather than producing tags that close out of order. */
-function deco(text, marks=[]){
+   is dropped rather than producing tags that close out of order.
+   `aligns` ([a,b,k]) are the phrases paired with an English subtitle. They
+   give way to both, the same way: the pairing is the least of the three. */
+function deco(text, marks=[], aligns=[]){
   const ms=[];
   for(const m of [...marks].sort((x,y)=>x[0]-y[0]))
     if(!ms.length || m[0]>=ms[ms.length-1][1]) ms.push(m);
   const crosses=(x,y)=>x[0]<y[1] && y[0]<x[1]
     && !(x[0]<=y[0] && x[1]>=y[1]) && !(y[0]<=x[0] && y[1]>=x[1]);
+  const gs=(S.gloss ? glossHits(text) : []).filter(g=>!ms.some(m=>crosses(g,m)));
   const els=[
     ...ms.map(([a,b,cls])=>({a, b, mark:1, open:`<mark class="${cls}">`, close:'</mark>'})),
-    ...(S.gloss ? glossHits(text) : []).filter(g=>!ms.some(m=>crosses(g,m)))
-      .map(([a,b,de,en])=>({a, b, mark:0,
-        open:`<span class="gl" data-de="${esc(de)}" data-en="${esc(en)}">`, close:'</span>'}))
+    ...gs.map(([a,b,de,en])=>({a, b, mark:0,
+        open:`<span class="gl" data-de="${esc(de)}" data-en="${esc(en)}">`, close:'</span>'})),
+    ...aligns.filter(x=>!ms.some(m=>crosses(x,m)) && !gs.some(g=>crosses(x,g)))
+      .map(([a,b,k])=>({a, b, mark:-1, open:`<span class="al" data-k="${k}">`, close:'</span>'}))
   ].sort((x,y)=>x.a-y.a || y.b-x.b || y.mark-x.mark);   /* outer first; a mark outside an equal gloss */
   let out='', at=0;
   const open=[];
@@ -224,7 +228,6 @@ function toolsHtml(q){
       ${q&&q.img?`<button class="copy" id="zoomBtn" type="button" title="Show the picture full screen" aria-label="Show the picture full screen">⤢<span class="wide"> Bigger</span></button>`:''}
       ${canSpeak?`<button class="copy" id="sayBtn" type="button" title="Read this question and its answers aloud in German (S)">Listen</button>`:''}
       <button class="copy" id="copyBtn" type="button" title="Copy the question and all four answers (C)">Copy</button>
-      <a class="copy" id="gtBtn" target="_blank" rel="noopener noreferrer" title="Open this question in Google Translate">Translate</a>
     </span>`;
 }
 function wireTools(q, revealed){
@@ -241,8 +244,6 @@ function wireTools(q, revealed){
     cb.classList.toggle('done', done);
     setTimeout(()=>{ cb.textContent='Copy'; cb.classList.remove('done'); },1600);
   };
-  const gt=$('gtBtn');
-  if(gt) gt.href='https://translate.google.com/?sl=de&tl=en&op=translate&text='+encodeURIComponent(text);
 }
 
 /* ---------------- deterministic shuffling ---------------- */
@@ -348,6 +349,66 @@ function loadHooks(){
 }
 const hookWanted=q=>S.mode!=='exam' && (S.hooks || (S.picked!==null && S.picked!==q.answer));
 const hookFor=q=>(hookWanted(q) && HOOKS && HOOKS.get(q.id)) || null;
+
+/* ---------------- English subtitles ----------------------------------------
+   After a wrong answer the question and its four answers each get an English
+   line, written once into data/questions-en.json and kept close to the German
+   wording. Both sides are marked up as [phrase|n]: the German and English
+   phrases that share an n are a pair, and pointing at one lights the other.
+   A line whose German no longer matches the catalogue (a BAMF revision the
+   translation has not caught up with) gets no subtitle rather than a stale one. */
+let EN=null, enWait=null;
+function loadEn(){
+  if(enWait) return enWait;
+  enWait=json('data/questions-en.json')
+    .then(j=>{ EN=new Map(j.questions.map(e=>[e.id,e])); })
+    .catch(()=>{ enWait=null; });
+  return enWait;
+}
+const enWanted=q=>S.mode!=='exam' && S.picked!==null && S.picked!==q.answer;
+const enFor=q=>(enWanted(q) && EN && EN.get(q.id)) || null;
+const PAIR=/\[([^\[\]|]+)\|(\d+)\]/g;
+function unpair(s){
+  let text='', at=0; const spans=[];
+  for(const m of s.matchAll(PAIR)){
+    text+=s.slice(at,m.index);
+    spans.push([text.length, text.length+m[1].length, m[2]]);
+    text+=m[1]; at=m.index+m[0].length;
+  }
+  return {text:text+s.slice(at), spans};
+}
+/* the German line's pairs, for deco(), and the English line as HTML */
+function subtitle(line, de){
+  if(!line) return null;
+  const d=unpair(line.de);
+  if(d.text!==de) return null;
+  const e=unpair(line.en);
+  let html='', at=0;
+  for(const [a,b,k] of e.spans){
+    html+=esc(e.text.slice(at,a))+`<span class="al" data-k="${k}">${esc(e.text.slice(a,b))}</span>`; at=b;
+  }
+  return {al:d.spans, html:html+esc(e.text.slice(at))};
+}
+/* Light every phrase of one pair: a mouse lights it while pointing, a tap
+   (or a click) pins it until the next one. */
+function lightPair(el, cls){
+  const g=el.closest('[data-g]');
+  if(g) document.querySelectorAll(`#view [data-g="${g.dataset.g}"] .al[data-k="${el.dataset.k}"]`)
+    .forEach(x=>x.classList.add(cls));
+}
+const unlight=cls=>document.querySelectorAll('#view .al.'+cls).forEach(x=>x.classList.remove(cls));
+document.addEventListener('pointerover',e=>{
+  if(e.pointerType!=='mouse') return;
+  unlight('lit');
+  const a=e.target.closest?.('#view .al'); if(a) lightPair(a,'lit');
+});
+document.addEventListener('click',e=>{
+  unlight('pin');
+  const a=e.target.closest?.('#view .al'); if(a) lightPair(a,'pin');
+},true);
+/* an answered option is aria-disabled, not disabled: a disabled button
+   swallows the taps and pointer events its subtitle pairs need */
+const locked=b=>b.disabled || b.getAttribute('aria-disabled')==='true';
 
 /* The ranges deco() wraps: the trigger(s) in the stem, the token in the right
    option -- or the whole option, when only an exact match tells it apart. */
@@ -730,7 +791,7 @@ document.addEventListener('click',e=>{
   const g=e.target.closest?.('.gl');
   if(!g){ hideTip(); return; }
   const btn=g.closest('.opt');
-  if(btn && !btn.disabled) return;          // let the tap answer the question instead
+  if(btn && !locked(btn)) return;           // let the tap answer the question instead
   e.stopPropagation(); e.preventDefault();
   /* a deliberate click on a term always reads it; on a mouse the tooltip is
      already open from the hover, so toggling here would just swallow the click */
@@ -788,7 +849,7 @@ function shotHtml(q){
          alt="Picture for question ${esc(String(q.num))}"></figure>`;
 }
 
-function optionsHtml(q, ord, revealed, h){
+function optionsHtml(q, ord, revealed, h, en){
   const ptr=pointerOpts(q);
   return `<ul class="opts${ptr?' pointer':''}">${ord.map((orig,pos)=>{
     let cls='opt', mark='';
@@ -799,8 +860,10 @@ function optionsHtml(q, ord, revealed, h){
     }
     const raw=q.options[orig];
     const marks=(revealed && orig===q.answer) ? tokenMarks(raw,h) : [];
-    return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'disabled':''}${ptr?` aria-label="${esc(raw)}"`:''}>
-      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw,marks)}</span>`}
+    const sub=(en && !ptr) ? subtitle(en.o[orig], raw) : null;
+    return `<li><button class="${cls}" data-orig="${orig}" ${revealed?'aria-disabled="true"':''}${sub?` data-g="o${orig}"`:''}${ptr?` aria-label="${esc(raw)}"`:''}>
+      <span class="cap">${ptr?esc(ptrNum(raw)):pos+1}</span>${ptr?'':`<span class="txt" lang="de">${deco(raw,marks,sub?.al)}${
+        sub?`<span class="sub" lang="en">${sub.html}</span>`:''}</span>`}
       <span class="mark">${mark}</span></button></li>`;
   }).join('')}</ul>`;
 }
@@ -827,6 +890,8 @@ function render(){
   const atPos=ord.indexOf(q.answer)+1;
   const h=hookFor(q);
   if(hookWanted(q) && !HOOKS) loadHooks().then(()=>{ if(HOOKS && S.mode!=='exam' && !autoTimer) render(); });
+  const en=enFor(q), qsub=en && subtitle(en.q, q.q);
+  if(enWanted(q) && !EN) loadEn().then(()=>{ if(EN && S.mode!=='exam') render(); });
   paintStreak();
 
   viewEl.innerHTML=`<div class="stage">
@@ -837,11 +902,12 @@ function render(){
     </div>
     <div class="scroll" id="scroll">
       ${h?hookCard(h, revealed):''}
-      <h1 class="q" lang="de">${deco(q.q, stemMarks(q,h))}</h1>
+      <h1 class="q" lang="de"${qsub?' data-g="q"':''}>${deco(q.q, stemMarks(q,h), qsub?.al)}</h1>
+      ${qsub?`<p class="sub qsub" lang="en" data-g="q">${qsub.html}</p>`:''}
       ${shotHtml(q)}
     </div>
-    <div class="answers" id="answers">
-      ${optionsHtml(q,ord,revealed,h)}
+    <div class="answers${en?' read':''}" id="answers">
+      ${optionsHtml(q,ord,revealed,h,en)}
       <div class="act">
         <button class="next quiet" id="prev">Back</button>
         ${ (S.picked!==null)
@@ -1289,7 +1355,7 @@ document.addEventListener('keydown',e=>{
      cancelled the control's own click, so Enter on the Glossary button
      skipped a question instead. */
   if(navOpen() || !lens.hidden) return;
-  if((k==='Enter'||k===' ') && e.target.matches?.(CONTROL)) return;
+  if((k==='Enter'||k===' ') && e.target.matches?.(CONTROL) && !locked(e.target)) return;
   if(!veil.hidden) return;
   if(k==='g'||k==='G'){ e.preventDefault(); openGlos(); return; }
   if(k==='c'||k==='C'){
@@ -1310,7 +1376,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     const b=viewEl.querySelectorAll('.opt')[+k-1];
     if(!b) return;
-    if(!b.disabled){ b.click(); return; }
+    if(!locked(b)){ b.click(); return; }
     if(canSpeak){                              /* already answered: read that one back */
       const q=view()[S.idx];
       if(q) say(sentence(q, +b.dataset.orig));
@@ -1321,9 +1387,9 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ---------------- boot ---------------- */
-/* The hooks are fetched now, not on the first miss, so the card is there when
-   that miss comes. render() asks for them too, and re-renders once they land. */
-(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); })();
+/* The hooks and the subtitles are fetched now, not on the first miss, so they
+   are there when that miss comes. render() asks for them too, and re-renders once they land. */
+(async()=>{ await load(); ready=true; window.theme?.set(S.theme); buildFilter(); initSpeech(); applyRail(); applyRoute(); loadHooks(); loadEn(); })();
 
 
 /* Fill the image cache in the background, so a randomly drawn exam still has

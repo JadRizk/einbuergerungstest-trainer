@@ -139,6 +139,14 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
   border-top:1px solid transparent;
 }
 .answers.stuck{border-top-color:var(--rule); box-shadow:0 -6px 16px rgba(10,18,20,.05)}
+/* With subtitles under a missed question the answers can outgrow a phone's
+   screen, and pinned they would cover the question for good. So they scroll
+   with the page, and only the Back / Next row stays under your thumb. */
+.answers.read{position:static; border-top-color:transparent; box-shadow:none}
+.answers.read .act{position:sticky; bottom:0; z-index:5; background:var(--paper);
+  margin:.6rem calc(-.85rem - var(--sar)) -.6rem calc(-.85rem - var(--sal));
+  padding:.5rem calc(.85rem + var(--sar)) .6rem calc(.85rem + var(--sal));
+  border-top:1px solid var(--rule); box-shadow:0 -6px 16px rgba(10,18,20,.05)}
 
 .meta{position:sticky; top:0; z-index:6; background:var(--paper); display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
   font-size:.8rem; color:var(--muted); margin:0;
@@ -166,8 +174,8 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
 .opt{display:flex; align-items:flex-start; gap:.7rem; width:100%; text-align:left; background:var(--card);
   border:1px solid var(--edge); border-radius:9px; padding:.72rem .8rem; cursor:pointer;
   transition:border-color .12s, background .12s; min-height:2.9rem}
-.opt:hover:not(:disabled){border-color:var(--muted)}
-.opt:disabled{cursor:default}
+.opt:hover:not([aria-disabled=true]){border-color:var(--muted)}
+.opt[aria-disabled=true]{cursor:default}
 .cap{flex:0 0 auto; width:1.5rem; height:1.5rem; border-radius:5px; border:1px solid var(--edge);
   background:var(--sunk); display:grid; place-items:center; font-size:.8rem; font-weight:600; color:var(--muted); margin-top:.06rem}
 .opt .txt{flex:1; min-width:0; overflow-wrap:break-word; hyphens:auto}
@@ -212,9 +220,17 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
 .verdictline{font-size:.86rem; font-weight:600; flex:1 1 auto; min-width:0}
 .verdictline.ok{color:var(--ok)} .verdictline.bad{color:var(--no)}
 
+/* ------------------------------------------------ English subtitles */
+.sub{display:block; margin-top:.2rem; font-size:.86rem; line-height:1.35; font-weight:400;
+  color:var(--muted); letter-spacing:0}
+.qsub{font-size:.95rem; margin:-.55rem 0 .9rem; max-width:44ch; text-wrap:pretty}
+.al{border-radius:3px; transition:background .1s, box-shadow .1s}
+.al.lit, .al.pin{background:var(--goldbg); box-shadow:0 0 0 2px var(--goldbg), inset 0 -2px 0 var(--gold); color:var(--ink)}
+.sub .al{cursor:pointer}
+
 /* ------------------------------------------------ glossary term + tooltip */
 .gl{border-bottom:1.5px dotted var(--gold); cursor:help}
-.opt:not(:disabled) .gl{cursor:pointer}
+.opt:not([aria-disabled=true]) .gl{cursor:pointer}
 #tip{position:fixed; z-index:60; max-width:19rem; background:var(--tipbg); color:var(--tipink);
   border:1px solid var(--tipline);
   border-radius:8px; padding:.5rem .65rem; font-size:.84rem; line-height:1.4;
@@ -438,6 +454,7 @@ body.exam .nav{transform:translateX(-101%)}
   .answers{padding:.6rem 1.5rem 1.2rem; background:transparent}
   .answers>*{max-width:var(--shell); margin-left:auto; margin-right:auto}
   .answers.stuck{box-shadow:none; border-top-color:transparent}
+  .answers.read .act{position:static; margin:.6rem 0 0; padding:0; border-top:0; box-shadow:none; background:transparent}
   .q{font-size:1.6rem; margin-bottom:1.2rem}
   .hint{display:flex}
   .opts{gap:.5rem}

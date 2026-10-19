@@ -78,8 +78,11 @@ Three ways to understand the questions rather than memorise them.
 - **Streak.** In Practice, the top bar shows how many you have right in a row and your best
   ("Streak 4 · Best 12"). A wrong answer puts the streak back to 0, and every visit starts at 0.
   Your best is kept with your progress.
-- **Copy or translate** any question with one click, for looking something up elsewhere or
-  pasting it into your own notes.
+- **English subtitles after a wrong answer.** The question and all four answers get an English
+  line underneath, written once for every question and kept close to the German wording. Point
+  at a German phrase, or tap it on a phone, and its English match lights up with it.
+- **Copy** any question with one click, for looking something up elsewhere or pasting it into
+  your own notes.
 - **Pick your state** to get the right 10 regional questions.
 - **Picture questions answer with a pointer.** In 36 of the 39, the options read only "Bild 3"
   or a bare "2" labelling a region on a map — nothing the picture does not already say. They are
@@ -119,10 +122,8 @@ Your progress is stored in your own browser (`localStorage`) and goes nowhere el
 
 The app makes no network requests of its own: no analytics, no tracking, no telemetry, no
 backend. It fetches only its own files from its own origin — the typeface included, so no
-visitor IP reaches Google.
-
-One external touch is worth naming so it is not a surprise: each question offers a **Translate**
-link, which opens Google Translate in a new tab, and only when you click it.
+visitor IP reaches Google. The English subtitles ship with the app as one more file, so no
+question is ever sent to a translation service.
 
 ## Found a mistake?
 
@@ -145,6 +146,7 @@ no bundler: `git push` is the deploy.
 | `data/questions.json` | The 460-question catalogue |
 | `data/glossary.json` | 361 German→English terms, a study aid |
 | `data/hooks.json` | One memory hook per question — derived, fetched after the page loads and never waited for |
+| `data/questions-en.json` | English subtitles for every question and answer, with German↔English phrase pairs — written once for this app, fetched after the page loads |
 | `organigramm.html` `.css` `.js` | *Who elects whom* — the chart page, its own route; reads the same two data files |
 | `timeline.html` `.css` `.js` | *How it happened* — the history questions on one timeline, from `data/timeline.json` |
 | `nav.js` `nav.css` | The menu every page shares: Practise, Learn, and Settings folded away |
