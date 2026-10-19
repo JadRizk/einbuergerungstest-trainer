@@ -427,7 +427,7 @@ function applyRoute(){
   const m=ROUTE[location.hash]||'drill';
   const changed=(m!==S.mode);
   S.mode=m;
-  if(changed){ letGo(); S.idx=0; }
+  if(changed){ letGo(); S.idx=0; stopSpeech(); }
   if(m!=='exam') S.exam=null;
   body.classList.toggle('exam', m==='exam');
   $('m-drill').setAttribute('aria-pressed',String(m==='drill'));
@@ -442,8 +442,8 @@ $('m-drill').onclick=()=>go('drill');
 $('m-flash').onclick=()=>go('flash');
 $('m-exam').onclick =()=>go('exam');
 
-landSel.onchange=e=>{S.land=e.target.value;S.idx=0;letGo();S.exam=null;save();closeNav();render();};
-filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;letGo();closeNav();render();};
+landSel.onchange=e=>{S.land=e.target.value;S.idx=0;letGo();S.exam=null;stopSpeech();save();closeNav();render();};
+filterSel.onchange=e=>{S.filter=e.target.value;S.idx=0;letGo();stopSpeech();closeNav();render();};
 
 function toggle(id,key,after){
   const el=$(id);
@@ -594,7 +594,7 @@ addEventListener('resize',()=>{
 });
 
 /* ---------------- speech ----------------------------------------------------
-   Once a question is answered, pressing 1-4 reads that answer in German, through
+   Once a question is answered, pressing 1–4 reads that answer in German, through
    the operating system's voice: nothing is downloaded and nothing leaves the
    machine. Only answers that are German text are read. One that is mostly a
    number or a date ("1949", "17. Juni", "5 Jahre") is not; one that is still a
@@ -612,7 +612,13 @@ function germanVoice(){
   const de=speechSynthesis.getVoices().filter(v=>/^de(-|$)/i.test(v.lang));
   return de.find(v=>v.localService) || de[0] || null;     /* on-device first: no network */
 }
-function stopSpeech(){ if(canSpeak) try{ speechSynthesis.cancel(); }catch(e){} }
+/* the queued utterance is cancelled along with the one playing, so a second
+   key press inside the delay below replaces the first instead of following it */
+let queued=null;
+function stopSpeech(){
+  clearTimeout(queued); queued=null;
+  if(canSpeak) try{ speechSynthesis.cancel(); }catch(e){}
+}
 function sayAnswer(q,i){
   if(!canSpeak || !speakable(q.options[i])) return;
   stopSpeech();
@@ -621,9 +627,9 @@ function sayAnswer(q,i){
   if(voice) u.voice=voice;
   u.rate = 0.85;
   /* Chrome silently drops an utterance queued in the same tick as cancel() */
-  setTimeout(()=>speechSynthesis.speak(u),40);
+  queued=setTimeout(()=>{ queued=null; speechSynthesis.speak(u); },40);
 }
-if(canSpeak) addEventListener('beforeunload',stopSpeech);
+addEventListener('pagehide',stopSpeech);
 
 /* ---------------- tooltip ---------------- */
 const tip=$('tip');
@@ -818,7 +824,7 @@ function step(d){
   letGo();
   list=view();
   S.idx=Math.max(0, list.findIndex(x=>x.id===to.id));
-  hideTip(); render();
+  hideTip(); stopSpeech(); render();
   const sc=$('scroll'); if(sc) sc.scrollTop=0;
 }
 
@@ -910,7 +916,7 @@ function paintStats(){
 
   el.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{
     S.filter=b.dataset.f; filterSel.value=S.filter;
-    S.idx=0; letGo(); setSheet(false); render();
+    S.idx=0; letGo(); stopSpeech(); setSheet(false); render();
   });
 }
 
@@ -952,7 +958,7 @@ function paintDock(){
         at=Math.max(0, view().findIndex(x=>x.id===q.id));
       }
       S.idx=at;
-      setSheet(false); render();
+      stopSpeech(); setSheet(false); render();
     };
     map.appendChild(b);
   });
