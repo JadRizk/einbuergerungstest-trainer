@@ -157,7 +157,6 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
   cursor:pointer; white-space:nowrap; text-decoration:none; line-height:1.4; min-height:2rem}
 .copy:hover{color:var(--ink)}
 .copy.done{border-color:var(--ok); color:var(--ok)}
-.copy.live{border-color:var(--accent); color:var(--accent); background:var(--picked)}
 .meta b{color:var(--ink); font-weight:600}
 .tag{display:inline-flex; align-items:center; min-height:2rem; border:1px solid var(--rule);
   border-radius:99px; padding:0 .7rem; font-size:.77rem; font-weight:500; background:var(--card)}

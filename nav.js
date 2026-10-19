@@ -2,7 +2,7 @@
 
    Every section every page shows is written here once. The Practice page
    keeps its own controls in index.html (the catalogue pickers, the study
-   options, read aloud, reset) and has fillNav() put the shared sections in
+   options, reset) and has fillNav() put the shared sections in
    around them. The chart and the timeline get the whole menu from
    mountNav(), always as a drawer, so they keep their full width on a wide
    screen. */
