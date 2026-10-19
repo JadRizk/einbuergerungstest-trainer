@@ -139,6 +139,14 @@ main{flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:to
   border-top:1px solid transparent;
 }
 .answers.stuck{border-top-color:var(--rule); box-shadow:0 -6px 16px rgba(10,18,20,.05)}
+/* With subtitles under a missed question the answers can outgrow a phone's
+   screen, and pinned they would cover the question for good. So they scroll
+   with the page, and only the Back / Next row stays under your thumb. */
+.answers.read{position:static; border-top-color:transparent; box-shadow:none}
+.answers.read .act{position:sticky; bottom:0; z-index:5; background:var(--paper);
+  margin:.6rem calc(-.85rem - var(--sar)) -.6rem calc(-.85rem - var(--sal));
+  padding:.5rem calc(.85rem + var(--sar)) .6rem calc(.85rem + var(--sal));
+  border-top:1px solid var(--rule); box-shadow:0 -6px 16px rgba(10,18,20,.05)}
 
 .meta{position:sticky; top:0; z-index:6; background:var(--paper); display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
   font-size:.8rem; color:var(--muted); margin:0;
@@ -446,6 +454,7 @@ body.exam .nav{transform:translateX(-101%)}
   .answers{padding:.6rem 1.5rem 1.2rem; background:transparent}
   .answers>*{max-width:var(--shell); margin-left:auto; margin-right:auto}
   .answers.stuck{box-shadow:none; border-top-color:transparent}
+  .answers.read .act{position:static; margin:.6rem 0 0; padding:0; border-top:0; box-shadow:none; background:transparent}
   .q{font-size:1.6rem; margin-bottom:1.2rem}
   .hint{display:flex}
   .opts{gap:.5rem}

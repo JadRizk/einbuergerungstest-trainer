@@ -906,7 +906,7 @@ function render(){
       ${qsub?`<p class="sub qsub" lang="en" data-g="q">${qsub.html}</p>`:''}
       ${shotHtml(q)}
     </div>
-    <div class="answers" id="answers">
+    <div class="answers${en?' read':''}" id="answers">
       ${optionsHtml(q,ord,revealed,h,en)}
       <div class="act">
         <button class="next quiet" id="prev">Back</button>
